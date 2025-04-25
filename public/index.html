@@ -7,7 +7,23 @@
 </head>
 <body>
   <h1>Bienvenido a la app del dentista</h1>
-  <button id="test-button">Probar conexión</button>
+
+  <!-- Seccion de login y registro -->
+   <div id="login-section">
+    <h2>Iniciar Sesion</h2>
+    <input type="email" id="email" placeholder="Correo">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button onclick="login()">Entrar</button>
+    <button onclick="registrar()">Registrarse</button>
+   </div>
+   <!-- Seccion de la app para usuarios autenticados -->
+    <div id="app-section" style="display:none;">
+        <h2>Bienvenido</h2>
+        <button onclick="guardarPaciente()">Probar guardar paciente</button>
+        <button onclick="logout()">Cerrar sesion</button>
+    </div>
+
+    <!-- Firebase y logica -->
 
   <script type="module">
     // Configuración de tu proyecto Firebase
@@ -28,24 +44,49 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Login anónimo
-    signInAnonymously(auth)
-      .then(() => console.log("Autenticado anónimamente"))
-      .catch((error) => console.error(error));
+    // Funcion para login
+    const login= async () =>{
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        try{
+            await signInWithEmailAndPassword(auth, email, password);
+            alert("Sesion iniciada");
+        } catch (e) {
+            alert("Error al iniciar sesion: "+ e.message);
+        }
+    };
 
-    // Botón para probar Firestore
-    const testButton = document.getElementById("test-button");
-    testButton.addEventListener("click", async () => {
-      try {
-        const docRef = await addDoc(collection(db, "pacientes"), {
-          nombre: "Paciente de prueba",
-          creado: new Date()
+    // Funcion para registrar usuario
+    const registrar = async () =>{
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            alert("Usuario registrado");
+        } catch (e) {
+            alert("Error al registrarse: " + e.message);
+        }
+    };
+
+    //Guardar paciente
+    const guardarPaciente = async () => {
+        await addDoc(collection(db, "pacientes"), {
+            nombre: "Paciente de prueba",
+            decha: new Date().toISOString()
         });
-        alert(`Paciente creado con ID: ${docRef.id}`);
-      } catch (e) {
-        console.error("Error al guardar en Firestore: ", e);
-      }
+        alert("Paciente creado");
+    }
+
+    // Mostrat/ocultar secciones segun si esta logueado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById("login-section").style.display = "none";
+            document.getElementById("app-section").style.display = "block";
+        } else {
+            document.getElementById("login-section").style.display = "block";
+            document.getElementById("app-section").style.display = "none";        }
     });
-  </script>
-</body>
+
+        </script>
+    </body>
 </html>
