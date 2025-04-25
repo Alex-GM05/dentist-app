@@ -3,96 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>App Dentista</title>
+  <title>Login - App Dentista</title>
 </head>
 <body>
-  <h1>Bienvenido a la app del dentista</h1>
+  <h1>Iniciar Sesión</h1>
+  <input type="email" id="email" placeholder="Correo" />
+  <input type="password" id="password" placeholder="Contraseña" />
+  <button onclick="login()">Entrar</button>
+  <button onclick="registrar()">Registrarse</button>
 
-  <!-- Seccion de login y registro -->
-   <div id="login-section">
-    <h2>Iniciar Sesion</h2>
-    <input type="email" id="email" placeholder="Correo">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button onclick="login()">Entrar</button>
-    <button onclick="registrar()">Registrarse</button>
-   </div>
-   <!-- Seccion de la app para usuarios autenticados -->
-    <div id="app-section" style="display:none;">
-        <h2>Bienvenido</h2>
-        <button onclick="guardarPaciente()">Probar guardar paciente</button>
-        <button onclick="logout()">Cerrar sesion</button>
-    </div>
-
-    <!-- Firebase y logica -->
-
-    <script type="module">
-        // Configuración de tu proyecto Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-      
-        const firebaseConfig = {
-            apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
-            authDomain: "dentist-app-2bb07.firebaseapp.com",
-            projectId: "dentist-app-2bb07",
-            storageBucket: "dentist-app-2bb07.firebasestorage.app",
-            messagingSenderId: "410183687912",
-            appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
-        };
-      
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-      
-        // Funcion para login
-        const login = async () => {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                alert("Sesión iniciada");
-            } catch (e) {
-                alert("Error al iniciar sesión: " + e.message);
-            }
-        };
-      
-        // Funcion para registrar usuario
-        const registrar = async () => {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                alert("Usuario registrado");
-            } catch (e) {
-                alert("Error al registrarse: " + e.message);
-            }
-        };
-      
-        // Funcion para cerrar sesión
-        const logout = async () => {
-            await signOut(auth);
-            alert("Sesión cerrada");
-        };
-      
-        // Guardar paciente
-        const guardarPaciente = async () => {
-            await addDoc(collection(db, "pacientes"), {
-                nombre: "Paciente de prueba",
-                fecha: new Date().toISOString() // corregido aquí
-            });
-            alert("Paciente creado");
-        };
-      
-        // Mostrar/ocultar secciones según si está logueado
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById("login-section").style.display = "none";
-                document.getElementById("app-section").style.display = "block";
-            } else {
-                document.getElementById("login-section").style.display = "block";
-                document.getElementById("app-section").style.display = "none";
-            }
-        });
-      </script>      
-    </body>
+  <script type="module" src="login.js"></script>
+</body>
 </html>
