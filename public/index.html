@@ -28,7 +28,7 @@
   <script type="module">
     // Configuración de tu proyecto Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -84,9 +84,9 @@
             document.getElementById("app-section").style.display = "block";
         } else {
             document.getElementById("login-section").style.display = "block";
-            document.getElementById("app-section").style.display = "none";        }
+            document.getElementById("app-section").style.display = "none";        
+        }
     });
-
         </script>
     </body>
 </html>
