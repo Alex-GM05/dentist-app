@@ -3,15 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - App Dentista</title>
+  <title>App del Dentista - Login</title>
 </head>
 <body>
-  <h1>Iniciar Sesión</h1>
-  <input type="email" id="email" placeholder="Correo" />
-  <input type="password" id="password" placeholder="Contraseña" />
-  <button onclick="login()">Entrar</button>
-  <button onclick="registrar()">Registrarse</button>
+  <h1>Bienvenido a la App del Dentista</h1>
 
-  <script type="module" src="login.js"></script>
+  <div id="login-section">
+    <input type="email" id="email" placeholder="Correo" />
+    <input type="password" id="password" placeholder="Contraseña" />
+    
+    <select id="rol">
+      <option value="paciente">Paciente</option>
+      <option value="admin">Administrador</option>
+    </select>
+    
+    <button onclick="login()">Iniciar sesión</button>
+    <button onclick="registrar()">Registrarse</button>
+  </div>
+
+  <script type="module" src="./login.js"></script>
 </body>
 </html>
