@@ -2,25 +2,28 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>App del Dentista - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Clínica Dental</title>
+  <link rel="stylesheet" href="styles.css">
+  <img src="../images/BELADENT.jpg" alt="Logo Beladent">
+  <h1>Clínica BELADENT</h1>
 </head>
 <body>
-  <h1>Bienvenido a la App del Dentista</h1>
+  <header>Clínica Dental - Iniciar Sesión</header>
+  <main>
+    <h2>Accede a tu cuenta</h2>
+    <input type="email" id="email" placeholder="Correo electrónico">
+    <input type="password" id="password" placeholder="Contraseña">
 
-  <div id="login-section">
-    <input type="email" id="email" placeholder="Correo" />
-    <input type="password" id="password" placeholder="Contraseña" />
-    
-    <select id="rol">
-      <option value="paciente">Paciente</option>
+    <select id="role">
       <option value="admin">Administrador</option>
+      <option value="paciente">Paciente</option>
     </select>
-    
-    <button onclick="login()">Iniciar sesión</button>
-    <button onclick="registrar()">Registrarse</button>
-  </div>
 
-  <script type="module" src="./login.js"></script>
+    <button onclick="login()">Iniciar Sesión</button>
+    <button onclick="register()">Registrarse</button>
+  </main>
+
+  <script type="module" src="login.js"></script>
 </body>
 </html>

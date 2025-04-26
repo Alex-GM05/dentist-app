@@ -1,0 +1,151 @@
+/* Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Variables de colores */
+  :root {
+    --primary: #2a9d8f;
+    --secondary: #264653;
+    --light: #f0f5f9;
+    --white: #ffffff;
+    --danger: #e63946;
+  }
+  
+  /* Body */
+  body {
+    background-color: var(--light);
+    color: var(--secondary);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    animation: fadeIn 1s ease-in;
+  }
+  
+  /* Animación */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  /* Header */
+  header {
+    background-color: var(--primary);
+    color: var(--white);
+    text-align: center;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  
+  /* Logo en el header */
+  header img {
+    height: 80px;
+    margin-bottom: 0.5rem;
+    animation: slideDown 1s ease;
+  }
+  
+  @keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  header h1 {
+    font-size: 2rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* Main container */
+  main {
+    padding: 2rem;
+    max-width: 500px;
+    margin: 2rem auto;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    animation: fadeIn 1.2s ease;
+  }
+  
+  /* Headings */
+  h2, h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Inputs y Selects */
+  input, select {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  /* Botones */
+  button {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary);
+    color: var(--white);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+  }
+  
+  button:hover {
+    background-color: #21867a;
+    transform: translateY(-2px);
+  }
+  
+  button.danger {
+    background-color: var(--danger);
+  }
+  
+  button.danger:hover {
+    background-color: #c53030;
+  }
+  
+  /* Historial clínico */
+  #historialClinico {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  
+  #detalleHistorial {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+  }
+  
+  /* Responsive */
+  @media (max-width: 600px) {
+    main {
+      margin: 1rem;
+      padding: 1.5rem;
+    }
+  
+    header img {
+      height: 60px;
+    }
+  
+    header h1 {
+      font-size: 1.5rem;
+    }
+  }
+  

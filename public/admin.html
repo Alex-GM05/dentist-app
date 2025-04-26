@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administrador - Clínica Dental</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <img src="../images/BELADENT.jpg" alt="Logo Beladent">
+  <h1>Clínica BELADENT</h1>
+</head>
+<body>
+  <header>Panel del Administrador</header>
+  <main>
+    <h2>Gestión de Pacientes</h2>
+
+    <label for="pacienteSelect">Buscar paciente:</label>
+    <select id="pacienteSelect">
+      <option value="">Seleccione un paciente</option>
+    </select>
+
+    <div id="historialClinico">
+      <h3>Historial Clínico</h3>
+      <div id="detalleHistorial"></div>
+    </div>
+
+    <button onclick="agregarPaciente()">Agregar Paciente</button>
+    <button onclick="modificarPaciente()">Modificar Paciente</button>
+    <button onclick="eliminarPaciente()">Eliminar Paciente</button>
+    <button onclick="logout()">Cerrar Sesión</button>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
