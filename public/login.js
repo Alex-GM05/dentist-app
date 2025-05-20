@@ -28,7 +28,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Función para registrar usuario con rol
-window.registrar = async () => {
+window.register = async () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const rol = document.getElementById("rol").value;
