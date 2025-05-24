@@ -3,27 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - Clínica Dental</title>
-  <link rel="stylesheet" href="styles.css">
-  <img src="BELADENT.jpg" alt="Logo Beladent">
-  <h1>Clínica BELADENT</h1>
+  <title>Beladent - Inicio</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
-<body>
-  <header>Clínica Dental - Iniciar Sesión</header>
-  <main>
-    <h2>Accede a tu cuenta</h2>
-    <input type="email" id="email" placeholder="Correo electrónico">
-    <input type="password" id="password" placeholder="Contraseña">
+<body class="login-body">
+  <div class="login-container fade-in">
+    <img src="BELADENT.jpg" alt="Beladent Logo" class="logo"/>
+    <h2>Bienvenido a Beladent</h2>
 
-    <select id="role">
-      <option value="admin">Administrador</option>
-      <option value="paciente">Paciente</option>
-    </select>
+    <form id="loginForm" class="form">
+      <input type="text" id="username" placeholder="Usuario" required />
+      <input type="password" id="password" placeholder="Contraseña" required />
+      <button type="submit" class="btn primary">Iniciar Sesión</button>
+    </form>
 
-    <button onclick="login()">Iniciar Sesión</button>
-    <button onclick="register()">Registrarse</button>
-  </main>
+    <div class="button-group">
+      <button onclick="location.href='registro.html'" class="btn secondary">Registrarse</button>
+      <button onclick="location.href='info.html'" class="btn info">Ver Información</button>
+    </div>
+  </div>
 
-  <script type="module" src="login.js"></script>
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      // Validación básica de ejemplo
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+
+      if (user && pass) {
+        window.location.href = "admin.html";
+      } else {
+        alert("Por favor ingresa usuario y contraseña.");
+      }
+    });
+  </script>
 </body>
 </html>
