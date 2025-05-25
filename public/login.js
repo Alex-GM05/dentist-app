@@ -1,5 +1,17 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -11,34 +23,73 @@ const firebaseConfig = {
   appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Escuchar el evento del formulario
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("loginForm");
+// Función para registrar usuario con rol
+window.register = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const rol = document.getElementById("rol").value;
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    if (!email || !password) {
-      Swal.fire("Error", "Completa todos los campos", "error");
-      return;
+  try {
+    // Validar si el correo ya está en la colección con otro rol
+    const querySnapshot = await getDoc(doc(db, "users", email));
+    if (querySnapshot.exists()) {
+      const data = querySnapshot.data();
+      if (data.rol !== rol) {
+        alert(`Este correo ya está registrado como ${data.rol}. No puede registrarse como ${rol}.`);
+        return;
+      }
     }
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        Swal.fire("Éxito", "Sesión iniciada correctamente", "success").then(() => {
-          window.location.href = "admin.html";
-        });
-      })
-      .catch((error) => {
-        console.error("Error al iniciar sesión:", error.message);
-        Swal.fire("Error", "Correo o contraseña incorrectos", "error");
-      });
-  });
-});
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      email,
+      rol
+    });
+
+    alert("Usuario registrado correctamente.");
+    redireccionarSegunRol(rol);
+  } catch (e) {
+    alert("Error al registrarse: " + e.message);
+  }
+};
+
+// Función para iniciar sesión
+window.login = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Obtener el rol desde Firestore
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const { rol } = docSnap.data();
+      redireccionarSegunRol(rol);
+    } else {
+      alert("No se encontró información de usuario.");
+    }
+  } catch (e) {
+    alert("Error al iniciar sesión: " + e.message);
+  }
+};
+
+// Función para redirigir al usuario según su rol
+function redireccionarSegunRol(rol) {
+  if (rol === "admin") {
+    window.location.href = "admin.html";
+  } else if (rol === "paciente") {
+    window.location.href = "paciente.html";
+  } else {
+    alert("Rol no reconocido.");
+  }
+}
