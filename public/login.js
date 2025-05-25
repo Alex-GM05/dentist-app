@@ -6,14 +6,16 @@ const firebaseConfig = {
   apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
   authDomain: "dentist-app-2bb07.firebaseapp.com",
   projectId: "dentist-app-2bb07",
-  storageBucket: "dentist-app-2bb07.firebasestorage.app",
+  storageBucket: "dentist-app-2bb07.appspot.com", // ← CORREGIDO
   messagingSenderId: "410183687912",
   appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
 };
 
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Manejo del login
 document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
