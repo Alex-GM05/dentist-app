@@ -3,12 +3,12 @@ import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/fir
 
 // Configura tu Firebase
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_STORAGE_BUCKET",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
+  authDomain: "dentist-app-2bb07.firebaseapp.com",
+  projectId: "dentist-app-2bb07",
+  storageBucket: "dentist-app-2bb07.firebasestorage.app",
+  messagingSenderId: "410183687912",
+  appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
 };
 
 const app = initializeApp(firebaseConfig);
