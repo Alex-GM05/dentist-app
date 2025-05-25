@@ -2,14 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Iniciar Sesión - Beladent</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <img src="BELADENT.jpg" alt="Beladent Logo">
+    <img src="BELADENT.jpg" alt="Beladent Logo" />
     <h1>Bienvenido a Beladent</h1>
   </header>
 
@@ -18,15 +17,17 @@
     <form id="loginForm">
       <input type="email" id="email" placeholder="Correo electrónico" required />
       <input type="password" id="password" placeholder="Contraseña" required />
-      <button type="submit">Iniciar Sesión</button>
+      <button type="submit">Iniciar sesión</button>
     </form>
 
-    <hr style="margin: 2rem 0; border: none; border-top: 1px solid #ccc;" />
-
-    <button onclick="window.location.href='registro.html'">Registrarse</button>
-    <button onclick="window.location.href='info.html'">Ver Información de Paciente</button>
+    <button onclick="location.href='registro.html'">Registrarse</button>
+    <button onclick="location.href='info.html'">Ver información</button>
   </main>
 
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Firebase Auth -->
   <script type="module" src="login.js"></script>
 </body>
 </html>
