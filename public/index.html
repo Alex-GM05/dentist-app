@@ -3,39 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Beladent - Inicio</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <title>Iniciar Sesión - Beladent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="login-body">
-  <div class="login-container fade-in">
-    <img src="BELADENT.jpg" alt="Beladent Logo" class="logo"/>
-    <h2>Bienvenido a Beladent</h2>
+<body>
+  <header>
+    <img src="BELADENT.jpg" alt="Beladent Logo">
+    <h1>Bienvenido a Beladent</h1>
+  </header>
 
-    <form id="loginForm" class="form">
-      <input type="text" id="username" placeholder="Usuario" required />
+  <main>
+    <h2>Iniciar Sesión</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Correo electrónico" required />
       <input type="password" id="password" placeholder="Contraseña" required />
-      <button type="submit" class="btn primary">Iniciar Sesión</button>
+      <button type="submit">Iniciar Sesión</button>
     </form>
 
-    <div class="button-group">
-      <button onclick="location.href='registro.html'" class="btn secondary">Registrarse</button>
-      <button onclick="location.href='info.html'" class="btn info">Ver Información</button>
-    </div>
-  </div>
+    <hr style="margin: 2rem 0; border: none; border-top: 1px solid #ccc;" />
 
-  <script>
-    document.getElementById("loginForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      // Validación básica de ejemplo
-      const user = document.getElementById("username").value;
-      const pass = document.getElementById("password").value;
+    <button onclick="window.location.href='registro.html'">Registrarse</button>
+    <button onclick="window.location.href='info.html'">Ver Información de Paciente</button>
+  </main>
 
-      if (user && pass) {
-        window.location.href = "admin.html";
-      } else {
-        alert("Por favor ingresa usuario y contraseña.");
-      }
-    });
-  </script>
+  <script type="module" src="login.js"></script>
 </body>
 </html>
