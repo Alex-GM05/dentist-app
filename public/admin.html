@@ -6,13 +6,16 @@
   <title>Administrador - Clínica Dental</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <img src="BELADENT.jpg" alt="Logo Beladent">
-  <h1>Clínica BELADENT</h1>
 </head>
 <body>
-  <header>Panel del Administrador</header>
+  <header>
+    <img src="BELADENT.jpg" alt="Logo Beladent" style="max-width: 150px;">
+    <h1>Clínica BELADENT</h1>
+    <h2>Panel del Administrador</h2>
+  </header>
+
   <main>
-    <h2>Gestión de Pacientes</h2>
+    <h3>Gestión de Pacientes</h3>
 
     <label for="pacienteSelect">Buscar paciente:</label>
     <select id="pacienteSelect">
@@ -20,7 +23,7 @@
     </select>
 
     <div id="historialClinico">
-      <h3>Historial Clínico</h3>
+      <h4>Historial Clínico</h4>
       <div id="detalleHistorial"></div>
     </div>
 
