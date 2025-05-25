@@ -1,15 +1,18 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getAuth,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
 import {
   getFirestore,
   doc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Configuración de Firebase
+// Configuración Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
   authDomain: "dentist-app-2bb07.firebaseapp.com",
@@ -19,12 +22,11 @@ const firebaseConfig = {
   appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Manejar el formulario de inicio de sesión
+// Login con verificación de rol
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -37,28 +39,33 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   }
 
   try {
+    await setPersistence(auth, browserLocalPersistence);
+
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Obtener rol desde Firestore
+    // Consultar el rol del usuario en Firestore
     const docRef = doc(db, "users", user.uid);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      const { rol } = docSnap.data();
-      Swal.fire("Éxito", "Sesión iniciada correctamente", "success").then(() => {
-        if (rol === "admin") {
-          window.location.href = "admin.html";
-        } else if (rol === "paciente") {
-          window.location.href = "paciente.html";
-        } else {
-          Swal.fire("Error", "Rol no reconocido", "error");
-        }
-      });
-    } else {
-      Swal.fire("Error", "No se encontró información del usuario en Firestore", "error");
-    }
+      const data = docSnap.data();
+      const rol = data.rol;
 
+      if (rol === "admin") {
+        Swal.fire("Éxito", "Bienvenido administrador", "success").then(() => {
+          window.location.href = "admin.html";
+        });
+      } else if (rol === "paciente") {
+        Swal.fire("Éxito", "Bienvenido paciente", "success").then(() => {
+          window.location.href = "paciente.html";
+        });
+      } else {
+        Swal.fire("Error", "Rol no reconocido", "error");
+      }
+    } else {
+      Swal.fire("Error", "No se encontró información de usuario", "error");
+    }
   } catch (error) {
     Swal.fire("Error", error.message, "error");
   }

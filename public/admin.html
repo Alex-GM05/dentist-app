@@ -1,35 +1,25 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Administrador - Clínica Dental</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <img src="BELADENT.jpg" alt="Logo Beladent">
-  <h1>Clínica BELADENT</h1>
-</head>
-<body>
-  <header>Panel del Administrador</header>
-  <main>
-    <h2>Gestión de Pacientes</h2>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-    <label for="pacienteSelect">Buscar paciente:</label>
-    <select id="pacienteSelect">
-      <option value="">Seleccione un paciente</option>
-    </select>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
+    authDomain: "dentist-app-2bb07.firebaseapp.com",
+    projectId: "dentist-app-2bb07",
+    storageBucket: "dentist-app-2bb07.appspot.com",
+    messagingSenderId: "410183687912",
+    appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
+  };
 
-    <div id="historialClinico">
-      <h3>Historial Clínico</h3>
-      <div id="detalleHistorial"></div>
-    </div>
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    <button onclick="agregarPaciente()">Agregar Paciente</button>
-    <button onclick="modificarPaciente()">Modificar Paciente</button>
-    <button onclick="eliminarPaciente()">Eliminar Paciente</button>
-    <button onclick="logout()">Cerrar Sesión</button>
-  </main>
-
-  <script type="module" src="admin.js"></script>
-</body>
-</html>
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      // Si no hay sesión, regresa al login
+      window.location.href = "index.html";
+    } else {
+      console.log("Sesión activa como:", user.email);
+    }
+  });
+</script>
