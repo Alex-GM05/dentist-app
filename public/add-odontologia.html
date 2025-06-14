@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Historia Clínica - Odontología</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Historia Clínica</h1>
+    <h2>Dra. Noemi Castillo</h2>
+  </header>
+
+  <main>
+    <form id="formHistoria">
+      <label>Fecha:
+        <input type="date" name="fecha" required>
+      </label>
+
+      <label>Nombre del paciente:
+        <input type="text" name="nombre" required>
+      </label>
+
+      <label>Edad:
+        <input type="number" name="edad" required>
+      </label>
+
+      <label>Dirección:
+        <input type="text" name="direccion">
+      </label>
+
+      <label>Teléfono:
+        <input type="tel" name="telefono">
+      </label>
+
+      <label>Mail:
+        <input type="email" name="email">
+      </label>
+
+      <label>Ocupación:
+        <input type="text" name="ocupacion">
+      </label>
+
+      <label>Estado Civil:
+        <input type="text" name="estadoCivil">
+      </label>
+
+      <label>Recomendado por:
+        <input type="text" name="recomendadoPor">
+      </label>
+
+      <label>¿Se encuentra en buen estado de salud?<br>
+        <input type="checkbox" name="salud" value="Si"> Sí
+        <input type="checkbox" name="salud" value="No"> No
+      </label>
+
+      <label>Peso:
+        <input type="number" name="peso" step="0.1"> Kg
+      </label>
+
+      <label>Estatura:
+        <input type="number" name="estatura" step="0.01"> m
+      </label>
+
+      <label>¿Presenta alguna enfermedad sistémica?<br>
+        <input type="checkbox" name="sistemica" value="Si"> Sí
+        <input type="checkbox" name="sistemica" value="No"> No
+      </label>
+
+      <label>¿Cuál?
+        <input type="text" name="sistemicaCual">
+      </label>
+
+      <label>¿Alguna enfermedad que crea conveniente mencionar?
+        <input type="text" name="enfermedadExtra">
+      </label>
+
+      <label>¿Toma algún medicamento?<br>
+        <input type="checkbox" name="medicamento" value="Si"> Sí
+        <input type="checkbox" name="medicamento" value="No"> No
+      </label>
+
+      <label>¿Cuál?
+        <input type="text" name="medicamentoCual">
+      </label>
+
+      <label>Alergias:
+        <input type="text" name="alergias">
+      </label>
+
+      <label>¿Problemas con anestesia local?
+        <input type="text" name="anestesia">
+      </label>
+
+      <label>¿Última vez que visitó al dentista?
+        <input type="date" name="ultimaVisita">
+      </label>
+
+      <label>¿Fuma?<br>
+        <input type="checkbox" name="fuma" value="Si"> Sí
+        <input type="checkbox" name="fuma" value="No"> No
+      </label>
+
+      <label>Frecuencia y cantidad:
+        <input type="text" name="fumaCantidad">
+      </label>
+
+      <label>¿Tiene o ha tenido contacto con drogas?
+        <input type="text" name="drogas">
+      </label>
+
+      <h3>MUJERES</h3>
+
+      <label>¿Está embarazada?<br>
+        <input type="checkbox" name="embarazo" value="Si"> Sí
+        <input type="checkbox" name="embarazo" value="No"> No
+      </label>
+
+      <label>¿Mes de gestación?
+        <input type="text" name="mesGestacion">
+      </label>
+
+      <label>¿Toma anticonceptivo?<br>
+        <input type="checkbox" name="anticonceptivo" value="Si"> Sí
+        <input type="checkbox" name="anticonceptivo" value="No"> No
+      </label>
+
+      <label>¿Cuál?
+        <input type="text" name="cualAnticonceptivo">
+      </label>
+
+      <h3>MENORES DE EDAD</h3>
+
+      <label>Nombre del padre o madre:
+        <input type="text" name="tutor">
+      </label>
+
+      <label>Teléfono de contacto:
+        <input type="tel" name="telefonoTutor">
+      </label>
+
+      <label>Motivo de consulta:</label>
+      <textarea name="motivoConsulta" rows="4" style="width: 100%; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;"></textarea>
+
+      <p style="text-align: justify; font-size: 0.85rem; color: #555;">
+        “Con esta fecha en la cual respondo de forma verídica, se me ha informado de los posibles riesgos y complicaciones que los tratamientos dentales conllevan, así como los costos y beneficios que obtendré en mi salud bucal después de realizados dichos tratamientos. Me doy por enterado (a) que todos los tratamientos tienen como objetivo prevenir, restaurar y/o devolver la función y la salud bucodental. Acepto el tratamiento y estoy de acuerdo con este, la cotización puede sufrir modificaciones conforme se vaya realizando con previo consentimiento mío. Cualquier cantidad de dinero no será devuelta si el paciente no asiste a sus citas cuando se le indiquen, se ausente de su tratamiento más de un mes sin justificación por escrito, abandona su tratamiento o se realiza cualquier tratamiento odontológico con Doctores no adscritos a Beladent, en estos casos estoy de acuerdo como paciente y doy mi consentimiento informado para darme de alta voluntaria y deslindo cualquier responsabilidad a los Doctores adscritos a Beladent.
+        <br><br>
+        Autorizo al Odontólogo que realice los procedimientos necesarios para mi atención odontológica.”
+      </p>
+
+      <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+        <div>
+          ___________________________<br>
+          <small>Firma del paciente o padre del menor</small>
+        </div>
+        <div>
+          ___________________________<br>
+          <small>Firma del Doctor (a)</small>
+        </div>
+      </div>
+    </form>
+  </main>
+</body>
+</html>
