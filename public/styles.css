@@ -148,4 +148,24 @@
       font-size: 1.5rem;
     }
   }
+  .form-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  @media (min-width: 700px) {
+    main form {
+      max-width: 800px;
+      margin: auto;
+    }
+  }
   

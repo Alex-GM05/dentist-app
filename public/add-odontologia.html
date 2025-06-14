@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Historia Clínica - Odontología</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    main form {
+      max-width: 800px;
+      margin: auto;
+    }
+    .checkbox-group {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .form-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -50,10 +68,11 @@
         <input type="text" name="recomendadoPor">
       </label>
 
-      <label>¿Se encuentra en buen estado de salud?<br>
-        <input type="checkbox" name="salud" value="Si"> Sí
-        <input type="checkbox" name="salud" value="No"> No
-      </label>
+      <label>¿Se encuentra en buen estado de salud?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="salud" value="Si"> Sí</label>
+        <label><input type="checkbox" name="salud" value="No"> No</label>
+      </div>
 
       <label>Peso:
         <input type="number" name="peso" step="0.1"> Kg
@@ -63,10 +82,11 @@
         <input type="number" name="estatura" step="0.01"> m
       </label>
 
-      <label>¿Presenta alguna enfermedad sistémica?<br>
-        <input type="checkbox" name="sistemica" value="Si"> Sí
-        <input type="checkbox" name="sistemica" value="No"> No
-      </label>
+      <label>¿Presenta alguna enfermedad sistémica?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="sistemica" value="Si"> Sí</label>
+        <label><input type="checkbox" name="sistemica" value="No"> No</label>
+      </div>
 
       <label>¿Cuál?
         <input type="text" name="sistemicaCual">
@@ -76,10 +96,11 @@
         <input type="text" name="enfermedadExtra">
       </label>
 
-      <label>¿Toma algún medicamento?<br>
-        <input type="checkbox" name="medicamento" value="Si"> Sí
-        <input type="checkbox" name="medicamento" value="No"> No
-      </label>
+      <label>¿Toma algún medicamento?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="medicamento" value="Si"> Sí</label>
+        <label><input type="checkbox" name="medicamento" value="No"> No</label>
+      </div>
 
       <label>¿Cuál?
         <input type="text" name="medicamentoCual">
@@ -97,10 +118,11 @@
         <input type="date" name="ultimaVisita">
       </label>
 
-      <label>¿Fuma?<br>
-        <input type="checkbox" name="fuma" value="Si"> Sí
-        <input type="checkbox" name="fuma" value="No"> No
-      </label>
+      <label>¿Fuma?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="fuma" value="Si"> Sí</label>
+        <label><input type="checkbox" name="fuma" value="No"> No</label>
+      </div>
 
       <label>Frecuencia y cantidad:
         <input type="text" name="fumaCantidad">
@@ -112,19 +134,21 @@
 
       <h3>MUJERES</h3>
 
-      <label>¿Está embarazada?<br>
-        <input type="checkbox" name="embarazo" value="Si"> Sí
-        <input type="checkbox" name="embarazo" value="No"> No
-      </label>
+      <label>¿Está embarazada?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="embarazo" value="Si"> Sí</label>
+        <label><input type="checkbox" name="embarazo" value="No"> No</label>
+      </div>
 
       <label>¿Mes de gestación?
         <input type="text" name="mesGestacion">
       </label>
 
-      <label>¿Toma anticonceptivo?<br>
-        <input type="checkbox" name="anticonceptivo" value="Si"> Sí
-        <input type="checkbox" name="anticonceptivo" value="No"> No
-      </label>
+      <label>¿Toma anticonceptivo?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="anticonceptivo" value="Si"> Sí</label>
+        <label><input type="checkbox" name="anticonceptivo" value="No"> No</label>
+      </div>
 
       <label>¿Cuál?
         <input type="text" name="cualAnticonceptivo">
@@ -158,6 +182,11 @@
           ___________________________<br>
           <small>Firma del Doctor (a)</small>
         </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" class="danger" onclick="window.location.href='select-add.html'">Cancelar</button>
+        <button type="submit">Agregar</button>
       </div>
     </form>
   </main>
