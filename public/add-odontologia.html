@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
 </head>
 <body>
   <header>
@@ -145,6 +147,10 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+
+    firebase.auth().signInAnonymously().catch((error) => {
+        console.error("Error al iniciar sesión anónima:", error);
+    });
 
     document.getElementById("formOdontologia").addEventListener("submit", async (e) => {
       e.preventDefault();
