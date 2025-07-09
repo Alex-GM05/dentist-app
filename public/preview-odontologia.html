@@ -2,87 +2,86 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vista previa - Historia Clínica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="styles.css" />
-  <style>
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #printSection, #printSection * {
-        visibility: visible;
-      }
-      #printSection {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-      }
-      .no-print {
-        display: none !important;
-      }
-    }
-  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Vista previa del historial clínico</h1>
+  <header class="no-print">
+    <h1>Vista previa - Historia Clínica</h1>
   </header>
 
-  <main id="printSection">
-    <div id="previewContent"></div>
+  <main>
+    <div id="historialClinico">
+      <h2>Historia Clínica Odontológica</h2>
+      <div id="detalleHistorial"></div>
+
+      <hr style="margin: 2rem 0;"/>
+
+      <h3>Aviso de privacidad</h3>
+      <p>
+        Sus datos personales serán utilizados únicamente con fines clínicos y administrativos
+        conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.
+        Para más información consulte el aviso completo en consultorio.
+      </p>
+
+      <br /><br />
+      <div style="display: flex; justify-content: space-between; margin-top: 3rem;">
+        <div style="text-align: center;">
+          ___________________________<br />
+          Firma del paciente
+        </div>
+        <div style="text-align: center;">
+          ___________________________<br />
+          Firma del responsable
+        </div>
+      </div>
+    </div>
 
     <div class="form-buttons no-print">
       <button onclick="window.print()">Imprimir</button>
-      <button onclick="location.href='receta.html'">Receta</button>
-      <button onclick="location.href='select-add.html'" class="danger">Volver</button>
+      <button onclick="window.location.href='receta.html'">Receta</button>
     </div>
   </main>
 
   <script>
-    const data = JSON.parse(localStorage.getItem("historiaOdontologia")) || {};
-    const container = document.getElementById("previewContent");
+    const firebaseConfig = {
+      apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
+      authDomain: "dentist-app-2bb07.firebaseapp.com",
+      projectId: "dentist-app-2bb07",
+      storageBucket: "dentist-app-2bb07.appspot.com",
+      messagingSenderId: "410183687912",
+      appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    function crearElemento(label, valor) {
-      if (!valor) return "";
-      return `<p><strong>${label}:</strong> ${Array.isArray(valor) ? valor.join(", ") : valor}</p>`;
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    async function cargarDatos() {
+      if (!id) return;
+      try {
+        const doc = await db.collection("historialOdontologia").doc(id).get();
+        if (!doc.exists) {
+          document.getElementById("detalleHistorial").innerHTML = "<p>No se encontró el historial.</p>";
+          return;
+        }
+        const data = doc.data();
+        const campos = Object.entries(data).map(([clave, valor]) => {
+          const etiqueta = clave.replace(/([A-Z])/g, ' $1').replace(/\b\w/g, l => l.toUpperCase());
+          return `<p><strong>${etiqueta}:</strong> ${valor || ''}</p>`;
+        }).join("");
+
+        document.getElementById("detalleHistorial").innerHTML = campos;
+      } catch (error) {
+        document.getElementById("detalleHistorial").innerHTML = "<p>Error al cargar datos.</p>";
+      }
     }
 
-    container.innerHTML = `
-      ${crearElemento("Fecha", data.fecha)}
-      ${crearElemento("Nombre", data.nombre)}
-      ${crearElemento("Edad", data.edad)}
-      ${crearElemento("Dirección", data.direccion)}
-      ${crearElemento("Teléfono", data.telefono)}
-      ${crearElemento("Email", data.email)}
-      ${crearElemento("Ocupación", data.ocupacion)}
-      ${crearElemento("Estado Civil", data.estadoCivil)}
-      ${crearElemento("Recomendado por", data.recomendadoPor)}
-      ${crearElemento("Salud", data.salud)}
-      ${crearElemento("Peso", data.peso)}
-      ${crearElemento("Estatura", data.estatura)}
-      ${crearElemento("Enfermedad sistémica", data.sistemica)}
-      ${crearElemento("¿Cuál?", data.sistemicaCual)}
-      ${crearElemento("Enfermedad extra", data.enfermedadExtra)}
-      ${crearElemento("Toma medicamento", data.medicamento)}
-      ${crearElemento("¿Cuál?", data.medicamentoCual)}
-      ${crearElemento("Alergias", data.alergias)}
-      ${crearElemento("Problemas con anestesia", data.anestesia)}
-      ${crearElemento("Última visita", data.ultimaVisita)}
-      ${crearElemento("Fuma", data.fuma)}
-      ${crearElemento("Cantidad/Frecuencia", data.fumaCantidad)}
-      ${crearElemento("Drogas", data.drogas)}
-      <h3>Mujeres</h3>
-      ${crearElemento("Embarazo", data.embarazo)}
-      ${crearElemento("Mes gestación", data.mesGestacion)}
-      ${crearElemento("Anticonceptivo", data.anticonceptivo)}
-      ${crearElemento("¿Cuál?", data.cualAnticonceptivo)}
-      <h3>Menores de edad</h3>
-      ${crearElemento("Padre/Madre", data.tutor)}
-      ${crearElemento("Tel. Tutor", data.telefonoTutor)}
-      ${crearElemento("Motivo consulta", data.motivoConsulta)}
-    `;
+    cargarDatos();
   </script>
 </body>
 </html>
