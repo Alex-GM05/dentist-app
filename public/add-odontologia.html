@@ -1,58 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Historia Clínica - Odontología</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <header>
+    <h1>Historia Clínica</h1>
+    <h2>Dra. Noemí Castillo</h2>
+  </header>
+
   <main>
-    <form id="formularioOdontologia">
-      <h2>Historia Clínica - Dra. Noemi Castillo</h2>
+    <form id="formHistoria">
+      <label>Fecha: <input type="date" name="fecha" required></label>
+      <label>Nombre del paciente: <input type="text" name="nombre" required></label>
+      <label>Edad: <input type="number" name="edad" required></label>
+      <label>Dirección: <input type="text" name="direccion"></label>
+      <label>Teléfono: <input type="tel" name="telefono"></label>
+      <label>Mail: <input type="email" name="email"></label>
+      <label>Ocupación: <input type="text" name="ocupacion"></label>
+      <label>Estado Civil: <input type="text" name="estadoCivil"></label>
+      <label>Recomendado por: <input type="text" name="recomendadoPor"></label>
 
-      <label>Nombre del paciente: <input name="nombre" required></label>
-      <label>Edad: <input name="edad" type="number"></label>
-      <label>Dirección: <input name="direccion"></label>
-      <label>Teléfono: <input name="telefono"></label>
-      <label>Celular: <input name="celular"></label>
-      <label>Mail: <input name="mail" type="email"></label>
-      <label>Ocupación: <input name="ocupacion"></label>
-      <label>Estado Civil: <input name="estadoCivil"></label>
-      <label>Recomendado por: <input name="recomendadoPor"></label>
-      <label>¿Está en buen estado de salud? <select name="salud"><option>Sí</option><option>No</option></select></label>
-      <label>Peso: <input name="peso" type="text"></label>
-      <label>Estatura: <input name="estatura" type="text"></label>
-      <label>¿Tiene enfermedad sistémica? <select name="enfermedadSistemica"><option>No</option><option>Sí</option></select> ¿Cuál? <input name="enfermedadCual"></label>
-      <label>¿Toma medicamentos? ¿Cuáles? <input name="medicamentos"></label>
-      <label>¿Es alérgico a algo? <input name="alergias"></label>
-      <label>¿Primera vez con anestesia? <input name="primeraAnestesia"></label>
-      <label>¿Problemas con anestesia local? <input name="problemasAnestesia"></label>
-      <label>Última vez que visitó al dentista: <input name="ultimaVisita"></label>
-      <label>¿Fuma? <input name="fuma"> Frecuencia y cantidad: <input name="fumaCantidad"></label>
-      <label>¿Drogas? <input name="drogas"></label>
+      <label>¿Se encuentra en buen estado de salud?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="salud" value="Sí"> Sí</label>
+        <label><input type="checkbox" name="salud" value="No"> No</label>
+      </div>
 
-      <h3>Mujeres</h3>
-      <label>¿Embarazada? <input name="embarazada"></label>
-      <label>Mes de gestación: <input name="mesGestacion"></label>
-      <label>¿Anticonceptivos? ¿Cuáles? <input name="anticonceptivos"></label>
+      <label>Peso: <input type="number" name="peso"> kg</label>
+      <label>Estatura: <input type="number" name="estatura"> m</label>
 
-      <h3>Menores de edad</h3>
-      <label>Nombre padre o madre: <input name="padreOMadre"></label>
-      <label>Teléfono de trabajo: <input name="telTrabajo"></label>
+      <label>¿Presenta alguna enfermedad sistémica?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="sistemica" value="Sí"> Sí</label>
+        <label><input type="checkbox" name="sistemica" value="No"> No</label>
+      </div>
 
-      <label>Motivo de consulta: <textarea name="motivoConsulta" rows="3"></textarea></label>
+      <label>¿Cuál? <input type="text" name="sistemicaCual"></label>
+
+      <label>¿Alguna enfermedad que crea conveniente mencionar? <input type="text" name="enfermedadExtra"></label>
+
+      <label>¿Toma algún medicamento?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="medicamento" value="Sí"> Sí</label>
+        <label><input type="checkbox" name="medicamento" value="No"> No</label>
+      </div>
+
+      <label>¿Cuál? <input type="text" name="medicamentoCual"></label>
+
+      <label>Alergias: <input type="text" name="alergias"></label>
+      <label>¿Problemas con anestesia local? <input type="text" name="anestesia"></label>
+      <label>¿Última vez que visitó al dentista? <input type="date" name="ultimaVisita"></label>
+
+      <label>¿Fuma?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="fuma" value="Sí"> Sí</label>
+        <label><input type="checkbox" name="fuma" value="No"> No</label>
+      </div>
+
+      <label>Frecuencia y cantidad: <input type="text" name="fumaCantidad"></label>
+      <label>¿Tiene o ha tenido contacto con drogas? <input type="text" name="drogas"></label>
+
+      <h3>MUJERES</h3>
+      <label>¿Está embarazada?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="embarazo" value="Sí"> Sí</label>
+        <label><input type="checkbox" name="embarazo" value="No"> No</label>
+      </div>
+      <label>¿Mes de gestación? <input type="text" name="mesGestacion"></label>
+
+      <label>¿Toma anticonceptivo?</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="anticonceptivo" value="Sí"> Sí</label>
+        <label><input type="checkbox" name="anticonceptivo" value="No"> No</label>
+      </div>
+      <label>¿Cuál? <input type="text" name="cualAnticonceptivo"></label>
+
+      <h3>MENORES DE EDAD</h3>
+      <label>Nombre del padre o madre: <input type="text" name="tutor"></label>
+      <label>Teléfono de contacto: <input type="tel" name="telefonoTutor"></label>
+
+      <label>Motivo de consulta:</label>
+      <textarea name="motivoConsulta" rows="4"></textarea>
 
       <div class="form-buttons">
-        <button type="submit">Agregar</button>
-        <button type="button" onclick="window.location.href='select-add.html'">Cancelar</button>
-        <button type="button" onclick="window.location.href='receta.html'">Receta</button>
+        <button type="button" onclick="guardarHistoria()">Agregar</button>
+        <button type="button" onclick="location.href='select-add.html'" class="danger">Cancelar</button>
       </div>
     </form>
   </main>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="add-odontologia.js"></script>
+  <script>
+    function guardarHistoria() {
+      const form = document.getElementById("formHistoria");
+      const data = new FormData(form);
+      const jsonData = {};
+      data.forEach((value, key) => {
+        if (jsonData[key]) {
+          if (Array.isArray(jsonData[key])) {
+            jsonData[key].push(value);
+          } else {
+            jsonData[key] = [jsonData[key], value];
+          }
+        } else {
+          jsonData[key] = value;
+        }
+      });
+
+      localStorage.setItem("historiaOdontologia", JSON.stringify(jsonData));
+      location.href = "preview-odontologia.html";
+    }
+  </script>
 </body>
 </html>
