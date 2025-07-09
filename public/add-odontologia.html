@@ -1,218 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Historia Clínica - Odontología</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>HISTORIA CLÍNICA</h1>
-    <h2>Dra. Noemi Castillo</h2>
-  </header>
-
   <main>
-    <form id="formHistoria">
-      <label>Fecha:
-        <input type="date" name="fecha" required>
-      </label>
+    <form id="formularioOdontologia">
+      <h2>Historia Clínica - Dra. Noemi Castillo</h2>
 
-      <label>Nombre del paciente:
-        <input type="text" name="nombre" required>
-      </label>
+      <label>Nombre del paciente: <input name="nombre" required></label>
+      <label>Edad: <input name="edad" type="number"></label>
+      <label>Dirección: <input name="direccion"></label>
+      <label>Teléfono: <input name="telefono"></label>
+      <label>Celular: <input name="celular"></label>
+      <label>Mail: <input name="mail" type="email"></label>
+      <label>Ocupación: <input name="ocupacion"></label>
+      <label>Estado Civil: <input name="estadoCivil"></label>
+      <label>Recomendado por: <input name="recomendadoPor"></label>
+      <label>¿Está en buen estado de salud? <select name="salud"><option>Sí</option><option>No</option></select></label>
+      <label>Peso: <input name="peso" type="text"></label>
+      <label>Estatura: <input name="estatura" type="text"></label>
+      <label>¿Tiene enfermedad sistémica? <select name="enfermedadSistemica"><option>No</option><option>Sí</option></select> ¿Cuál? <input name="enfermedadCual"></label>
+      <label>¿Toma medicamentos? ¿Cuáles? <input name="medicamentos"></label>
+      <label>¿Es alérgico a algo? <input name="alergias"></label>
+      <label>¿Primera vez con anestesia? <input name="primeraAnestesia"></label>
+      <label>¿Problemas con anestesia local? <input name="problemasAnestesia"></label>
+      <label>Última vez que visitó al dentista: <input name="ultimaVisita"></label>
+      <label>¿Fuma? <input name="fuma"> Frecuencia y cantidad: <input name="fumaCantidad"></label>
+      <label>¿Drogas? <input name="drogas"></label>
 
-      <label>Edad:
-        <input type="number" name="edad" required>
-      </label>
+      <h3>Mujeres</h3>
+      <label>¿Embarazada? <input name="embarazada"></label>
+      <label>Mes de gestación: <input name="mesGestacion"></label>
+      <label>¿Anticonceptivos? ¿Cuáles? <input name="anticonceptivos"></label>
 
-      <label>Dirección:
-        <input type="text" name="direccion">
-      </label>
+      <h3>Menores de edad</h3>
+      <label>Nombre padre o madre: <input name="padreOMadre"></label>
+      <label>Teléfono de trabajo: <input name="telTrabajo"></label>
 
-      <label>Teléfono:
-        <input type="tel" name="telefono">
-      </label>
+      <label>Motivo de consulta: <textarea name="motivoConsulta" rows="3"></textarea></label>
 
-      <label>Celular:
-        <input type="tel" name="celular">
-      </label>
-
-      <label>Mail:
-        <input type="email" name="email">
-      </label>
-
-      <label>Ocupación:
-        <input type="text" name="ocupacion">
-      </label>
-
-      <label>Estado Civil:
-        <input type="text" name="estadoCivil">
-      </label>
-
-      <label>Recomendado por:
-        <input type="text" name="recomendadoPor">
-      </label>
-
-      <div class="checkbox-group">
-        <label>¿Se encuentra en buen estado de salud?</label>
-        <label><input type="checkbox" name="salud" value="Si"> Sí</label>
-        <label><input type="checkbox" name="salud" value="No"> No</label>
-      </div>
-
-      <label>Peso en Kg:
-        <input type="number" name="peso" step="0.1">
-      </label>
-
-      <label>Estatura en m:
-        <input type="number" name="estatura" step="0.01">
-      </label>
-
-      <div class="checkbox-group">
-        <label>¿Presenta alguna enfermedad sistémica?</label>
-        <label><input type="checkbox" name="sistemica" value="Si"> Sí</label>
-        <label><input type="checkbox" name="sistemica" value="No"> No</label>
-      </div>
-
-      <label>¿Cuál?
-        <input type="text" name="sistemicaCual">
-      </label>
-
-      <label>¿Alguna enfermedad que crea conveniente mencionar?
-        <input type="text" name="enfermedadExtra">
-      </label>
-
-      <div class="checkbox-group">
-        <label>¿Toma actualmente algún medicamento?</label>
-        <label><input type="checkbox" name="medicamento" value="Si"> Sí</label>
-        <label><input type="checkbox" name="medicamento" value="No"> No</label>
-      </div>
-
-      <label>¿Cuál?
-        <input type="text" name="medicamentoCual">
-      </label>
-
-      <label>¿Es alérgico a:
-        <input type="text" name="alergias">
-      </label>
-
-      <label>¿Es la primera vez que lo anestesian?
-        <input type="text" name="primeraAnestesia">
-      </label>
-
-      <label>¿Tiene problemas con la anestesia local?
-        <input type="text" name="anestesiaProblema">
-      </label>
-
-      <label>¿Cuándo fue la última vez que visitó al dentista?
-        <input type="date" name="ultimaVisita">
-      </label>
-
-      <div class="checkbox-group">
-        <label>¿Fuma?</label>
-        <label><input type="checkbox" name="fuma" value="Si"> Sí</label>
-        <label><input type="checkbox" name="fuma" value="No"> No</label>
-      </div>
-
-      <label>Frecuencia y cantidad:
-        <input type="text" name="fumaCantidad">
-      </label>
-
-      <label>¿Tiene o ha tenido contacto con drogas?
-        <input type="text" name="drogas">
-      </label>
-
-      <h3>MUJERES</h3>
-
-      <div class="checkbox-group">
-        <label>¿Está embarazada?</label>
-        <label><input type="checkbox" name="embarazo" value="Si"> Sí</label>
-        <label><input type="checkbox" name="embarazo" value="No"> No</label>
-      </div>
-
-      <label>¿En qué mes de gestación?
-        <input type="text" name="mesGestacion">
-      </label>
-
-      <div class="checkbox-group">
-        <label>¿Toma anticonceptivo?</label>
-        <label><input type="checkbox" name="anticonceptivo" value="Si"> Sí</label>
-        <label><input type="checkbox" name="anticonceptivo" value="No"> No</label>
-      </div>
-
-      <label>¿Cuál?
-        <input type="text" name="cualAnticonceptivo">
-      </label>
-
-      <h3>MENORES DE EDAD</h3>
-
-      <label>Nombre del padre o madre:
-        <input type="text" name="tutor">
-      </label>
-
-      <label>Teléfonos de trabajo:
-        <input type="tel" name="telefonoTutor">
-      </label>
-
-      <label>Motivo de consulta:</label>
-      <textarea name="motivoConsulta" rows="4" style="width: 100%; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;"></textarea>
-
-      <p style="text-align: justify; font-size: 0.85rem; color: #555;">
-        “Con esta fecha en la cual respondo de forma verídica, se me ha informado de los posibles riesgos y complicaciones que los tratamientos dentales conllevan, así como los costos y beneficios que obtendré en mi salud bucal después de realizados dichos tratamientos. Me doy por enterado (a) que todos los tratamientos tienen como objetivo prevenir, restaurar y/o devolver la función y la salud bucodental. Acepto el tratamiento y estoy de acuerdo con este, la cotización puede sufrir modificaciones conforme se vaya realizando con previo consentimiento mío. Cualquier cantidad de dinero no será devuelta si el paciente no asiste a sus citas cuando se le indiquen, se ausente de su tratamiento más de un mes sin justificación por escrito, abandona su tratamiento o se realiza cualquier tratamiento odontológico con Doctores no adscritos a Beladent, en estos casos estoy de acuerdo como paciente y doy mi consentimiento informado para darme de alta voluntaria y deslindo cualquier responsabilidad a los Doctores adscritos a Beladent.<br><br>
-        Autorizo al Odontólogo que realice los procedimientos necesarios para mi atención odontológica.”
-      </p>
-
-      <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
-        <div>
-          ___________________________<br>
-          <small>Firma del paciente o padre del menor</small>
-        </div>
-        <div>
-          ___________________________<br>
-          <small>Firma del Doctor (a)</small>
-        </div>
-      </div>
-
-      <div class="form-buttons no-print">
+      <div class="form-buttons">
         <button type="submit">Agregar</button>
         <button type="button" onclick="window.location.href='select-add.html'">Cancelar</button>
-        <button type="button" onclick="mostrarPreview()">Vista previa</button>
         <button type="button" onclick="window.location.href='receta.html'">Receta</button>
-      </div>      
-
+      </div>
     </form>
   </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="add-odontologia.js"></script>
 </body>
 </html>
-
-<script>
-    function mostrarPreview() {
-      // Verifica que se haya llenado algo básico antes de mostrar preview
-      const nombre = document.getElementById('nombre').value;
-      if (!nombre) {
-        alert("Por favor llena al menos el nombre del paciente antes de imprimir.");
-        return;
-      }
-    
-      // Convierte todos los inputs a solo lectura
-      document.querySelectorAll('input, textarea, select').forEach(el => {
-        el.setAttribute('readonly', true);
-        el.setAttribute('disabled', true);
-        el.style.border = 'none';
-        el.style.backgroundColor = 'transparent';
-        el.style.color = 'black';
-      });
-    
-      window.print();
-    
-      // Después de imprimir, vuelve a activar los inputs
-      document.querySelectorAll('input, textarea, select').forEach(el => {
-        el.removeAttribute('readonly');
-        el.removeAttribute('disabled');
-        el.style.border = '';
-        el.style.backgroundColor = '';
-        el.style.color = '';
-      });
-    }
-    </script>
-    

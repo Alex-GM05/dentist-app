@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Vista previa - Historia Clínica</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        margin: 2cm;
+        background: white !important;
+        color: black !important;
+      }
+    }
+
+    .preview {
+      max-width: 900px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+    }
+
+    .firmas {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+    }
+
+    .firmas div {
+      text-align: center;
+      width: 48%;
+    }
+
+    h2, h3 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="preview" id="previewContenido">
+    <h2>Historia Clínica - Dra. Noemi Castillo</h2>
+    <div id="datos"></div>
+
+    <p style="margin-top: 2rem;">“Con esta fecha en la cual respondo de forma verídica, [...] para mi atención odontológica.”</p>
+
+    <div class="firmas">
+      <div>__________________________<br>Firma del paciente o padre del menor</div>
+      <div>__________________________<br>Firma del Doctor (a)</div>
+    </div>
+
+    <div class="form-buttons no-print">
+      <button onclick="window.print()">Imprimir</button>
+      <button onclick="window.location.href='receta.html'">Receta</button>
+      <button onclick="window.location.href='select-add.html'">Volver</button>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const db = firebase.firestore();
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    db.collection("historial_odontologia").doc(id).get().then(doc => {
+      const data = doc.data();
+      const div = document.getElementById("datos");
+
+      for (let [key, value] of Object.entries(data)) {
+        if (key !== "fecha") {
+          div.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+        }
+      }
+      div.innerHTML += `<p><strong>Fecha:</strong> ${data.fecha}</p>`;
+    });
+  </script>
+</body>
+</html>
