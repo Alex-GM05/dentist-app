@@ -81,7 +81,7 @@
 
       <label>¿Última vez que visitó al dentista?</label>
       <input type="date" id="fecha" name="fecha" required>
-      
+
       <label>¿Fuma? ¿Frecuencia/Cantidad?</label>
       <input type="text" name="fuma" />
 
@@ -150,7 +150,7 @@
       e.preventDefault();
       const data = Object.fromEntries(new FormData(e.target));
       try {
-        const docRef = await db.collection("historialOdontologia").add(data);
+        const docRef = await db.collection("historial-odontologia").add(data);
         window.location.href = `preview-odontologia.html?id=${docRef.id}`;
       } catch (err) {
         alert("Error al guardar: " + err.message);
