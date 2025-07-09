@@ -1,12 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // Reglas para la colección de usuarios
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Agrega aquí otras colecciones si es necesario
+    // Reglas para historial odontológico (ajusta el nombre exacto si es diferente)
+    match /historial-odontologia/{docId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Puedes añadir otras colecciones similares aquí
   }
 }
+
