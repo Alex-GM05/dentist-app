@@ -173,12 +173,46 @@
         </div>
       </div>
 
-      <div class="form-buttons">
+      <div class="form-buttons no-print">
         <button type="submit">Agregar</button>
-        <button type="button" class="danger" onclick="window.location.href='select-add.html'">Cancelar</button>
-        <button type="button" onclick="window.print()">Imprimir</button>
-      </div>
+        <button type="button" onclick="window.location.href='select-add.html'">Cancelar</button>
+        <button type="button" onclick="mostrarPreview()">Vista previa</button>
+        <button type="button" onclick="window.location.href='receta.html'">Receta</button>
+      </div>      
+
     </form>
   </main>
 </body>
 </html>
+
+<script>
+    function mostrarPreview() {
+      // Verifica que se haya llenado algo básico antes de mostrar preview
+      const nombre = document.getElementById('nombre').value;
+      if (!nombre) {
+        alert("Por favor llena al menos el nombre del paciente antes de imprimir.");
+        return;
+      }
+    
+      // Convierte todos los inputs a solo lectura
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.setAttribute('readonly', true);
+        el.setAttribute('disabled', true);
+        el.style.border = 'none';
+        el.style.backgroundColor = 'transparent';
+        el.style.color = 'black';
+      });
+    
+      window.print();
+    
+      // Después de imprimir, vuelve a activar los inputs
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.removeAttribute('readonly');
+        el.removeAttribute('disabled');
+        el.style.border = '';
+        el.style.backgroundColor = '';
+        el.style.color = '';
+      });
+    }
+    </script>
+    

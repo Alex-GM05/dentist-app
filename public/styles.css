@@ -170,30 +170,27 @@
   }
   
   @media print {
-    button, .form-buttons {
+    header, .form-buttons, .no-print {
       display: none !important;
     }
   
     body {
-      background-color: white;
-      color: black;
+      background-color: white !important;
+      color: black !important;
+      margin: 0;
+      padding: 0;
     }
   
     main {
       box-shadow: none;
-      border: none;
-      padding: 0;
       margin: 0;
+      max-width: 100%;
+      padding: 0;
     }
   
-    header {
-      background-color: white;
-      color: black;
-      box-shadow: none;
-    }
-  
-    input, textarea {
-      border: none;
+    input, select, textarea {
+      border: none !important;
+      outline: none !important;
     }
   }
   
