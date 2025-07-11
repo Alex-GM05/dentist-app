@@ -193,4 +193,18 @@
       outline: none !important;
     }
   }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  table th, table td {
+    border: 1px solid #aaa;
+    padding: 5px;
+    text-align: center;
+  }
+  input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
   
