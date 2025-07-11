@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
 </head>
 <body>
   <header class="no-print">
@@ -82,7 +84,14 @@
       }
     }
 
-    cargarDatos();
+    firebase.auth().signInAnonymously()
+      .then(() => {
+        cargarDatos(); // Solo cargar después de autenticar
+    })
+    .catch((error) => {
+        console.error("Error al iniciar sesión anónima:", error);
+        document.getElementById("detalleHistorial").innerHTML = "<p>No se pudo autenticar.</p>";
+    });
   </script>
 </body>
 </html>
