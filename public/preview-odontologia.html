@@ -55,6 +55,7 @@
       messagingSenderId: "410183687912",
       appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
     };
+
     if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -81,9 +82,9 @@
         document.getElementById("detalleHistorial").innerHTML = "<p>Error al cargar datos.</p>";
       }
     }
-}
 
     cargarDatos();
+}
   </script>
 </body>
 </html>
