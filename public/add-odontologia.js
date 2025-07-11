@@ -8,7 +8,7 @@ formulario.addEventListener('submit', async (e) => {
   datos.fecha = new Date().toLocaleDateString();
 
   try {
-    const docRef = await db.collection("historial_odontologia").add(datos);
+    const docRef = await db.collection("historial-odontologia").add(datos);
     window.location.href = `preview-odontologia.html?id=${docRef.id}`;
   } catch (err) {
     alert("Error al guardar: " + err.message);
