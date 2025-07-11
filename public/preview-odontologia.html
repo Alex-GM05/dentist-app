@@ -64,7 +64,7 @@
     async function cargarDatos() {
       if (!id) return;
       try {
-        const doc = await db.collection("historial-odontologia").doc(id).get();
+        const doc = await db.collection("historial_odontologia").doc(id).get();
         if (!doc.exists) {
           document.getElementById("detalleHistorial").innerHTML = "<p>No se encontró el historial.</p>";
           return;
