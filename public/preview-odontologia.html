@@ -56,7 +56,6 @@
       appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
     };
 
-    if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -84,7 +83,6 @@
     }
 
     cargarDatos();
-}
   </script>
 </body>
 </html>
