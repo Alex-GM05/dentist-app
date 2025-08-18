@@ -4,18 +4,115 @@
   <meta charset="UTF-8" />
   <title>Historia Clínica Odontológica</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; color: #000; }
-    h2 { text-align: center; text-transform: uppercase; margin-bottom: 1rem; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 1.5rem; }
-    th, td { border: 1px solid #000; padding: 6px; font-size: 13px; text-align: left; }
+    /* Reset y estilo global */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    :root {
+      --primary: #2a9d8f;
+      --secondary: #264653;
+      --light: #f0f5f9;
+      --white: #ffffff;
+      --danger: #e63946;
+    }
+    body {
+      background-color: var(--light);
+      color: var(--secondary);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    header {
+      background-color: var(--primary);
+      color: var(--white);
+      text-align: center;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    header h1 { font-size: 2rem; }
+
+    main {
+      padding: 2rem;
+      max-width: 800px;
+      margin: 2rem auto;
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    }
+    h2 { text-align: center; margin-bottom: 1rem; text-transform: uppercase; }
+    h3 { margin: 1rem 0; }
+
+    /* Tabla de historial */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 6px;
+      font-size: 14px;
+      text-align: left;
+    }
     th { background: #f2f2f2; }
+
+    /* Aviso y firmas */
     .seccion { margin-top: 20px; }
-    .firmas { display: flex; justify-content: space-between; margin-top: 3rem; }
-    .firmas div { text-align: center; width: 45%; }
+    .firmas {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+    }
+    .firmas div {
+      text-align: center;
+      width: 45%;
+    }
+
+    /* Botones */
+    .form-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    button {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--primary);
+      color: var(--white);
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background-color: #21867a; }
+    button.danger { background-color: var(--danger); }
+    button.danger:hover { background-color: #c53030; }
+
+    /* Estilo impresión */
     @media print {
-      body { margin: 20mm; }
-      .no-print { display: none; }
+      header, .form-buttons, .no-print { display: none !important; }
+      body {
+        background-color: white !important;
+        color: black !important;
+        margin: 0;
+        padding: 0;
+      }
+      main {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        border-radius: 0;
+      }
+      th { background: #ddd !important; }
     }
   </style>
 
@@ -31,32 +128,23 @@
   <main id="historialClinico">
     <h2>Historia Clínica Odontológica</h2>
 
-    <table id="tablaHistorial">
-      <tbody></tbody>
-    </table>
+    <table id="tablaHistorial"><tbody></tbody></table>
 
     <div class="seccion">
       <h3>Aviso de privacidad</h3>
       <p>
-        Sus datos personales serán utilizados únicamente con fines clínicos y administrativos
+        Sus datos personales serán utilizados únicamente con fines clínicos y administrativos,
         conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.
-        Para más información consulte el aviso completo en consultorio.
       </p>
     </div>
 
     <div class="firmas">
-      <div>
-        ___________________________<br />
-        Firma del paciente
-      </div>
-      <div>
-        ___________________________<br />
-        Firma del responsable
-      </div>
+      <div>_________________________<br />Firma del paciente</div>
+      <div>_________________________<br />Firma del responsable</div>
     </div>
   </main>
 
-  <div class="form-buttons no-print" style="margin-top: 20px;">
+  <div class="form-buttons no-print">
     <button onclick="window.print()">Imprimir</button>
     <button onclick="window.location.href='receta.html'">Receta</button>
     <button type="button" onclick="window.location.href='add-odontologia.html'" class="danger">Cancelar</button>
@@ -71,10 +159,8 @@
       messagingSenderId: "410183687912",
       appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
 
@@ -99,7 +185,6 @@
           "<tr><td colspan='2'>Error al cargar datos.</td></tr>";
       }
     }
-
     firebase.auth().signInAnonymously().then(cargarDatos);
   </script>
 </body>
