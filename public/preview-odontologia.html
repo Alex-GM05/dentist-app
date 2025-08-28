@@ -27,12 +27,16 @@
     const db = firebase.firestore();
 
     const params = new URLSearchParams(window.location.search);
-    const email = params.get("email");
-
+    const id = params.get("id");
+      
     async function cargarDatos() {
-      const snapshot = await db.collection("historial-odontologia").where("email","==",email).orderBy("fecha","desc").limit(1).get();
-      if (!snapshot.empty) {
-        const data = snapshot.docs[0].data();
+      try {
+        const doc = await db.collection("historial-odontologia").doc(id).get();
+        if (!doc.exists) {
+          document.getElementById("previewContent").innerHTML = "<p>No se encontró el historial.</p>";
+          return;
+        }
+        const data = doc.data();
         let html = `
           <h2>Datos Generales</h2>
           <p><b>Nombre:</b> ${data.nombre}</p>
@@ -41,7 +45,7 @@
           <p><b>Correo:</b> ${data.email}</p>
           <p><b>Teléfono:</b> ${data.telefono || "-"}</p>
           <p><b>Fecha:</b> ${data.fecha}</p>
-
+      
           <h2>Antecedentes</h2>
           <p><b>Enfermedad:</b> ${data.enfermedad || "-"}</p>
           <p><b>Tratamiento:</b> ${data.tratamiento || "-"}</p>
@@ -53,14 +57,14 @@
           <p><b>Hipertenso:</b> ${data.hipertenso}</p>
           <p><b>Embarazo:</b> ${data.embarazo} ${data.mesesEmbarazo ? "(" + data.mesesEmbarazo + " meses)" : ""}</p>
           <p><b>Drogas:</b> ${data.drogas} ${data.tipoDrogas ? "(" + data.tipoDrogas + ")" : ""}</p>
-
+      
           <h2>Odontograma</h2>
           <img src="odontogr.png" style="max-width:100%; border:1px solid #ccc;">
-
+      
           <h2>Costos</h2>
           <table border="1" style="width:100%; text-align:center;">
             <tr><th>Concepto</th><th>Unidades</th><th>Costo Unidad</th><th>Total</th></tr>
-            ${data.costos.map(c=>`
+            ${(data.costos || []).map(c=>`
               <tr>
                 <td>${c.concepto}</td>
                 <td>${c.unidades}</td>
@@ -69,16 +73,18 @@
               </tr>`).join("")}
           </table>
           <h3>Total General: $${data.totalGeneral}</h3>
-
+        
           <h2>Receta</h2>
           <p>${data.receta || "-"}</p>
-
+        
           <div class="firmas">
             <div><p>__________________________<br>Firma del paciente</p></div>
             <div><p>__________________________<br>Firma del odontólogo</p></div>
           </div>
         `;
         document.getElementById("previewContent").innerHTML = html;
+      } catch (err) {
+        console.error("Error al cargar:", err);
       }
     }
     cargarDatos();

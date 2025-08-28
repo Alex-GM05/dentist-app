@@ -188,7 +188,7 @@
       const form = e.target;
       const data = {};
       new FormData(form).forEach((v, k) => data[k] = v);
-
+        
       // costos
       let costos = [];
       document.querySelectorAll("#tablaCostos tbody tr").forEach(fila => {
@@ -201,9 +201,15 @@
       });
       data["costos"] = costos;
       data["totalGeneral"] = document.getElementById("granTotal").textContent;
-
-      await db.collection("historial-odontologia").add(data);
-      window.location.href = "preview-odontologia.html?email=" + data.email;
+    
+      try {
+        const docRef = await db.collection("historial-odontologia").add(data);
+        console.log("Guardado con ID:", docRef.id);
+        window.location.href = "preview-odontologia.html?id=" + docRef.id;
+      } catch (err) {
+        console.error("Error al guardar:", err);
+        alert("Error al guardar: " + err.message);
+      }
     });
   </script>
 </body>
