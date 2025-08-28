@@ -1,141 +1,113 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Historia Clínica - Odontología</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historia Clínica Odontología</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Historia Clínica</h1>
-    <p>Dra. Noemí Castillo</p>
-  </header>
-
-  <main>
-    <form id="formOdontologia">
-      <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
-        <div style="flex: 1 1 45%;">
-          <label>Nombre del paciente:</label>
-          <input type="text" name="nombre" required />
-
-          <label>Dirección:</label>
-          <input type="text" name="direccion" />
-
-          <label>Teléfono:</label>
-          <input type="tel" name="telefono" />
-
-          <label>Ocupación:</label>
-          <input type="text" name="ocupacion" />
-
-          <label>Estado Civil:</label>
-          <input type="text" name="estadoCivil" />
-
-          <label>¿En buen estado de salud?</label>
-          <select name="estadoSalud">
-            <option value="Sí">Sí</option>
-            <option value="No">No</option>
+  <div class="container">
+    <h2>Historia Clínica Odontología</h2>
+    <form id="odontologiaForm">
+      <!-- Datos Generales -->
+      <h3>Datos Generales</h3>
+      <div class="form-grid">
+        <label>Nombre completo: <input type="text" name="nombre" required></label>
+        <label>Correo electrónico: <input type="email" name="correo" required></label>
+        <label>Edad: <input type="number" name="edad" id="edad" required></label>
+        <label>Sexo: 
+          <select name="sexo" id="sexo" required>
+            <option value="">Seleccione</option>
+            <option value="hombre">Hombre</option>
+            <option value="mujer">Mujer</option>
           </select>
-
-          <label>¿Toma medicamentos? ¿Cuál?</label>
-          <input type="text" name="medicamento" />
-        </div>
-
-        <div style="flex: 1 1 45%;">
-          <label>Edad:</label>
-          <input type="number" name="edad" />
-
-          <label>Celular:</label>
-          <input type="tel" name="celular" />
-
-          <label>Mail:</label>
-          <input type="email" name="email" />
-
-          <label>Recomendado por:</label>
-          <input type="text" name="recomendadoPor" />
-
-          <label>Peso:</label>
-          <input type="text" name="peso" />
-
-          <label>Estatura:</label>
-          <input type="text" name="estatura" />
-
-          <label>¿Alergias? ¿A qué?</label>
-          <input type="text" name="alergias" />
-        </div>
+        </label>
+        <label>Fecha: <input type="date" name="fecha" required></label>
       </div>
 
-      <label>¿Enfermedad sistémica? ¿Cuál?</label>
-      <input type="text" name="sistemica" />
-
-      <label>¿Alguna enfermedad importante?</label>
-      <input type="text" name="enfermedadImportante" />
-
-      <label>¿Primera vez con anestesia?</label>
-      <input type="text" name="primeraAnestesia" />
-
-      <label>¿Problemas con anestesia local?</label>
-      <input type="text" name="problemasAnestesia" />
-
-      <label>¿Última vez que visitó al dentista?</label>
-      <input type="date" id="fecha" name="fecha" required>
-
-      <label>¿Fuma? ¿Frecuencia/Cantidad?</label>
-      <input type="text" name="fuma" />
-
-      <label>¿Contacto con drogas?</label>
-      <input type="text" name="drogas" />
-
-      <div class="checkbox-group">
-        <label><input type="checkbox" id="esMujer" /> Mujer</label>
-        <label><input type="checkbox" id="esMenor" /> Menor de edad</label>
+      <!-- Sección condicional -->
+      <div id="embarazoCampos" style="display:none;">
+        <h4>Información para mujeres</h4>
+        <label>¿Está embarazada?: 
+          <select name="embarazo">
+            <option value="">Seleccione</option>
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </label>
       </div>
 
-      <div id="mujerCampos" style="display: none;">
-        <label>¿Embarazada?</label>
-        <input type="text" name="embarazada" />
-
-        <label>¿Mes de gestación?</label>
-        <input type="text" name="mesGestacion" />
-
-        <label>¿Anticonceptivos? ¿Cuál?</label>
-        <input type="text" name="anticonceptivos" />
+      <div id="tutorCampos" style="display:none;">
+        <h4>Información para menores de edad</h4>
+        <label>Nombre del tutor: <input type="text" name="tutor"></label>
+        <label>Teléfono del tutor: <input type="text" name="telefonoTutor"></label>
       </div>
 
-      <div id="menorCampos" style="display: none;">
-        <label>Nombre del padre o madre:</label>
-        <input type="text" name="nombrePadre" />
+      <!-- Antecedentes -->
+      <h3>Antecedentes Médicos</h3>
+      <textarea name="antecedentes" rows="3"></textarea>
 
-        <label>Teléfono del trabajo:</label>
-        <input type="text" name="telefonoTrabajo" />
+      <h3>Hábitos</h3>
+      <textarea name="habitos" rows="3"></textarea>
+
+      <!-- Exploración Clínica -->
+      <h3>Exploración Clínica</h3>
+      <textarea name="exploracion" rows="3"></textarea>
+      <h4>Odontograma</h4>
+      <img src="odontograma.png" alt="Odontograma" class="odontograma">
+
+      <!-- Diagnóstico y Plan -->
+      <h3>Diagnóstico</h3>
+      <textarea name="diagnostico" rows="3"></textarea>
+
+      <h3>Plan de Tratamiento</h3>
+      <textarea name="tratamiento" rows="3"></textarea>
+
+      <!-- Tabla de costos -->
+      <h3>Costos</h3>
+      <table id="tablaCostos">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Unidades</th>
+            <th>Costo Unitario</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="costosBody">
+          <tr>
+            <td><input type="text" name="concepto[]"></td>
+            <td><input type="number" name="unidades[]" class="unidad"></td>
+            <td><input type="number" name="costoUnit[]" class="costoUnit"></td>
+            <td><input type="number" name="total[]" class="total" readonly></td>
+          </tr>
+        </tbody>
+      </table>
+      <button type="button" onclick="agregarFila()">Agregar concepto</button>
+      <h4>Total General: <span id="totalGeneral">0</span></h4>
+
+      <!-- Receta -->
+      <h3>Receta</h3>
+      <textarea name="receta" rows="4"></textarea>
+
+      <!-- Firmas -->
+      <h3>Firmas</h3>
+      <div class="form-grid">
+        <label>Firma del Paciente: ____________________________</label>
+        <label>Firma del Doctor: ____________________________</label>
       </div>
 
-      <h3>Motivo de consulta</h3>
-      <textarea name="motivoConsulta" rows="6" placeholder="Describa el motivo de la consulta..."></textarea>
-
-      <div class="form-buttons">
-        <button type="submit">Agregar</button>
-        <button type="button" onclick="window.location.href='select-add.html'" class="danger">Cancelar</button>
-        <button type="button" onclick="window.location.href='receta.html'">Receta</button>
-      </div>
+      <button type="submit">Guardar</button>
+      <button type="button" onclick="window.location.href='preview-odontologia.html'">Vista Previa</button>
     </form>
-  </main>
+  </div>
 
   <script>
-    // Mostrar campos condicionales
-    document.getElementById("esMujer").addEventListener("change", function() {
-      document.getElementById("mujerCampos").style.display = this.checked ? "block" : "none";
-    });
-
-    document.getElementById("esMenor").addEventListener("change", function() {
-      document.getElementById("menorCampos").style.display = this.checked ? "block" : "none";
-    });
-
-    // Firebase config
+    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
       authDomain: "dentist-app-2bb07.firebaseapp.com",
@@ -144,23 +116,55 @@
       messagingSenderId: "410183687912",
       appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
     };
-
-    firebase.initializeApp(firebaseConfig);
+    const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    firebase.auth().signInAnonymously().catch((error) => {
-        console.error("Error al iniciar sesión anónima:", error);
+    // Mostrar campos condicionales
+    document.getElementById("sexo").addEventListener("change", function() {
+      document.getElementById("embarazoCampos").style.display = this.value === "mujer" ? "block" : "none";
+    });
+    document.getElementById("edad").addEventListener("input", function() {
+      document.getElementById("tutorCampos").style.display = this.value < 18 ? "block" : "none";
     });
 
-    document.getElementById("formOdontologia").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target));
-      try {
-        const docRef = await db.collection("historial-odontologia").add(data);
-        window.location.href = `preview-odontologia.html?id=${docRef.id}`;
-      } catch (err) {
-        alert("Error al guardar: " + err.message);
+    // Tabla de costos: cálculo automático
+    function calcularTotales() {
+      let totalGeneral = 0;
+      document.querySelectorAll("#costosBody tr").forEach(row => {
+        const unidad = row.querySelector(".unidad")?.value || 0;
+        const costoUnit = row.querySelector(".costoUnit")?.value || 0;
+        const total = row.querySelector(".total");
+        const subtotal = unidad * costoUnit;
+        total.value = subtotal;
+        totalGeneral += subtotal;
+      });
+      document.getElementById("totalGeneral").innerText = totalGeneral;
+    }
+    document.addEventListener("input", e => {
+      if (e.target.classList.contains("unidad") || e.target.classList.contains("costoUnit")) {
+        calcularTotales();
       }
+    });
+    function agregarFila() {
+      const row = `
+        <tr>
+          <td><input type="text" name="concepto[]"></td>
+          <td><input type="number" name="unidades[]" class="unidad"></td>
+          <td><input type="number" name="costoUnit[]" class="costoUnit"></td>
+          <td><input type="number" name="total[]" class="total" readonly></td>
+        </tr>`;
+      document.getElementById("costosBody").insertAdjacentHTML("beforeend", row);
+    }
+
+    // Guardar en Firestore
+    document.getElementById("odontologiaForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+      data.timestamp = new Date();
+
+      await db.collection("historial-odontologia").add(data);
+      alert("Historial guardado correctamente.");
     });
   </script>
 </body>
