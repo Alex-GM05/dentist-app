@@ -2,112 +2,97 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Historia Clínica Odontología</title>
+  <title>Agregar Historia Clínica Odontológica</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h2>Historia Clínica Odontología</h2>
+  <div class="form-container">
+    <h1>Historia Clínica Odontológica</h1>
     <form id="odontologiaForm">
+      
       <!-- Datos Generales -->
-      <h3>Datos Generales</h3>
-      <div class="form-grid">
-        <label>Nombre completo: <input type="text" name="nombre" required></label>
-        <label>Correo electrónico: <input type="email" name="correo" required></label>
-        <label>Edad: <input type="number" name="edad" id="edad" required></label>
-        <label>Sexo: 
-          <select name="sexo" id="sexo" required>
-            <option value="">Seleccione</option>
-            <option value="hombre">Hombre</option>
-            <option value="mujer">Mujer</option>
+      <section>
+        <h2>Datos Generales</h2>
+        <div class="two-columns">
+          <label>Fecha: <input type="date" name="fecha" required></label>
+          <label>Correo del Paciente: <input type="email" name="correo" required></label>
+          <label>Nombre: <input type="text" name="nombre" required></label>
+          <label>Edad: <input type="number" name="edad" required></label>
+          <label>Sexo:
+            <select name="sexo" id="sexo">
+              <option value="">Seleccione</option>
+              <option value="Hombre">Hombre</option>
+              <option value="Mujer">Mujer</option>
+            </select>
+          </label>
+          <label>Ocupación: <input type="text" name="ocupacion"></label>
+        </div>
+      </section>
+
+      <!-- Condicionales -->
+      <section>
+        <h2>Información Adicional</h2>
+        <label>¿Consume Drogas?
+          <select name="drogas" id="drogas">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
           </select>
         </label>
-        <label>Fecha: <input type="date" name="fecha" required></label>
-      </div>
+        <div id="drogasExtra" style="display:none;">
+          <label>¿Cuáles? <input type="text" name="tipoDrogas"></label>
+        </div>
 
-      <!-- Sección condicional -->
-      <div id="embarazoCampos" style="display:none;">
-        <h4>Información para mujeres</h4>
-        <label>¿Está embarazada?: 
-          <select name="embarazo">
-            <option value="">Seleccione</option>
-            <option value="si">Sí</option>
-            <option value="no">No</option>
+        <label>¿Está Embarazada? (solo mujeres)
+          <select name="embarazo" id="embarazo">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
           </select>
         </label>
-      </div>
+        <div id="embarazoExtra" style="display:none;">
+          <label>Meses de gestación: <input type="number" name="mesesEmbarazo"></label>
+        </div>
+      </section>
 
-      <div id="tutorCampos" style="display:none;">
-        <h4>Información para menores de edad</h4>
-        <label>Nombre del tutor: <input type="text" name="tutor"></label>
-        <label>Teléfono del tutor: <input type="text" name="telefonoTutor"></label>
-      </div>
-
-      <!-- Antecedentes -->
-      <h3>Antecedentes Médicos</h3>
-      <textarea name="antecedentes" rows="3"></textarea>
-
-      <h3>Hábitos</h3>
-      <textarea name="habitos" rows="3"></textarea>
-
-      <!-- Exploración Clínica -->
-      <h3>Exploración Clínica</h3>
-      <textarea name="exploracion" rows="3"></textarea>
-      <h4>Odontograma</h4>
-      <img src="odontogr.png" alt="Odontograma" class="odontograma">
-
-      <!-- Diagnóstico y Plan -->
-      <h3>Diagnóstico</h3>
-      <textarea name="diagnostico" rows="3"></textarea>
-
-      <h3>Plan de Tratamiento</h3>
-      <textarea name="tratamiento" rows="3"></textarea>
-
-      <!-- Tabla de costos -->
-      <h3>Costos</h3>
-      <table id="tablaCostos">
-        <thead>
-          <tr>
-            <th>Concepto</th>
-            <th>Unidades</th>
-            <th>Costo Unitario</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="costosBody">
-          <tr>
-            <td><input type="text" name="concepto[]"></td>
-            <td><input type="number" name="unidades[]" class="unidad"></td>
-            <td><input type="number" name="costoUnit[]" class="costoUnit"></td>
-            <td><input type="number" name="total[]" class="total" readonly></td>
-          </tr>
-        </tbody>
-      </table>
-      <button type="button" onclick="agregarFila()">Agregar concepto</button>
-      <h4>Total General: <span id="totalGeneral">0</span></h4>
+      <!-- Costos -->
+      <section>
+        <h2>Costos</h2>
+        <table id="tablaCostos">
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th>Unidad</th>
+              <th>Costo por unidad</th>
+              <th>Total</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" id="agregarFila">Agregar Concepto</button>
+        <h3>Total General: $<span id="totalGeneral">0</span></h3>
+      </section>
 
       <!-- Receta -->
-      <h3>Receta</h3>
-      <textarea name="receta" rows="4"></textarea>
+      <section>
+        <h2>Receta</h2>
+        <textarea name="receta" rows="5" placeholder="Escriba aquí la receta..."></textarea>
+      </section>
 
-      <!-- Firmas -->
-      <h3>Firmas</h3>
-      <div class="form-grid">
-        <label>Firma del Paciente: ____________________________</label>
-        <label>Firma del Doctor: ____________________________</label>
-      </div>
+      <!-- Imagen de dientes -->
+      <section>
+        <h2>Odontograma</h2>
+        <img src="odontogr.png" alt="Odontograma" class="odontograma">
+      </section>
 
-      <button type="submit">Guardar</button>
-      <button type="button" onclick="window.location.href='preview-odontologia.html'">Vista Previa</button>
+      <button type="submit">Guardar Historia Clínica</button>
     </form>
   </div>
 
   <script>
-    // Configuración de Firebase
+    // 🔹 Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
       authDomain: "dentist-app-2bb07.firebaseapp.com",
@@ -119,52 +104,83 @@
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Mostrar campos condicionales
-    document.getElementById("sexo").addEventListener("change", function() {
-      document.getElementById("embarazoCampos").style.display = this.value === "mujer" ? "block" : "none";
+    // 🔹 Mostrar condicionales
+    document.getElementById("drogas").addEventListener("change", e => {
+      document.getElementById("drogasExtra").style.display = e.target.value === "Sí" ? "block" : "none";
     });
-    document.getElementById("edad").addEventListener("input", function() {
-      document.getElementById("tutorCampos").style.display = this.value < 18 ? "block" : "none";
+    document.getElementById("sexo").addEventListener("change", e => {
+      document.getElementById("embarazo").parentElement.style.display = e.target.value === "Mujer" ? "block" : "none";
+    });
+    document.getElementById("embarazo").addEventListener("change", e => {
+      document.getElementById("embarazoExtra").style.display = e.target.value === "Sí" ? "block" : "none";
     });
 
-    // Tabla de costos: cálculo automático
-    function calcularTotales() {
-      let totalGeneral = 0;
-      document.querySelectorAll("#costosBody tr").forEach(row => {
-        const unidad = row.querySelector(".unidad")?.value || 0;
-        const costoUnit = row.querySelector(".costoUnit")?.value || 0;
-        const total = row.querySelector(".total");
-        const subtotal = unidad * costoUnit;
-        total.value = subtotal;
-        totalGeneral += subtotal;
-      });
-      document.getElementById("totalGeneral").innerText = totalGeneral;
-    }
+    // 🔹 Costos dinámicos
+    document.getElementById("agregarFila").addEventListener("click", () => {
+      const tbody = document.querySelector("#tablaCostos tbody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" name="concepto"></td>
+        <td><input type="number" name="unidad" value="1"></td>
+        <td><input type="number" name="costoUnidad" value="0"></td>
+        <td class="total">0</td>
+        <td><button type="button" class="eliminar">X</button></td>`;
+      tbody.appendChild(row);
+      actualizarCostos();
+    });
+
     document.addEventListener("input", e => {
-      if (e.target.classList.contains("unidad") || e.target.classList.contains("costoUnit")) {
-        calcularTotales();
+      if (e.target.name === "unidad" || e.target.name === "costoUnidad") {
+        actualizarCostos();
       }
     });
-    function agregarFila() {
-      const row = `
-        <tr>
-          <td><input type="text" name="concepto[]"></td>
-          <td><input type="number" name="unidades[]" class="unidad"></td>
-          <td><input type="number" name="costoUnit[]" class="costoUnit"></td>
-          <td><input type="number" name="total[]" class="total" readonly></td>
-        </tr>`;
-      document.getElementById("costosBody").insertAdjacentHTML("beforeend", row);
+
+    document.addEventListener("click", e => {
+      if (e.target.classList.contains("eliminar")) {
+        e.target.closest("tr").remove();
+        actualizarCostos();
+      }
+    });
+
+    function actualizarCostos() {
+      let totalGeneral = 0;
+      document.querySelectorAll("#tablaCostos tbody tr").forEach(row => {
+        const unidad = parseFloat(row.querySelector("[name='unidad']").value) || 0;
+        const costoUnidad = parseFloat(row.querySelector("[name='costoUnidad']").value) || 0;
+        const total = unidad * costoUnidad;
+        row.querySelector(".total").textContent = total.toFixed(2);
+        totalGeneral += total;
+      });
+      document.getElementById("totalGeneral").textContent = totalGeneral.toFixed(2);
     }
 
-    // Guardar en Firestore
-    document.getElementById("odontologiaForm").addEventListener("submit", async (e) => {
+    // 🔹 Guardar en Firestore
+    document.getElementById("odontologiaForm").addEventListener("submit", async e => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
-      data.timestamp = new Date();
 
-      await db.collection("historial-odontologia").add(data);
-      alert("Historial guardado correctamente.");
+      // Costos
+      let costos = [];
+      document.querySelectorAll("#tablaCostos tbody tr").forEach(row => {
+        costos.push({
+          concepto: row.querySelector("[name='concepto']").value,
+          unidad: row.querySelector("[name='unidad']").value,
+          costoUnidad: row.querySelector("[name='costoUnidad']").value,
+          total: row.querySelector(".total").textContent
+        });
+      });
+      data.costos = costos;
+      data.totalGeneral = document.getElementById("totalGeneral").textContent;
+
+      try {
+        await db.collection("historial-odontologia").add(data);
+        alert("Historia clínica guardada correctamente.");
+        window.location.href = "preview-odontologia.html?correo=" + data.correo;
+      } catch (error) {
+        console.error(error);
+        alert("Error al guardar: " + error.message);
+      }
     });
   </script>
 </body>

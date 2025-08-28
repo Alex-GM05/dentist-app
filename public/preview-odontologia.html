@@ -1,153 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Historia Clínica Odontológica</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-  <style>
-    /* Reset y estilo global */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    :root {
-      --primary: #2a9d8f;
-      --secondary: #264653;
-      --light: #f0f5f9;
-      --white: #ffffff;
-      --danger: #e63946;
-    }
-    body {
-      background-color: var(--light);
-      color: var(--secondary);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      animation: fadeIn 1s ease-in;
-    }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    header {
-      background-color: var(--primary);
-      color: var(--white);
-      text-align: center;
-      padding: 1rem;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    header h1 { font-size: 2rem; }
-
-    main {
-      padding: 2rem;
-      max-width: 800px;
-      margin: 2rem auto;
-      background-color: var(--white);
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
-    }
-    h2 { text-align: center; margin-bottom: 1rem; text-transform: uppercase; }
-    h3 { margin: 1rem 0; }
-
-    /* Tabla de historial */
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-bottom: 1.5rem;
-    }
-    th, td {
-      border: 1px solid #000;
-      padding: 6px;
-      font-size: 14px;
-      text-align: left;
-    }
-    th { background: #f2f2f2; }
-
-    /* Aviso y firmas */
-    .seccion { margin-top: 20px; }
-    .firmas {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 3rem;
-    }
-    .firmas div {
-      text-align: center;
-      width: 45%;
-    }
-
-    /* Botones */
-    .form-buttons {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    button {
-      flex: 1;
-      padding: 0.75rem;
-      border: none;
-      border-radius: 8px;
-      background-color: var(--primary);
-      color: var(--white);
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover { background-color: #21867a; }
-    button.danger { background-color: var(--danger); }
-    button.danger:hover { background-color: #c53030; }
-
-    /* Estilo impresión */
-    @media print {
-      header, .form-buttons, .no-print { display: none !important; }
-      body {
-        background-color: white !important;
-        color: black !important;
-        margin: 0;
-        padding: 0;
-      }
-      main {
-        box-shadow: none;
-        margin: 0;
-        padding: 0;
-        border-radius: 0;
-      }
-      th { background: #ddd !important; }
-    }
-  </style>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <meta charset="UTF-8">
+  <title>Vista Previa Historia Clínica</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
 </head>
 <body>
-  <header class="no-print">
-    <h1>Vista previa - Historia Clínica</h1>
-  </header>
-
-  <main id="historialClinico">
-    <h2>Historia Clínica Odontológica</h2>
-
-    <table id="tablaHistorial"><tbody></tbody></table>
-
-    <div class="seccion">
-      <h3>Aviso de privacidad</h3>
-      <p>
-        Sus datos personales serán utilizados únicamente con fines clínicos y administrativos,
-        conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.
-      </p>
-    </div>
-
-    <div class="firmas">
-      <div>_________________________<br />Firma del paciente</div>
-      <div>_________________________<br />Firma del responsable</div>
-    </div>
-  </main>
-
-  <div class="form-buttons no-print">
+  <div class="preview-container">
+    <h1>Historia Clínica Odontológica</h1>
+    <div id="contenido"></div>
     <button onclick="window.print()">Imprimir</button>
-    <button onclick="window.location.href='receta.html'">Receta</button>
-    <button type="button" onclick="window.location.href='add-odontologia.html'" class="danger">Cancelar</button>
   </div>
 
   <script>
@@ -159,33 +23,39 @@
       messagingSenderId: "410183687912",
       appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
     };
-    firebase.initializeApp(firebaseConfig);
+    const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const correo = urlParams.get("correo");
 
     async function cargarDatos() {
-      if (!id) return;
-      try {
-        const doc = await db.collection("historial-odontologia").doc(id).get();
-        if (!doc.exists) {
-          document.querySelector("#tablaHistorial tbody").innerHTML =
-            "<tr><td colspan='2'>No se encontró el historial.</td></tr>";
-          return;
-        }
-        const data = doc.data();
-        let filas = "";
-        Object.entries(data).forEach(([clave, valor]) => {
-          const etiqueta = clave.replace(/([A-Z])/g, " $1").replace(/\b\w/g, l => l.toUpperCase());
-          filas += `<tr><th>${etiqueta}</th><td>${valor || ""}</td></tr>`;
-        });
-        document.querySelector("#tablaHistorial tbody").innerHTML = filas;
-      } catch (error) {
-        document.querySelector("#tablaHistorial tbody").innerHTML =
-          "<tr><td colspan='2'>Error al cargar datos.</td></tr>";
+      const snap = await db.collection("historial-odontologia").where("correo", "==", correo).orderBy("fecha", "desc").limit(1).get();
+      if (!snap.empty) {
+        const data = snap.docs[0].data();
+        let html = `
+          <p><b>Fecha:</b> ${data.fecha}</p>
+          <p><b>Nombre:</b> ${data.nombre}</p>
+          <p><b>Edad:</b> ${data.edad}</p>
+          <p><b>Sexo:</b> ${data.sexo}</p>
+          <p><b>Ocupación:</b> ${data.ocupacion || ""}</p>
+          <h2>Costos</h2>
+          <table>
+            <tr><th>Concepto</th><th>Unidad</th><th>Costo Unidad</th><th>Total</th></tr>
+            ${data.costos.map(c => `<tr><td>${c.concepto}</td><td>${c.unidad}</td><td>${c.costoUnidad}</td><td>${c.total}</td></tr>`).join("")}
+          </table>
+          <h3>Total General: $${data.totalGeneral}</h3>
+          <h2>Receta</h2>
+          <p>${data.receta || ""}</p>
+          <h2>Odontograma</h2>
+          <img src="odontograma.png" alt="Odontograma" class="odontograma">
+        `;
+        document.getElementById("contenido").innerHTML = html;
+      } else {
+        document.getElementById("contenido").innerHTML = "<p>No se encontró información.</p>";
       }
     }
-    firebase.auth().signInAnonymously().then(cargarDatos);
+    cargarDatos();
   </script>
 </body>
 </html>
