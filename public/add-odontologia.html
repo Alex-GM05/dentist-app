@@ -2,68 +2,101 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Agregar Historia Clínica Odontológica</title>
+  <title>Historia Clínica Odontología</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 </head>
 <body>
-  <div class="form-container">
+  <div class="container">
     <h1>Historia Clínica Odontológica</h1>
     <form id="odontologiaForm">
-      
-      <!-- Datos Generales -->
+
+      <!-- DATOS GENERALES -->
       <section>
         <h2>Datos Generales</h2>
-        <div class="two-columns">
-          <label>Fecha: <input type="date" name="fecha" required></label>
-          <label>Correo del Paciente: <input type="email" name="correo" required></label>
-          <label>Nombre: <input type="text" name="nombre" required></label>
-          <label>Edad: <input type="number" name="edad" required></label>
-          <label>Sexo:
-            <select name="sexo" id="sexo">
-              <option value="">Seleccione</option>
-              <option value="Hombre">Hombre</option>
-              <option value="Mujer">Mujer</option>
-            </select>
-          </label>
-          <label>Ocupación: <input type="text" name="ocupacion"></label>
-        </div>
+        <label>Nombre completo: <input type="text" name="nombre" required></label>
+        <label>Edad: <input type="number" name="edad" required></label>
+        <label>Sexo: 
+          <select name="sexo" required>
+            <option value="">Seleccione</option>
+            <option>Hombre</option>
+            <option>Mujer</option>
+          </select>
+        </label>
+        <label>Correo electrónico: <input type="email" name="email" required></label>
+        <label>Teléfono: <input type="text" name="telefono"></label>
+        <label>Fecha: <input type="date" name="fecha" required></label>
       </section>
 
-      <!-- Condicionales -->
+      <!-- ANTECEDENTES -->
       <section>
-        <h2>Información Adicional</h2>
-        <label>¿Consume Drogas?
-          <select name="drogas" id="drogas">
+        <h2>Antecedentes</h2>
+        <label>Padece alguna enfermedad: 
+          <input type="text" name="enfermedad">
+        </label>
+        <label>Está bajo tratamiento médico: 
+          <input type="text" name="tratamiento">
+        </label>
+        <label>Toma medicamentos: 
+          <input type="text" name="medicamentos">
+        </label>
+        <label>Es alérgico a medicamentos o sustancias: 
+          <input type="text" name="alergias">
+        </label>
+        <label>Ha sido operado: 
+          <input type="text" name="operaciones">
+        </label>
+        <label>Ha recibido transfusiones: 
+          <input type="text" name="transfusiones">
+        </label>
+        <label>Es diabético: 
+          <select name="diabetico">
             <option value="No">No</option>
             <option value="Sí">Sí</option>
           </select>
         </label>
-        <div id="drogasExtra" style="display:none;">
-          <label>¿Cuáles? <input type="text" name="tipoDrogas"></label>
-        </div>
-
-        <label>¿Está Embarazada? (solo mujeres)
+        <label>Es hipertenso: 
+          <select name="hipertenso">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
+          </select>
+        </label>
+        <label>Está embarazada: 
           <select name="embarazo" id="embarazo">
             <option value="No">No</option>
             <option value="Sí">Sí</option>
           </select>
         </label>
         <div id="embarazoExtra" style="display:none;">
-          <label>Meses de gestación: <input type="number" name="mesesEmbarazo"></label>
+          <label>Meses de embarazo: <input type="number" name="mesesEmbarazo"></label>
+        </div>
+        <label>Consume drogas: 
+          <select name="drogas" id="drogas">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
+          </select>
+        </label>
+        <div id="drogasExtra" style="display:none;">
+          <label>¿Cuáles?: <input type="text" name="tipoDrogas"></label>
         </div>
       </section>
 
-      <!-- Costos -->
+      <!-- ODONTOGRAMA -->
+      <section>
+        <h2>Odontograma</h2>
+        <img src="odontograma.png" alt="Odontograma" style="max-width:100%; border:1px solid #ccc;">
+      </section>
+
+      <!-- COSTOS -->
       <section>
         <h2>Costos</h2>
-        <table id="tablaCostos">
+        <table id="tablaCostos" border="1" style="width:100%; text-align:center;">
           <thead>
             <tr>
               <th>Concepto</th>
-              <th>Unidad</th>
+              <th>Unidades</th>
               <th>Costo por unidad</th>
               <th>Total</th>
               <th>Acción</th>
@@ -71,28 +104,34 @@
           </thead>
           <tbody></tbody>
         </table>
-        <button type="button" id="agregarFila">Agregar Concepto</button>
-        <h3>Total General: $<span id="totalGeneral">0</span></h3>
+        <button type="button" onclick="agregarFila()">➕ Agregar concepto</button>
+        <h3>Total general: $<span id="granTotal">0</span></h3>
       </section>
 
-      <!-- Receta -->
+      <!-- RECETA -->
       <section>
         <h2>Receta</h2>
-        <textarea name="receta" rows="5" placeholder="Escriba aquí la receta..."></textarea>
+        <textarea name="receta" rows="6" placeholder="Escriba la receta aquí..."></textarea>
       </section>
 
-      <!-- Imagen de dientes -->
-      <section>
-        <h2>Odontograma</h2>
-        <img src="odontogr.png" alt="Odontograma" class="odontograma">
+      <!-- FIRMAS -->
+      <section class="firmas">
+        <div>
+          <p>__________________________</p>
+          <p>Firma del paciente</p>
+        </div>
+        <div>
+          <p>__________________________</p>
+          <p>Firma del odontólogo</p>
+        </div>
       </section>
 
-      <button type="submit">Guardar Historia Clínica</button>
+      <button type="submit">Guardar y ver impresión</button>
     </form>
   </div>
 
   <script>
-    // 🔹 Configuración Firebase
+    // Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
       authDomain: "dentist-app-2bb07.firebaseapp.com",
@@ -104,83 +143,67 @@
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 🔹 Mostrar condicionales
-    document.getElementById("drogas").addEventListener("change", e => {
-      document.getElementById("drogasExtra").style.display = e.target.value === "Sí" ? "block" : "none";
+    // Condicionales
+    document.getElementById("embarazo").addEventListener("change", function() {
+      document.getElementById("embarazoExtra").style.display = this.value === "Sí" ? "block" : "none";
     });
-    document.getElementById("sexo").addEventListener("change", e => {
-      document.getElementById("embarazo").parentElement.style.display = e.target.value === "Mujer" ? "block" : "none";
-    });
-    document.getElementById("embarazo").addEventListener("change", e => {
-      document.getElementById("embarazoExtra").style.display = e.target.value === "Sí" ? "block" : "none";
+    document.getElementById("drogas").addEventListener("change", function() {
+      document.getElementById("drogasExtra").style.display = this.value === "Sí" ? "block" : "none";
     });
 
-    // 🔹 Costos dinámicos
-    document.getElementById("agregarFila").addEventListener("click", () => {
+    // Costos dinámicos
+    function agregarFila() {
       const tbody = document.querySelector("#tablaCostos tbody");
-      const row = document.createElement("tr");
-      row.innerHTML = `
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
         <td><input type="text" name="concepto"></td>
-        <td><input type="number" name="unidad" value="1"></td>
-        <td><input type="number" name="costoUnidad" value="0"></td>
-        <td class="total">0</td>
-        <td><button type="button" class="eliminar">X</button></td>`;
-      tbody.appendChild(row);
-      actualizarCostos();
-    });
-
-    document.addEventListener("input", e => {
-      if (e.target.name === "unidad" || e.target.name === "costoUnidad") {
-        actualizarCostos();
-      }
-    });
-
-    document.addEventListener("click", e => {
-      if (e.target.classList.contains("eliminar")) {
-        e.target.closest("tr").remove();
-        actualizarCostos();
-      }
-    });
-
-    function actualizarCostos() {
-      let totalGeneral = 0;
-      document.querySelectorAll("#tablaCostos tbody tr").forEach(row => {
-        const unidad = parseFloat(row.querySelector("[name='unidad']").value) || 0;
-        const costoUnidad = parseFloat(row.querySelector("[name='costoUnidad']").value) || 0;
-        const total = unidad * costoUnidad;
-        row.querySelector(".total").textContent = total.toFixed(2);
-        totalGeneral += total;
-      });
-      document.getElementById("totalGeneral").textContent = totalGeneral.toFixed(2);
+        <td><input type="number" name="unidades" value="1" min="1" oninput="calcularTotalFila(this)"></td>
+        <td><input type="number" name="costoUnidad" value="0" min="0" oninput="calcularTotalFila(this)"></td>
+        <td class="totalFila">0</td>
+        <td><button type="button" onclick="eliminarFila(this)">❌</button></td>
+      `;
+      tbody.appendChild(fila);
+    }
+    function calcularTotalFila(input) {
+      const fila = input.closest("tr");
+      const unidades = parseFloat(fila.querySelector("[name='unidades']").value) || 0;
+      const costoUnidad = parseFloat(fila.querySelector("[name='costoUnidad']").value) || 0;
+      const total = unidades * costoUnidad;
+      fila.querySelector(".totalFila").textContent = total.toFixed(2);
+      calcularGranTotal();
+    }
+    function eliminarFila(btn) {
+      btn.closest("tr").remove();
+      calcularGranTotal();
+    }
+    function calcularGranTotal() {
+      let total = 0;
+      document.querySelectorAll(".totalFila").forEach(td => total += parseFloat(td.textContent));
+      document.getElementById("granTotal").textContent = total.toFixed(2);
     }
 
-    // 🔹 Guardar en Firestore
-    document.getElementById("odontologiaForm").addEventListener("submit", async e => {
+    // Guardar en Firestore
+    document.getElementById("odontologiaForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData.entries());
+      const form = e.target;
+      const data = {};
+      new FormData(form).forEach((v, k) => data[k] = v);
 
-      // Costos
+      // costos
       let costos = [];
-      document.querySelectorAll("#tablaCostos tbody tr").forEach(row => {
+      document.querySelectorAll("#tablaCostos tbody tr").forEach(fila => {
         costos.push({
-          concepto: row.querySelector("[name='concepto']").value,
-          unidad: row.querySelector("[name='unidad']").value,
-          costoUnidad: row.querySelector("[name='costoUnidad']").value,
-          total: row.querySelector(".total").textContent
+          concepto: fila.querySelector("[name='concepto']").value,
+          unidades: fila.querySelector("[name='unidades']").value,
+          costoUnidad: fila.querySelector("[name='costoUnidad']").value,
+          total: fila.querySelector(".totalFila").textContent
         });
       });
-      data.costos = costos;
-      data.totalGeneral = document.getElementById("totalGeneral").textContent;
+      data["costos"] = costos;
+      data["totalGeneral"] = document.getElementById("granTotal").textContent;
 
-      try {
-        await db.collection("historial-odontologia").add(data);
-        alert("Historia clínica guardada correctamente.");
-        window.location.href = "preview-odontologia.html?correo=" + data.correo;
-      } catch (error) {
-        console.error(error);
-        alert("Error al guardar: " + error.message);
-      }
+      await db.collection("historial-odontologia").add(data);
+      window.location.href = "preview-odontologia.html?email=" + data.email;
     });
   </script>
 </body>

@@ -2,16 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Vista Previa Historia Clínica</title>
+  <title>Vista previa Historia Clínica</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
 <body>
-  <div class="preview-container">
+  <div class="container" id="previewContainer">
     <h1>Historia Clínica Odontológica</h1>
-    <div id="contenido"></div>
-    <button onclick="window.print()">Imprimir</button>
+    <div id="previewContent"></div>
+    <button onclick="window.print()">🖨️ Imprimir</button>
   </div>
 
   <script>
@@ -26,33 +26,59 @@
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const correo = urlParams.get("correo");
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email");
 
     async function cargarDatos() {
-      const snap = await db.collection("historial-odontologia").where("correo", "==", correo).orderBy("fecha", "desc").limit(1).get();
-      if (!snap.empty) {
-        const data = snap.docs[0].data();
+      const snapshot = await db.collection("historial-odontologia").where("email","==",email).orderBy("fecha","desc").limit(1).get();
+      if (!snapshot.empty) {
+        const data = snapshot.docs[0].data();
         let html = `
-          <p><b>Fecha:</b> ${data.fecha}</p>
+          <h2>Datos Generales</h2>
           <p><b>Nombre:</b> ${data.nombre}</p>
           <p><b>Edad:</b> ${data.edad}</p>
           <p><b>Sexo:</b> ${data.sexo}</p>
-          <p><b>Ocupación:</b> ${data.ocupacion || ""}</p>
+          <p><b>Correo:</b> ${data.email}</p>
+          <p><b>Teléfono:</b> ${data.telefono || "-"}</p>
+          <p><b>Fecha:</b> ${data.fecha}</p>
+
+          <h2>Antecedentes</h2>
+          <p><b>Enfermedad:</b> ${data.enfermedad || "-"}</p>
+          <p><b>Tratamiento:</b> ${data.tratamiento || "-"}</p>
+          <p><b>Medicamentos:</b> ${data.medicamentos || "-"}</p>
+          <p><b>Alergias:</b> ${data.alergias || "-"}</p>
+          <p><b>Operaciones:</b> ${data.operaciones || "-"}</p>
+          <p><b>Transfusiones:</b> ${data.transfusiones || "-"}</p>
+          <p><b>Diabético:</b> ${data.diabetico}</p>
+          <p><b>Hipertenso:</b> ${data.hipertenso}</p>
+          <p><b>Embarazo:</b> ${data.embarazo} ${data.mesesEmbarazo ? "(" + data.mesesEmbarazo + " meses)" : ""}</p>
+          <p><b>Drogas:</b> ${data.drogas} ${data.tipoDrogas ? "(" + data.tipoDrogas + ")" : ""}</p>
+
+          <h2>Odontograma</h2>
+          <img src="odontograma.png" style="max-width:100%; border:1px solid #ccc;">
+
           <h2>Costos</h2>
-          <table>
-            <tr><th>Concepto</th><th>Unidad</th><th>Costo Unidad</th><th>Total</th></tr>
-            ${data.costos.map(c => `<tr><td>${c.concepto}</td><td>${c.unidad}</td><td>${c.costoUnidad}</td><td>${c.total}</td></tr>`).join("")}
+          <table border="1" style="width:100%; text-align:center;">
+            <tr><th>Concepto</th><th>Unidades</th><th>Costo Unidad</th><th>Total</th></tr>
+            ${data.costos.map(c=>`
+              <tr>
+                <td>${c.concepto}</td>
+                <td>${c.unidades}</td>
+                <td>${c.costoUnidad}</td>
+                <td>${c.total}</td>
+              </tr>`).join("")}
           </table>
           <h3>Total General: $${data.totalGeneral}</h3>
+
           <h2>Receta</h2>
-          <p>${data.receta || ""}</p>
-          <h2>Odontograma</h2>
-          <img src="odontograma.png" alt="Odontograma" class="odontograma">
+          <p>${data.receta || "-"}</p>
+
+          <div class="firmas">
+            <div><p>__________________________<br>Firma del paciente</p></div>
+            <div><p>__________________________<br>Firma del odontólogo</p></div>
+          </div>
         `;
-        document.getElementById("contenido").innerHTML = html;
-      } else {
-        document.getElementById("contenido").innerHTML = "<p>No se encontró información.</p>";
+        document.getElementById("previewContent").innerHTML = html;
       }
     }
     cargarDatos();
