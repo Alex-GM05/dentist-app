@@ -2,16 +2,17 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Vista previa Historia Clínica</title>
+  <title>Previsualización Historia Clínica</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
 <body>
-  <div class="container" id="previewContainer">
+  <div class="container">
     <h1>Historia Clínica Odontológica</h1>
-    <div id="previewContent"></div>
+    <div id="previewData"></div>
     <button onclick="window.print()">🖨️ Imprimir</button>
+    <button onclick="window.location.href='add-odontologia.html'">➕ Nuevo Registro</button>
   </div>
 
   <script>
@@ -19,7 +20,7 @@
       apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
       authDomain: "dentist-app-2bb07.firebaseapp.com",
       projectId: "dentist-app-2bb07",
-      storageBucket: "dentist-app-2bb07.firebasestorage.app",
+      storageBucket: "dentist-app-2bb07.appspot.com",
       messagingSenderId: "410183687912",
       appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
     };
@@ -28,14 +29,11 @@
 
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
-      
-    async function cargarDatos() {
-      try {
-        const doc = await db.collection("historial-odontologia").doc(id).get();
-        if (!doc.exists) {
-          document.getElementById("previewContent").innerHTML = "<p>No se encontró el historial.</p>";
-          return;
-        }
+
+    async function loadData(){
+      if(!id) return;
+      const doc = await db.collection("historial-odontologia").doc(id).get();
+      if(doc.exists){
         const data = doc.data();
         let html = `
           <h2>Datos Generales</h2>
@@ -43,28 +41,25 @@
           <p><b>Edad:</b> ${data.edad}</p>
           <p><b>Sexo:</b> ${data.sexo}</p>
           <p><b>Correo:</b> ${data.email}</p>
-          <p><b>Teléfono:</b> ${data.telefono || "-"}</p>
+          <p><b>Teléfono:</b> ${data.telefono}</p>
           <p><b>Fecha:</b> ${data.fecha}</p>
-      
+
           <h2>Antecedentes</h2>
-          <p><b>Enfermedad:</b> ${data.enfermedad || "-"}</p>
-          <p><b>Tratamiento:</b> ${data.tratamiento || "-"}</p>
-          <p><b>Medicamentos:</b> ${data.medicamentos || "-"}</p>
-          <p><b>Alergias:</b> ${data.alergias || "-"}</p>
-          <p><b>Operaciones:</b> ${data.operaciones || "-"}</p>
-          <p><b>Transfusiones:</b> ${data.transfusiones || "-"}</p>
+          <p><b>Enfermedad:</b> ${data.enfermedad || ''}</p>
+          <p><b>Tratamiento:</b> ${data.tratamiento || ''}</p>
+          <p><b>Medicamentos:</b> ${data.medicamentos || ''}</p>
+          <p><b>Alergias:</b> ${data.alergias || ''}</p>
+          <p><b>Operaciones:</b> ${data.operaciones || ''}</p>
+          <p><b>Transfusiones:</b> ${data.transfusiones || ''}</p>
           <p><b>Diabético:</b> ${data.diabetico}</p>
           <p><b>Hipertenso:</b> ${data.hipertenso}</p>
-          <p><b>Embarazo:</b> ${data.embarazo} ${data.mesesEmbarazo ? "(" + data.mesesEmbarazo + " meses)" : ""}</p>
-          <p><b>Drogas:</b> ${data.drogas} ${data.tipoDrogas ? "(" + data.tipoDrogas + ")" : ""}</p>
-      
-          <h2>Odontograma</h2>
-          <img src="odontogr.png" style="max-width:100%; border:1px solid #ccc;">
-      
+          <p><b>Embarazo:</b> ${data.embarazo} ${data.mesesEmbarazo ? `(${data.mesesEmbarazo} meses)` : ''}</p>
+          <p><b>Drogas:</b> ${data.drogas} ${data.tipoDrogas ? `(${data.tipoDrogas})` : ''}</p>
+
           <h2>Costos</h2>
           <table border="1" style="width:100%; text-align:center;">
-            <tr><th>Concepto</th><th>Unidades</th><th>Costo Unidad</th><th>Total</th></tr>
-            ${(data.costos || []).map(c=>`
+            <tr><th>Concepto</th><th>Unidades</th><th>Costo unidad</th><th>Total</th></tr>
+            ${(data.costos || []).map(c => `
               <tr>
                 <td>${c.concepto}</td>
                 <td>${c.unidades}</td>
@@ -72,22 +67,20 @@
                 <td>${c.total}</td>
               </tr>`).join("")}
           </table>
-          <h3>Total General: $${data.totalGeneral}</h3>
-        
+          <p><b>Total General:</b> $${data.totalGeneral || 0}</p>
+
           <h2>Receta</h2>
-          <p>${data.receta || "-"}</p>
-        
-          <div class="firmas">
-            <div><p>__________________________<br>Firma del paciente</p></div>
-            <div><p>__________________________<br>Firma del odontólogo</p></div>
-          </div>
+          <p>${data.receta || ''}</p>
+
+          ${data.imagenes && data.imagenes.length ? `
+            <h2>Imágenes</h2>
+            ${data.imagenes.map(url => `<img src="${url}" style="max-width:300px; margin:10px;">`).join("")}
+          ` : ''}
         `;
-        document.getElementById("previewContent").innerHTML = html;
-      } catch (err) {
-        console.error("Error al cargar:", err);
+        document.getElementById("previewData").innerHTML = html;
       }
     }
-    cargarDatos();
+    loadData();
   </script>
 </body>
 </html>

@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
 </head>
 <body>
   <div class="container">
@@ -33,24 +33,12 @@
       <!-- ANTECEDENTES -->
       <section>
         <h2>Antecedentes</h2>
-        <label>Padece alguna enfermedad: 
-          <input type="text" name="enfermedad">
-        </label>
-        <label>Está bajo tratamiento médico: 
-          <input type="text" name="tratamiento">
-        </label>
-        <label>Toma medicamentos: 
-          <input type="text" name="medicamentos">
-        </label>
-        <label>Es alérgico a medicamentos o sustancias: 
-          <input type="text" name="alergias">
-        </label>
-        <label>Ha sido operado: 
-          <input type="text" name="operaciones">
-        </label>
-        <label>Ha recibido transfusiones: 
-          <input type="text" name="transfusiones">
-        </label>
+        <label>Padece alguna enfermedad: <input type="text" name="enfermedad"></label>
+        <label>Está bajo tratamiento médico: <input type="text" name="tratamiento"></label>
+        <label>Toma medicamentos: <input type="text" name="medicamentos"></label>
+        <label>Es alérgico a medicamentos o sustancias: <input type="text" name="alergias"></label>
+        <label>Ha sido operado: <input type="text" name="operaciones"></label>
+        <label>Ha recibido transfusiones: <input type="text" name="transfusiones"></label>
         <label>Es diabético: 
           <select name="diabetico">
             <option value="No">No</option>
@@ -114,6 +102,13 @@
         <textarea name="receta" rows="6" placeholder="Escriba la receta aquí..."></textarea>
       </section>
 
+      <!-- IMÁGENES -->
+      <section>
+        <h2>Imágenes (Opcional)</h2>
+        <input type="file" id="imagenes" multiple accept="image/*">
+        <p>Puedes subir radiografías, fotos clínicas, etc.</p>
+      </section>
+
       <!-- FIRMAS -->
       <section class="firmas">
         <div>
@@ -136,12 +131,13 @@
       apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
       authDomain: "dentist-app-2bb07.firebaseapp.com",
       projectId: "dentist-app-2bb07",
-      storageBucket: "dentist-app-2bb07.firebasestorage.app",
+      storageBucket: "dentist-app-2bb07.appspot.com",
       messagingSenderId: "410183687912",
       appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
     };
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
     // Condicionales
     document.getElementById("embarazo").addEventListener("change", function() {
@@ -182,7 +178,7 @@
       document.getElementById("granTotal").textContent = total.toFixed(2);
     }
 
-    // Guardar en Firestore
+    // Guardar en Firestore con imágenes
     document.getElementById("odontologiaForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.target;
@@ -201,13 +197,22 @@
       });
       data["costos"] = costos;
       data["totalGeneral"] = document.getElementById("granTotal").textContent;
-    
+
+      // Subir imágenes si hay
+      const files = document.getElementById("imagenes").files;
+      let urls = [];
+      for (let file of files) {
+        const storageRef = storage.ref("odontologia/" + Date.now() + "_" + file.name);
+        await storageRef.put(file);
+        const url = await storageRef.getDownloadURL();
+        urls.push(url);
+      }
+      data["imagenes"] = urls;
+
       try {
         const docRef = await db.collection("historial-odontologia").add(data);
-        console.log("Guardado con ID:", docRef.id);
         window.location.href = "preview-odontologia.html?id=" + docRef.id;
       } catch (err) {
-        console.error("Error al guardar:", err);
         alert("Error al guardar: " + err.message);
       }
     });
