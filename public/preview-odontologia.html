@@ -2,85 +2,228 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Previsualización Historia Clínica</title>
+  <title>Vista previa — Historia Clínica</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+  <style>
+    .container { max-width: 900px; margin: 2rem auto; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.07); }
+    .hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+    .section { margin-top: 1.25rem; }
+    .section h2 { margin-bottom:.5rem; }
+    .kv { display:grid; grid-template-columns: 220px 1fr; gap:.5rem .75rem; }
+    .kv div { padding:.4rem 0; border-bottom:1px dashed #ddd; }
+    .odontograma { border:1px solid #ddd; background:#f8f9fa; border-radius:10px; padding:8px; }
+    table { width:100%; border-collapse: collapse; margin-top:.5rem; }
+    th, td { border:1px solid #aaa; padding:.5rem; text-align:center; }
+    .images-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:.75rem; margin-top:.5rem; }
+    .images-grid img { width:100%; height:180px; object-fit:cover; border-radius:8px; border:1px solid #ddd; }
+    .firmas { display:flex; justify-content:space-between; gap:2rem; margin-top:2rem; }
+    .firmas > div { text-align:center; flex:1; }
+    .no-print { margin-top:1rem; display:flex; gap:1rem; }
+    @media print {
+      .no-print { display:none !important; }
+      body { background:#fff !important; }
+      .container { box-shadow:none; margin:0; border-radius:0; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Historia Clínica Odontológica</h1>
-    <div id="previewData"></div>
-    <button onclick="window.print()">🖨️ Imprimir</button>
-    <button onclick="window.location.href='add-odontologia.html'">➕ Nuevo Registro</button>
+    <div class="hdr">
+      <h1>Historia Clínica Odontológica</h1>
+      <div class="no-print">
+        <button onclick="window.print()">🖨️ Imprimir</button>
+        <button onclick="window.location.href='add-odontologia.html'">➕ Nuevo</button>
+      </div>
+    </div>
+
+    <div id="contenido">
+      <!-- Se rellena vía JS -->
+    </div>
   </div>
 
   <script>
+    // --- Firebase init ---
     const firebaseConfig = {
       apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
       authDomain: "dentist-app-2bb07.firebaseapp.com",
       projectId: "dentist-app-2bb07",
-      storageBucket: "dentist-app-2bb07.appspot.com",
+      storageBucket: "dentist-app-2bb07.firebasestorage.app",
       messagingSenderId: "410183687912",
       appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
     };
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-
-    async function loadData(){
-      if(!id) return;
-      const doc = await db.collection("historial-odontologia").doc(id).get();
-      if(doc.exists){
-        const data = doc.data();
-        let html = `
-          <h2>Datos Generales</h2>
-          <p><b>Nombre:</b> ${data.nombre}</p>
-          <p><b>Edad:</b> ${data.edad}</p>
-          <p><b>Sexo:</b> ${data.sexo}</p>
-          <p><b>Correo:</b> ${data.email}</p>
-          <p><b>Teléfono:</b> ${data.telefono}</p>
-          <p><b>Fecha:</b> ${data.fecha}</p>
-
-          <h2>Antecedentes</h2>
-          <p><b>Enfermedad:</b> ${data.enfermedad || ''}</p>
-          <p><b>Tratamiento:</b> ${data.tratamiento || ''}</p>
-          <p><b>Medicamentos:</b> ${data.medicamentos || ''}</p>
-          <p><b>Alergias:</b> ${data.alergias || ''}</p>
-          <p><b>Operaciones:</b> ${data.operaciones || ''}</p>
-          <p><b>Transfusiones:</b> ${data.transfusiones || ''}</p>
-          <p><b>Diabético:</b> ${data.diabetico}</p>
-          <p><b>Hipertenso:</b> ${data.hipertenso}</p>
-          <p><b>Embarazo:</b> ${data.embarazo} ${data.mesesEmbarazo ? `(${data.mesesEmbarazo} meses)` : ''}</p>
-          <p><b>Drogas:</b> ${data.drogas} ${data.tipoDrogas ? `(${data.tipoDrogas})` : ''}</p>
-
-          <h2>Costos</h2>
-          <table border="1" style="width:100%; text-align:center;">
-            <tr><th>Concepto</th><th>Unidades</th><th>Costo unidad</th><th>Total</th></tr>
-            ${(data.costos || []).map(c => `
-              <tr>
-                <td>${c.concepto}</td>
-                <td>${c.unidades}</td>
-                <td>${c.costoUnidad}</td>
-                <td>${c.total}</td>
-              </tr>`).join("")}
-          </table>
-          <p><b>Total General:</b> $${data.totalGeneral || 0}</p>
-
-          <h2>Receta</h2>
-          <p>${data.receta || ''}</p>
-
-          ${data.imagenes && data.imagenes.length ? `
-            <h2>Imágenes</h2>
-            ${data.imagenes.map(url => `<img src="${url}" style="max-width:300px; margin:10px;">`).join("")}
-          ` : ''}
-        `;
-        document.getElementById("previewData").innerHTML = html;
+    // Asegurar auth (para cumplir reglas si están con request.auth != null)
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        firebase.auth().signInAnonymously().then(cargar).catch(() => {
+          // aunque falle, intentamos cargar (por si reglas permiten)
+          cargar();
+        });
+      } else {
+        cargar();
       }
+    });
+
+    const params = new URLSearchParams(location.search);
+    const docId = params.get("id");
+    const email = params.get("email");
+
+    async function cargar() {
+      let docData = null;
+
+      try {
+        if (docId) {
+          const snap = await db.collection("historial-odontologia").doc(docId).get();
+          if (snap.exists) docData = { id: snap.id, ...snap.data() };
+        } else if (email) {
+          const q = await db.collection("historial-odontologia")
+                            .where("email", "==", email)
+                            .orderBy("createdAt", "desc")
+                            .limit(1)
+                            .get();
+          if (!q.empty) docData = { id: q.docs[0].id, ...q.docs[0].data() };
+        }
+      } catch (err) {
+        console.error("Error consultando:", err);
+      }
+
+      if (!docData) {
+        document.getElementById("contenido").innerHTML =
+          "<p>No se encontró el historial solicitado.</p>";
+        return;
+      }
+
+      render(docData);
     }
-    loadData();
+
+    function kv(label, value) {
+      return `<div><strong>${label}</strong></div><div>${value ?? "-"}</div>`;
+    }
+
+    function render(data) {
+      const costos = Array.isArray(data.costos) ? data.costos : [];
+      const imagenes = Array.isArray(data.imagenesAdjuntas) ? data.imagenesAdjuntas : [];
+
+      const html = `
+        <div class="section">
+          <h2>Datos Generales</h2>
+          <div class="kv">
+            ${kv("Nombre", data.nombre)}
+            ${kv("Edad", data.edad)}
+            ${kv("Sexo", data.sexo)}
+            ${kv("Estado civil", data.estadoCivil)}
+            ${kv("Correo", data.email)}
+            ${kv("Teléfono", data.telefono)}
+            ${kv("Ocupación", data.ocupacion)}
+            ${kv("Dirección", data.direccion)}
+            ${kv("Fecha", data.fecha)}
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Antecedentes</h2>
+          <div class="kv">
+            ${kv("Estado de salud", data.estadoSalud)}
+            ${kv("Tratamiento médico", data.tratamiento)}
+            ${kv("Medicamentos", data.medicamentos)}
+            ${kv("Alergias", data.alergias)}
+            ${kv("Operaciones", data.operaciones)}
+            ${kv("Transfusiones", data.transfusiones)}
+            ${kv("Enf. sistémica", data.enfermedad)}
+            ${kv("Importante", data.enfermedadImportante)}
+            ${kv("Diabético", data.diabetico)}
+            ${kv("Hipertenso", data.hipertenso)}
+            ${kv("Primera vez anestesia", data.primeraAnestesia)}
+            ${kv("Problemas anestesia", data.problemasAnestesia)}
+            ${kv("Fuma", data.fuma)}
+            ${kv("Drogas", data.drogas)}
+            ${data.drogas === "Sí" ? kv("Tipo/Frecuencia", `${data.tipoDrogas ?? "-"} / ${data.frecuenciaDrogas ?? "-"}`) : ""}
+            ${kv("Embarazo", data.embarazo)}
+            ${data.embarazo === "Sí" ? kv("Meses embarazo", data.mesesEmbarazo) : ""}
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Motivo de consulta</h2>
+          <div>${(data.motivoConsulta || "").replace(/\n/g, "<br>") || "-"}</div>
+        </div>
+
+        <div class="section">
+          <h2>Odontograma</h2>
+          <div class="odontograma">
+            <img src="odontogr.png" alt="Odontograma" style="max-width:100%; display:block; border-radius:8px;">
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Costos</h2>
+          ${
+            costos.length
+              ? `
+              <table>
+                <thead>
+                  <tr><th>Concepto</th><th>Unidades</th><th>Costo unidad</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                  ${costos.map(c=>`
+                    <tr>
+                      <td>${c.concepto ?? "-"}</td>
+                      <td>${Number(c.unidades ?? 0)}</td>
+                      <td>$${Number(c.costoUnidad ?? 0).toFixed(2)}</td>
+                      <td>$${Number(c.total ?? 0).toFixed(2)}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+              <h3 style="margin-top:.5rem;">Total general: $${Number(data.totalGeneral ?? 0).toFixed(2)}</h3>
+              `
+              : "<p>No se capturaron costos.</p>"
+          }
+        </div>
+
+        <div class="section">
+          <h2>Receta</h2>
+          <div>${(data.receta || "").replace(/\n/g, "<br>") || "-"}</div>
+        </div>
+
+        <div class="section">
+          <h2>Imágenes adjuntas</h2>
+          ${
+            imagenes.length
+              ? `<div class="images-grid">
+                  ${imagenes.map(u=>`<a href="${u}" target="_blank" rel="noreferrer noopener"><img src="${u}" alt="Adjunto"></a>`).join("")}
+                 </div>`
+              : "<p>No hay imágenes adjuntas.</p>"
+          }
+        </div>
+
+        <div class="section firmas">
+          <div>
+            <p>__________________________</p>
+            <p>Firma del paciente</p>
+          </div>
+          <div>
+            <p>__________________________</p>
+            <p>Firma del odontólogo</p>
+          </div>
+        </div>
+
+        <div class="section" style="margin-top:1rem;">
+          <h3>Aviso de privacidad</h3>
+          <p>Sus datos personales serán utilizados únicamente con fines clínicos y administrativos conforme a la normativa aplicable. Para más información consulte el aviso completo en el consultorio.</p>
+        </div>
+      `;
+
+      document.getElementById("contenido").innerHTML = html;
+    }
   </script>
 </body>
 </html>
