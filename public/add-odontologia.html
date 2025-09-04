@@ -5,37 +5,11 @@
   <title>Historia Clínica Odontología</title>
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Firebase (compat) -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
-
-  <style>
-    /* Pequeños ajustes visuales para esta página (suma a tu styles.css) */
-    .container { max-width: 900px; margin: 2rem auto; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.07); }
-    section { margin-bottom: 2rem; }
-    section h2 { margin: 1rem 0; }
-    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:1rem; }
-    .grid-3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; }
-    label { display:block; margin-bottom:.5rem; }
-    input[type="text"], input[type="number"], input[type="email"], input[type="date"], select, textarea {
-      width:100%; padding:.75rem; border:1px solid #ccc; border-radius:8px; font-size:1rem;
-    }
-    textarea { min-height: 120px; }
-    #tablaCostos { width:100%; border-collapse: collapse; margin-top: .5rem; }
-    #tablaCostos th, #tablaCostos td { border:1px solid #aaa; padding:.5rem; text-align:center; }
-    .images-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:.75rem; }
-    .thumb { border:1px solid #ddd; border-radius:8px; padding:.5rem; background:#f9fafb; }
-    .thumb img { width:100%; height:140px; object-fit:cover; border-radius:6px; display:block; }
-    .thumb p { font-size:.85rem; margin-top:.35rem; word-break: break-word; }
-    .firmas { display:flex; justify-content:space-between; gap:2rem; margin-top:1.5rem; }
-    .firmas > div { text-align:center; flex:1; }
-    .btn-row { display:flex; gap:1rem; flex-wrap:wrap; }
-    .btn-link { background:transparent; color:var(--secondary); text-decoration:underline; cursor:pointer; border:none; padding:0; }
-    .odontograma-wrap { border:1px solid #ddd; border-radius:10px; padding:8px; background:#f8f9fa; }
-    .muted { font-size:.9rem; color:#666; }
-  </style>
 </head>
 <body>
   <div class="container">
@@ -46,37 +20,18 @@
       <section>
         <h2>Datos Generales</h2>
         <div class="grid-2">
-          <label>Nombre completo
-            <input type="text" name="nombre" required>
-          </label>
-          <label>Edad
-            <input type="number" name="edad" min="0" required>
-          </label>
-          <label>Sexo
+          <label>Nombre completo <input type="text" name="nombre" required></label>
+          <label>Edad <input type="number" name="edad" min="0" required></label>
+          <label>Sexo 
             <select name="sexo" required>
               <option value="">Seleccione</option>
               <option>Hombre</option>
               <option>Mujer</option>
             </select>
           </label>
-          <label>Estado civil
-            <input type="text" name="estadoCivil" placeholder="Soltero/a, Casado/a, etc.">
-          </label>
-          <label>Correo electrónico
-            <input type="email" name="email" id="emailPaciente" required>
-          </label>
-          <label>Teléfono
-            <input type="text" name="telefono">
-          </label>
-          <label>Ocupación
-            <input type="text" name="ocupacion">
-          </label>
-          <label>Dirección
-            <input type="text" name="direccion">
-          </label>
-          <label>Fecha
-            <input type="date" name="fecha" required>
-          </label>
+          <label>Correo electrónico <input type="email" name="email" required></label>
+          <label>Teléfono <input type="text" name="telefono"></label>
+          <label>Fecha <input type="date" name="fecha" required></label>
         </div>
       </section>
 
@@ -85,94 +40,50 @@
         <h2>Antecedentes</h2>
         <div class="grid-2">
           <label>¿En buen estado de salud?
-            <select name="estadoSalud">
-              <option>Sí</option>
-              <option>No</option>
-            </select>
+            <select name="estadoSalud"><option>Sí</option><option>No</option></select>
           </label>
-          <label>Tratamiento médico actual
-            <input type="text" name="tratamiento" placeholder="Especifique si aplica">
-          </label>
-
-          <label>¿Toma medicamentos?
-            <input type="text" name="medicamentos" placeholder="¿Cuáles?">
-          </label>
-          <label>¿Alergias?
-            <input type="text" name="alergias" placeholder="¿A qué?">
-          </label>
-
-          <label>¿Ha sido operado?
-            <input type="text" name="operaciones" placeholder="Procedimiento y fecha">
-          </label>
-          <label>¿Ha recibido transfusiones?
-            <input type="text" name="transfusiones">
-          </label>
-
-          <label>¿Padece enfermedad sistémica?
-            <input type="text" name="enfermedad" placeholder="Diabetes, cardiopatías, etc.">
-          </label>
-          <label>Enfermedad importante
-            <input type="text" name="enfermedadImportante">
-          </label>
-
-          <label>¿Es diabético?
-            <select name="diabetico"><option>No</option><option>Sí</option></select>
-          </label>
-          <label>¿Es hipertenso?
-            <select name="hipertenso"><option>No</option><option>Sí</option></select>
-          </label>
-
-          <label>¿Primera vez con anestesia?
-            <select name="primeraAnestesia"><option>No</option><option>Sí</option></select>
-          </label>
-          <label>Problemas con anestesia local
-            <input type="text" name="problemasAnestesia" placeholder="Explique si aplica">
-          </label>
-
-          <label>¿Fuma?
-            <input type="text" name="fuma" placeholder="Frecuencia/cantidad">
-          </label>
-          <label>¿Contacto con drogas?
+          <label>¿Toma medicamentos? <input type="text" name="medicamentos"></label>
+          <label>¿Alergias? <input type="text" name="alergias"></label>
+          <label>¿Operaciones previas? <input type="text" name="operaciones"></label>
+          <label>¿Drogas? 
             <select name="drogas" id="drogas"><option>No</option><option>Sí</option></select>
           </label>
         </div>
-
-        <div id="drogasExtra" style="display:none; margin-top:.75rem;">
-          <div class="grid-2">
-            <label>¿Cuáles drogas?
-              <input type="text" name="tipoDrogas">
-            </label>
-            <label>Frecuencia/Cantidad
-              <input type="text" name="frecuenciaDrogas">
-            </label>
-          </div>
+        <div id="drogasExtra" style="display:none;">
+          <label>Especificar drogas <input type="text" name="tipoDrogas"></label>
         </div>
-
-        <div class="grid-2" style="margin-top:1rem;">
-          <label>¿Está embarazada?
+        <div>
+          <label>¿Está embarazada? 
             <select name="embarazo" id="embarazo"><option>No</option><option>Sí</option></select>
           </label>
-          <div id="embarazoExtra" style="display:none;">
-            <label>Meses de embarazo
-              <input type="number" name="mesesEmbarazo" min="0">
-            </label>
-          </div>
+        </div>
+        <div id="embarazoExtra" style="display:none;">
+          <label>Meses de embarazo <input type="number" name="mesesEmbarazo" min="0"></label>
         </div>
       </section>
 
       <!-- MOTIVO DE CONSULTA -->
       <section>
         <h2>Motivo de consulta</h2>
-        <textarea name="motivoConsulta" placeholder="Describa el motivo de la consulta..."></textarea>
+        <textarea name="motivoConsulta"></textarea>
       </section>
 
-      <!-- ODONTOGRAMA (IMAGEN) -->
+      <!-- ODONTOGRAMA (TABLA) -->
       <section>
         <h2>Odontograma</h2>
-        <div class="odontograma-wrap">
-          <img src="odontogr.png" alt="Odontograma" style="max-width:100%; display:block; border-radius:8px;">
-          <p class="muted" style="margin-top:.5rem;">(Imagen de referencia. Puedes adjuntar radiografías o fotos clínicas abajo.)</p>
-        </div>
+        <table id="tablaOdontograma">
+          <thead>
+            <tr><th>Diente</th><th>Dx</th><th>Tx</th></tr>
+          </thead>
+          <tbody>
+            ${[...Array(8)].map((_,i)=>`
+              <tr>
+                <td>${i+11}</td>
+                <td><input type="text" name="dx${i+11}"></td>
+                <td><input type="text" name="tx${i+11}"></td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
       </section>
 
       <!-- COSTOS -->
@@ -180,57 +91,36 @@
         <h2>Costos</h2>
         <table id="tablaCostos">
           <thead>
-            <tr>
-              <th>Concepto</th>
-              <th>Unidades</th>
-              <th>Costo por unidad</th>
-              <th>Total</th>
-              <th>Acción</th>
-            </tr>
+            <tr><th>Fecha</th><th>Concepto</th><th>Costo</th><th>Total</th><th>Acción</th></tr>
           </thead>
           <tbody></tbody>
         </table>
-        <div class="btn-row" style="margin-top:.5rem;">
-          <button type="button" onclick="agregarFila()">➕ Agregar concepto</button>
-          <button type="button" class="btn-link" onclick="limpiarCostos()">Limpiar costos</button>
-        </div>
-        <h3 style="margin-top:1rem;">Total general: $<span id="granTotal">0.00</span></h3>
+        <button type="button" onclick="agregarFila()">➕ Agregar concepto</button>
+        <h3>Total: $<span id="granTotal">0.00</span></h3>
       </section>
 
       <!-- RECETA -->
       <section>
         <h2>Receta</h2>
-        <textarea name="receta" rows="6" placeholder="Medicamentos e indicaciones (p. ej., Paracetamol 500 mg c/8h por 3 días)..."></textarea>
+        <textarea name="receta" rows="5"></textarea>
       </section>
 
-      <!-- SUBIDA DE IMÁGENES -->
+      <!-- IMÁGENES -->
       <section>
-        <h2>Adjuntar imágenes (opcional)</h2>
-        <p class="muted">Puedes subir radiografías, fotos clínicas, etc. (JPG/PNG, máx. 5 MB c/u)</p>
+        <h2>Imágenes</h2>
         <input type="file" id="imagenes" accept="image/*" multiple>
-        <div id="previewImagenes" class="images-grid" style="margin-top: .75rem;"></div>
+        <div id="previewImagenes" class="images-grid"></div>
       </section>
 
-      <!-- FIRMAS -->
-      <section class="firmas">
-        <div>
-          <p>__________________________</p>
-          <p>Firma del paciente</p>
-        </div>
-        <div>
-          <p>__________________________</p>
-          <p>Firma del odontólogo</p>
-        </div>
-      </section>
-
-      <div class="btn-row" style="margin-top:1rem;">
+      <!-- BOTONES -->
+      <div class="btn-row">
         <button type="submit">Guardar y ver impresión</button>
+        <button type="button" onclick="window.location.href='select-add.html'" class="danger">Cancelar</button>
       </div>
     </form>
   </div>
 
   <script>
-    // --- Firebase init ---
     const firebaseConfig = {
       apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
       authDomain: "dentist-app-2bb07.firebaseapp.com",
@@ -243,142 +133,74 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // Asegurar auth (si ya iniciaste sesión por correo, respeta; si no, anónima)
-    firebase.auth().onAuthStateChanged((user) => {
-      if (!user) {
-        firebase.auth().signInAnonymously().catch(err => console.error("Auth anónima:", err));
-      }
+    // Condicionales
+    document.getElementById("embarazo").addEventListener("change", e => {
+      document.getElementById("embarazoExtra").style.display = e.target.value==="Sí"?"block":"none";
+    });
+    document.getElementById("drogas").addEventListener("change", e => {
+      document.getElementById("drogasExtra").style.display = e.target.value==="Sí"?"block":"none";
     });
 
-    // --- Condicionales ---
-    document.getElementById("embarazo").addEventListener("change", function() {
-      document.getElementById("embarazoExtra").style.display = this.value === "Sí" ? "block" : "none";
-    });
-    document.getElementById("drogas").addEventListener("change", function() {
-      document.getElementById("drogasExtra").style.display = this.value === "Sí" ? "block" : "none";
-    });
-
-    // --- Costos dinámicos ---
-    const tbodyCostos = document.querySelector("#tablaCostos tbody");
-    function agregarFila(concepto = "", unidades = 1, costoUnidad = 0) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><input type="text" name="concepto" value="${concepto}"></td>
-        <td><input type="number" name="unidades" value="${unidades}" min="1"></td>
-        <td><input type="number" name="costoUnidad" value="${costoUnidad}" min="0" step="0.01"></td>
+    // Costos dinámicos
+    const tbodyCostos=document.querySelector("#tablaCostos tbody");
+    function agregarFila(fecha="",concepto="",costo=0){
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td><input type="date" value="${fecha}"></td>
+        <td><input type="text" value="${concepto}"></td>
+        <td><input type="number" value="${costo}" step="0.01"></td>
         <td class="totalFila">0.00</td>
-        <td><button type="button" onclick="eliminarFila(this)">❌</button></td>
-      `;
+        <td><button type="button" onclick="this.closest('tr').remove();calcularTotal()">❌</button></td>`;
       tbodyCostos.appendChild(tr);
+      tr.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",()=>recalcularFila(tr)));
       recalcularFila(tr);
-      // listeners
-      tr.querySelectorAll("input[name='unidades'], input[name='costoUnidad']").forEach(inp => {
-        inp.addEventListener("input", () => recalcularFila(tr));
-      });
     }
-    function eliminarFila(btn) {
-      btn.closest("tr").remove();
-      calcularGranTotal();
+    function recalcularFila(tr){
+      const costo=parseFloat(tr.querySelector("input[type='number']").value)||0;
+      tr.querySelector(".totalFila").textContent=costo.toFixed(2);
+      calcularTotal();
     }
-    function recalcularFila(tr) {
-      const u = parseFloat(tr.querySelector("[name='unidades']").value) || 0;
-      const cu = parseFloat(tr.querySelector("[name='costoUnidad']").value) || 0;
-      tr.querySelector(".totalFila").textContent = (u * cu).toFixed(2);
-      calcularGranTotal();
+    function calcularTotal(){
+      let t=0;document.querySelectorAll(".totalFila").forEach(td=>t+=parseFloat(td.textContent)||0);
+      document.getElementById("granTotal").textContent=t.toFixed(2);
     }
-    function calcularGranTotal() {
-      let total = 0;
-      document.querySelectorAll(".totalFila").forEach(td => total += parseFloat(td.textContent) || 0);
-      document.getElementById("granTotal").textContent = total.toFixed(2);
-    }
-    function limpiarCostos() {
-      tbodyCostos.innerHTML = "";
-      calcularGranTotal();
-    }
-    // Arrancamos con una fila
     agregarFila();
 
-    // --- Previsualización local de imágenes ---
-    const inputImgs = document.getElementById("imagenes");
-    const previewCont = document.getElementById("previewImagenes");
-    inputImgs.addEventListener("change", () => {
-      previewCont.innerHTML = "";
-      [...inputImgs.files].forEach(file => {
-        const url = URL.createObjectURL(file);
-        const div = document.createElement("div");
-        div.className = "thumb";
-        div.innerHTML = `<img src="${url}" alt=""><p>${file.name}</p>`;
-        previewCont.appendChild(div);
+    // Imágenes preview
+    const inputImgs=document.getElementById("imagenes"),preview=document.getElementById("previewImagenes");
+    inputImgs.addEventListener("change",()=>{
+      preview.innerHTML="";
+      [...inputImgs.files].forEach(f=>{
+        const url=URL.createObjectURL(f);
+        preview.innerHTML+=`<div class="thumb"><img src="${url}"><p>${f.name}</p></div>`;
       });
     });
 
-    // --- Guardar en Firestore + Storage ---
-    document.getElementById("odontologiaForm").addEventListener("submit", async (e) => {
+    // Guardar
+    document.getElementById("odontologiaForm").addEventListener("submit",async e=>{
       e.preventDefault();
+      const data={};
+      new FormData(e.target).forEach((v,k)=>data[k]=v);
+      data.costos=[...tbodyCostos.querySelectorAll("tr")].map(tr=>({
+        fecha:tr.querySelector("input[type='date']").value,
+        concepto:tr.querySelector("input[type='text']").value,
+        costo:parseFloat(tr.querySelector("input[type='number']").value)||0
+      }));
+      data.total=parseFloat(document.getElementById("granTotal").textContent);
+      data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
 
-      const form = e.target;
-      const data = {};
-      new FormData(form).forEach((v, k) => data[k] = v);
+      let docRef=await db.collection("historial-odontologia").add(data);
 
-      // Validación mínima
-      if (!data.email) {
-        alert("Captura el correo del paciente.");
-        return;
+      // subir imágenes
+      const urls=[];
+      for(const f of inputImgs.files){
+        const ref=storage.ref(`historial-odontologia/${docRef.id}/${f.name}`);
+        await ref.put(f);
+        urls.push(await ref.getDownloadURL());
       }
+      await docRef.update({imagenes:urls});
 
-      // Costos
-      const costos = [];
-      document.querySelectorAll("#tablaCostos tbody tr").forEach(tr => {
-        costos.push({
-          concepto: tr.querySelector("[name='concepto']").value || "",
-          unidades: parseFloat(tr.querySelector("[name='unidades']").value) || 0,
-          costoUnidad: parseFloat(tr.querySelector("[name='costoUnidad']").value) || 0,
-          total: parseFloat(tr.querySelector(".totalFila").textContent) || 0
-        });
-      });
-      data.costos = costos;
-      data.totalGeneral = parseFloat(document.getElementById("granTotal").textContent) || 0;
-
-      // Metadatos
-      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-
-      // 1) Guardar documento primero (sin imágenes) para obtener docId
-      let docRef = null;
-      try {
-        docRef = await db.collection("historial-odontologia").add(data);
-      } catch (err) {
-        console.error("Error guardando datos:", err);
-        alert("No se pudo guardar el historial (datos). Revisa la consola.");
-        return;
-      }
-
-      // 2) Subir imágenes si las hay y actualizar el documento con URLs
-      const files = inputImgs.files ? [...inputImgs.files] : [];
-      if (files.length > 0) {
-        try {
-          const urls = [];
-          for (const file of files) {
-            // Validación simple (5 MB)
-            if (file.size > 5 * 1024 * 1024) {
-              alert(`El archivo ${file.name} excede 5 MB. No se subirá.`);
-              continue;
-            }
-            const path = `historial-odontologia/${docRef.id}/adjuntos/${Date.now()}_${file.name}`;
-            const ref = storage.ref().child(path);
-            await ref.put(file);
-            const url = await ref.getDownloadURL();
-            urls.push(url);
-          }
-          await docRef.update({ imagenesAdjuntas: urls, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        } catch (err) {
-          console.error("Error subiendo imágenes:", err);
-          alert("Se guardó el historial, pero hubo errores subiendo imágenes. Puedes intentar añadirlas después.");
-        }
-      }
-
-      // 3) Ir al preview
-      window.location.href = `preview-odontologia.html?id=${docRef.id}`;
+      window.location.href=`preview-odontologia.html?id=${docRef.id}`;
     });
   </script>
 </body>
