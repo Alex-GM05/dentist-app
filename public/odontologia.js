@@ -9,21 +9,28 @@ const firebaseConfig = {
 };
 
 // Inicializar Firebase
-let db, storage;
+let db, storage, auth;
 try {
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
   storage = firebase.storage();
+  auth = firebase.auth();
 } catch (error) {
   console.error("Error inicializando Firebase:", error);
 }
 
-// Asegurar auth (si ya iniciaste sesión por correo, respeta; si no, anónima)
-if (firebase.auth) {
-  firebase.auth().onAuthStateChanged((user) => {
-    if (!user) {
-      firebase.auth().signInAnonymously().catch(err => console.error("Auth anónima:", err));
-    }
+// Función para autenticación anónima
+async function authenticateAnonymously() {
+  return new Promise((resolve, reject) => {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        resolve(user);
+      } else {
+        auth.signInAnonymously()
+          .then((userCredential) => resolve(userCredential.user))
+          .catch((error) => reject(error));
+      }
+    });
   });
 }
 
@@ -199,6 +206,38 @@ function setupImagePreview() {
   }
 }
 
+// Función para subir imágenes a Firebase Storage
+async function subirImagenes(docId, files) {
+  const urls = [];
+  
+  for (const file of files) {
+    try {
+      // Validación simple (5 MB)
+      if (file.size > 5 * 1024 * 1024) {
+        console.warn(`El archivo ${file.name} excede 5 MB. No se subirá.`);
+        continue;
+      }
+      
+      const path = `historial-odontologia/${docId}/adjuntos/${Date.now()}_${file.name}`;
+      const ref = storage.ref().child(path);
+      
+      // Subir el archivo
+      await ref.put(file);
+      
+      // Obtener la URL de descarga
+      const url = await ref.getDownloadURL();
+      urls.push(url);
+      
+      console.log(`Imagen ${file.name} subida correctamente`);
+    } catch (error) {
+      console.error(`Error subiendo imagen ${file.name}:`, error);
+      throw error; // Relanzar el error para manejarlo en el nivel superior
+    }
+  }
+  
+  return urls;
+}
+
 // --- Guardar en Firestore + Storage ---
 function setupFormSubmission() {
   const form = document.getElementById("odontologiaForm");
@@ -207,77 +246,85 @@ function setupFormSubmission() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const data = {};
-    new FormData(form).forEach((v, k) => data[k] = v);
+    // Mostrar indicador de carga
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    submitButton.textContent = "Guardando...";
+    submitButton.disabled = true;
 
-    // Validación mínima
-    if (!data.email) {
-      alert("Captura el correo del paciente.");
-      return;
-    }
-
-    // Recopilar datos del odontograma
-    data.odontograma = {};
-    document.querySelectorAll(".tooth-input").forEach(input => {
-      if (input.value.trim() !== "") {
-        data.odontograma[input.name] = input.value;
-      }
-    });
-    data.observacionesOdontograma = data.observacionesOdontograma || "";
-
-    // Costos (MODIFICADO)
-    const costos = [];
-    document.querySelectorAll("#tablaCostos tbody tr").forEach(tr => {
-      costos.push({
-        fecha: tr.querySelector("[name='fechaCosto']").value,
-        concepto: tr.querySelector("[name='conceptoCosto']").value,
-        costo: parseFloat(tr.querySelector("[name='costoCosto']").value) || 0
-      });
-    });
-    data.costos = costos;
-    data.totalGeneral = parseFloat(document.getElementById("granTotal").textContent) || 0;
-
-    // Metadatos
-    data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-    data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-
-    // 1) Guardar documento primero (sin imágenes) para obtener docId
-    let docRef = null;
     try {
-      docRef = await db.collection("historial-odontologia").add(data);
-    } catch (err) {
-      console.error("Error guardando datos:", err);
-      alert("No se pudo guardar el historial (datos). Revisa la consola.");
-      return;
-    }
+      // Asegurar autenticación
+      await authenticateAnonymously();
+      
+      const data = {};
+      new FormData(form).forEach((v, k) => data[k] = v);
 
-    // 2) Subir imágenes si las hay y actualizar el documento con URLs
-    const inputImgs = document.getElementById("imagenes");
-    const files = inputImgs.files ? [...inputImgs.files] : [];
-    if (files.length > 0) {
-      try {
-        const urls = [];
-        for (const file of files) {
-          // Validación simple (5 MB)
-          if (file.size > 5 * 1024 * 1024) {
-            alert(`El archivo ${file.name} excede 5 MB. No se subirá.`);
-            continue;
-          }
-          const path = `historial-odontologia/${docRef.id}/adjuntos/${Date.now()}_${file.name}`;
-          const ref = storage.ref().child(path);
-          await ref.put(file);
-          const url = await ref.getDownloadURL();
-          urls.push(url);
-        }
-        await docRef.update({ imagenesAdjuntas: urls, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-      } catch (err) {
-        console.error("Error subiendo imágenes:", err);
-        alert("Se guardó el historial, pero hubo errores subiendo imágenes. Puedes intentar añadirlas después.");
+      // Validación mínima
+      if (!data.email) {
+        alert("Captura el correo del paciente.");
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        return;
       }
-    }
 
-    // 3) Ir al preview
-    window.location.href = `preview-odontologia.html?id=${docRef.id}`;
+      // Recopilar datos del odontograma
+      data.odontograma = {};
+      document.querySelectorAll(".tooth-input").forEach(input => {
+        if (input.value.trim() !== "") {
+          data.odontograma[input.name] = input.value;
+        }
+      });
+      data.observacionesOdontograma = data.observacionesOdontograma || "";
+
+      // Costos (MODIFICADO)
+      const costos = [];
+      document.querySelectorAll("#tablaCostos tbody tr").forEach(tr => {
+        costos.push({
+          fecha: tr.querySelector("[name='fechaCosto']").value,
+          concepto: tr.querySelector("[name='conceptoCosto']").value,
+          costo: parseFloat(tr.querySelector("[name='costoCosto']").value) || 0
+        });
+      });
+      data.costos = costos;
+      data.totalGeneral = parseFloat(document.getElementById("granTotal").textContent) || 0;
+
+      // Metadatos
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+
+      // 1) Guardar documento primero (sin imágenes) para obtener docId
+      const docRef = await db.collection("historial-odontologia").add(data);
+      console.log("Datos guardados correctamente con ID:", docRef.id);
+
+      // 2) Subir imágenes si las hay
+      const inputImgs = document.getElementById("imagenes");
+      const files = inputImgs.files ? [...inputImgs.files] : [];
+      
+      if (files.length > 0) {
+        try {
+          const urls = await subirImagenes(docRef.id, files);
+          await docRef.update({ 
+            imagenesAdjuntas: urls, 
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+          });
+          console.log("Imágenes subidas correctamente");
+        } catch (error) {
+          console.error("Error subiendo imágenes:", error);
+          // No hacemos return aquí, continuamos para mostrar el preview
+        }
+      }
+
+      // 3) Ir al preview
+      window.location.href = `preview-odontologia.html?id=${docRef.id}`;
+
+    } catch (error) {
+      console.error("Error en el proceso de guardado:", error);
+      alert("Ocurrió un error al guardar. Por favor, revisa la consola para más detalles.");
+      
+      // Restaurar botón
+      submitButton.textContent = originalText;
+      submitButton.disabled = false;
+    }
   });
 }
 
