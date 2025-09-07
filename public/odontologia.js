@@ -20,18 +20,18 @@ try {
   console.error("Error inicializando Firebase:", error);
 }
 
-// Función para autenticación anónima
-async function authenticateAnonymously() {
+// Función mejorada para autenticación anónima
+async function ensureAuth() {
   return new Promise((resolve, reject) => {
-    // Verificar si ya estamos autenticados
     const user = auth.currentUser;
+    
     if (user) {
       console.log("Usuario ya autenticado:", user.uid);
       resolve(user);
       return;
     }
     
-    // Si no, iniciar autenticación anónima
+    // Forzar autenticación anónima
     auth.signInAnonymously()
       .then((userCredential) => {
         console.log("Autenticación anónima exitosa:", userCredential.user.uid);
@@ -44,7 +44,7 @@ async function authenticateAnonymously() {
   });
 }
 
-// --- Generar odontograma según el formato proporcionado ---
+// --- Generar odontograma (OD NO editable) ---
 function generarOdontograma() {
   const tbody = document.querySelector("#tablaOdontograma tbody");
   if (!tbody) return;
@@ -256,9 +256,12 @@ function setupImagePreview() {
   }
 }
 
-// Función para subir imágenes a Firebase Storage
+// Función MEJORADA para subir imágenes a Firebase Storage
 async function subirImagenes(docId, files) {
   const urls = [];
+  
+  // Asegurar autenticación antes de subir
+  await ensureAuth();
   
   for (const file of files) {
     try {
@@ -274,30 +277,34 @@ async function subirImagenes(docId, files) {
       
       console.log(`Subiendo imagen: ${fileName}`);
       
-      // Subir el archivo
-      const snapshot = await storageRef.put(file);
+      // Subir el archivo con metadata
+      const metadata = {
+        contentType: file.type,
+        customMetadata: {
+          'uploadedBy': 'anonymous',
+          'uploadedAt': new Date().toISOString()
+        }
+      };
+      
+      const snapshot = await storageRef.put(file, metadata);
       console.log(`Imagen subida: ${fileName}`);
       
       // Obtener la URL de descarga
       const url = await storageRef.getDownloadURL();
       console.log(`URL obtenida para ${fileName}: ${url}`);
       
-      urls.push({
-        name: file.name,
-        url: url,
-        path: path
-      });
+      urls.push(url);
       
     } catch (error) {
       console.error(`Error subiendo imagen ${file.name}:`, error);
-      throw error;
+      // No relanzamos el error para continuar con las demás imágenes
     }
   }
   
   return urls;
 }
 
-// --- Guardar en Firestore + Storage ---
+// --- Guardar en Firestore + Storage (VERSIÓN MEJORADA) ---
 function setupFormSubmission() {
   const form = document.getElementById("odontologiaForm");
   if (!form) return;
@@ -314,10 +321,10 @@ function setupFormSubmission() {
     try {
       console.log("Iniciando proceso de guardado...");
       
-      // Asegurar autenticación
+      // Asegurar autenticación AL INICIO del proceso
       console.log("Autenticando...");
-      const user = await authenticateAnonymously();
-      console.log("Usuario autenticado:", user.uid);
+      await ensureAuth();
+      console.log("Usuario autenticado");
 
       const data = {};
       new FormData(form).forEach((v, k) => data[k] = v);
@@ -330,7 +337,7 @@ function setupFormSubmission() {
         return;
       }
 
-      // Recopilar datos del odontograma
+      // Recopilar datos del odontograma (solo DX y TX)
       data.odontograma = {};
       document.querySelectorAll(".tooth-input").forEach(input => {
         if (input.value.trim() !== "") {
@@ -367,17 +374,20 @@ function setupFormSubmission() {
       if (files.length > 0) {
         try {
           console.log(`Subiendo ${files.length} imágenes...`);
-          const uploadedImages = await subirImagenes(docRef.id, files);
+          const imageUrls = await subirImagenes(docRef.id, files);
           
-          // Actualizar documento con URLs de imágenes
-          await docRef.update({ 
-            imagenesAdjuntas: uploadedImages.map(img => img.url),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
-          });
-          
-          console.log("Imágenes subidas correctamente y documento actualizado");
+          if (imageUrls.length > 0) {
+            // Actualizar documento con URLs de imágenes
+            await docRef.update({ 
+              imagenesAdjuntas: imageUrls,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+            });
+            console.log("Imágenes subidas correctamente y documento actualizado");
+          } else {
+            console.log("No se subieron imágenes (posiblemente por errores)");
+          }
         } catch (error) {
-          console.error("Error subiendo imágenes:", error);
+          console.error("Error en el proceso de imágenes:", error);
           // Continuamos aunque haya error en imágenes
         }
       } else {
@@ -654,6 +664,11 @@ function renderPreview(data) {
 // --- Inicialización cuando el DOM esté listo ---
 document.addEventListener('DOMContentLoaded', function() {
   console.log("DOM cargado, inicializando...");
+  
+  // Autenticar inmediatamente al cargar la página
+  ensureAuth().catch(error => {
+    console.error("Error en autenticación inicial:", error);
+  });
   
   // Solo ejecutar estas funciones si estamos en la página de agregar odontología
   if (document.getElementById('odontologiaForm')) {

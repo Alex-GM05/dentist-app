@@ -353,16 +353,18 @@ input[type="text"], input[type="number"], textarea {
   text-align: center; 
 }
 
-.tooth-input { 
-  width: 100%; 
-  border: none; 
-  text-align: center; 
-  background: transparent; 
+.tooth-input {
+  width: 100%;
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+  background: white;
 }
 
-.tooth-input:focus { 
-  outline: none; 
-  background-color: #f0f8ff; 
+.tooth-input:focus {
+  outline: none;
+  background-color: #f0f8ff;
+  border-color: #2a9d8f;
 }
 
 .tooth-section { 
@@ -372,7 +374,12 @@ input[type="text"], input[type="number"], textarea {
 
 .tooth-od {
   font-weight: bold;
-  padding: 5px;
+  padding: 8px;
+  background-color: #f0f0f0;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Estilos para la vista previa */
