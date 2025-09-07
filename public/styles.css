@@ -370,6 +370,11 @@ input[type="text"], input[type="number"], textarea {
   background-color: #f0f0f0; 
 }
 
+.tooth-od {
+  font-weight: bold;
+  padding: 5px;
+}
+
 /* Estilos para la vista previa */
 .preview-container { 
   max-width: 900px; 
