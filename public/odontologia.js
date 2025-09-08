@@ -20,12 +20,11 @@ try {
   console.error("Error inicializando Firebase:", error);
 }
 
-// Función mejorada para autenticación
+// --- FUNCIÓN ensureAuth (SOLO UNA VEZ) ---
 async function ensureAuth() {
   return new Promise((resolve, reject) => {
     const user = auth.currentUser;
     
-    // Si ya hay un usuario autenticado (email o anónimo)
     if (user) {
       console.log("Usuario ya autenticado:", user.uid, "Anónimo:", user.isAnonymous);
       resolve(user);
@@ -34,12 +33,10 @@ async function ensureAuth() {
     
     console.log("Iniciando autenticación anónima...");
     
-    // Timeout para evitar bloqueos infinitos
     const authTimeout = setTimeout(() => {
       reject(new Error("Timeout en autenticación anónima"));
     }, 10000);
     
-    // Intentar autenticación anónima
     auth.signInAnonymously()
       .then((userCredential) => {
         clearTimeout(authTimeout);
@@ -54,32 +51,24 @@ async function ensureAuth() {
   });
 }
 
-// --- Generar odontograma (OD NO editable) ---
+// --- Generar odontograma ---
 function generarOdontograma() {
   const tbody = document.querySelector("#tablaOdontograma tbody");
   if (!tbody) return;
   
-  // Dientes superiores (18 a 28)
   const dientesSuperiores = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
-  
-  // Dientes inferiores (48 a 38)
   const dientesInferiores = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
   
-  // Crear filas para dientes superiores
   for (let i = 0; i < 8; i++) {
     const tr = document.createElement('tr');
     
-    // Lado izquierdo (OD, DX, TX)
     for (let j = 0; j < 3; j++) {
       const td = document.createElement('td');
-      
       if (j === 0) {
-        // OD - Solo texto (no editable)
         td.innerHTML = `<div class="tooth-od">${dientesSuperiores[i]}</div>`;
         td.style.backgroundColor = "#f0f0f0";
         td.style.fontWeight = "bold";
       } else {
-        // DX y TX - Editables
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'tooth-input';
@@ -87,21 +76,16 @@ function generarOdontograma() {
         input.placeholder = `${['OD', 'DX', 'TX'][j]}`;
         td.appendChild(input);
       }
-      
       tr.appendChild(td);
     }
     
-    // Lado derecho (OD, DX, TX)
     for (let j = 0; j < 3; j++) {
       const td = document.createElement('td');
-      
       if (j === 0) {
-        // OD - Solo texto (no editable)
         td.innerHTML = `<div class="tooth-od">${dientesSuperiores[i+8]}</div>`;
         td.style.backgroundColor = "#f0f0f0";
         td.style.fontWeight = "bold";
       } else {
-        // DX y TX - Editables
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'tooth-input';
@@ -109,33 +93,26 @@ function generarOdontograma() {
         input.placeholder = `${['OD', 'DX', 'TX'][j]}`;
         td.appendChild(input);
       }
-      
       tr.appendChild(td);
     }
     
     tbody.appendChild(tr);
   }
   
-  // Separador entre arcadas
   const separator = document.createElement('tr');
   separator.innerHTML = '<td colspan="6" style="background-color: #f0f0f0; text-align: center; font-weight: bold;">Arcada Inferior</td>';
   tbody.appendChild(separator);
   
-  // Crear filas para dientes inferiores
   for (let i = 0; i < 8; i++) {
     const tr = document.createElement('tr');
     
-    // Lado izquierdo (OD, DX, TX)
     for (let j = 0; j < 3; j++) {
       const td = document.createElement('td');
-      
       if (j === 0) {
-        // OD - Solo texto (no editable)
         td.innerHTML = `<div class="tooth-od">${dientesInferiores[i]}</div>`;
         td.style.backgroundColor = "#f0f0f0";
         td.style.fontWeight = "bold";
       } else {
-        // DX y TX - Editables
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'tooth-input';
@@ -143,21 +120,16 @@ function generarOdontograma() {
         input.placeholder = `${['OD', 'DX', 'TX'][j]}`;
         td.appendChild(input);
       }
-      
       tr.appendChild(td);
     }
     
-    // Lado derecho (OD, DX, TX)
     for (let j = 0; j < 3; j++) {
       const td = document.createElement('td');
-      
       if (j === 0) {
-        // OD - Solo texto (no editable)
         td.innerHTML = `<div class="tooth-od">${dientesInferiores[i+8]}</div>`;
         td.style.backgroundColor = "#f0f0f0";
         td.style.fontWeight = "bold";
       } else {
-        // DX y TX - Editables
         const input = document.createElement('input');
         input.type = 'text';
         input.className = 'tooth-input';
@@ -165,7 +137,6 @@ function generarOdontograma() {
         input.placeholder = `${['OD', 'DX', 'TX'][j]}`;
         td.appendChild(input);
       }
-      
       tr.appendChild(td);
     }
     
@@ -181,23 +152,19 @@ function setupConditionals() {
   if (embarazoSelect) {
     embarazoSelect.addEventListener("change", function() {
       const embarazoExtra = document.getElementById("embarazoExtra");
-      if (embarazoExtra) {
-        embarazoExtra.style.display = this.value === "Sí" ? "block" : "none";
-      }
+      if (embarazoExtra) embarazoExtra.style.display = this.value === "Sí" ? "block" : "none";
     });
   }
   
   if (drogasSelect) {
     drogasSelect.addEventListener("change", function() {
       const drogasExtra = document.getElementById("drogasExtra");
-      if (drogasExtra) {
-        drogasExtra.style.display = this.value === "Sí" ? "block" : "none";
-      }
+      if (drogasExtra) drogasExtra.style.display = this.value === "Sí" ? "block" : "none";
     });
   }
 }
 
-// --- Costos dinámicos (MODIFICADO) ---
+// --- Costos dinámicos ---
 function setupCostos() {
   const tbodyCostos = document.querySelector("#tablaCostos tbody");
   if (!tbodyCostos) return;
@@ -212,7 +179,6 @@ function setupCostos() {
     `;
     tbodyCostos.appendChild(tr);
     
-    // listeners para recalcular total
     tr.querySelectorAll("input[name='costoCosto']").forEach(inp => {
       inp.addEventListener("input", calcularGranTotal);
     });
@@ -231,9 +197,7 @@ function setupCostos() {
       total += parseFloat(input.value) || 0;
     });
     const granTotalElement = document.getElementById("granTotal");
-    if (granTotalElement) {
-      granTotalElement.textContent = total.toFixed(2);
-    }
+    if (granTotalElement) granTotalElement.textContent = total.toFixed(2);
   };
   
   window.limpiarCostos = function() {
@@ -243,7 +207,6 @@ function setupCostos() {
     }
   };
   
-  // Arrancamos con una fila
   agregarFilaCosto();
 }
 
@@ -266,23 +229,15 @@ function setupImagePreview() {
   }
 }
 
-// --- Función MEJORADA para subir imágenes ---
+// --- Función para subir imágenes ---
 async function subirImagenes(docId, files) {
   const urls = [];
   
-  console.log(`Intentando subir ${files.length} imágenes para documento: ${docId}`);
-  
-  if (!files || files.length === 0) {
-    console.log("No hay imágenes para subir");
-    return urls;
-  }
+  if (!files || files.length === 0) return urls;
 
   try {
-    // Asegurar autenticación
     const user = await ensureAuth();
-    console.log("Usuario autenticado para subida:", user.uid, "Anónimo:", user.isAnonymous);
     
-    // Crear contenedor para progreso
     let progressContainer = document.getElementById('upload-progress-container');
     if (!progressContainer) {
       progressContainer = document.createElement('div');
@@ -293,27 +248,17 @@ async function subirImagenes(docId, files) {
       progressContainer.style.borderRadius = '8px';
       progressContainer.style.border = '1px solid #ddd';
       const form = document.getElementById('odontologiaForm');
-      if (form) {
-        form.appendChild(progressContainer);
-      }
+      if (form) form.appendChild(progressContainer);
     }
 
     for (const file of files) {
       try {
-        // Validación de tamaño
-        if (file.size > 5 * 1024 * 1024) {
-          console.warn(`El archivo ${file.name} excede 5 MB. No se subirá.`);
-          continue;
-        }
+        if (file.size > 5 * 1024 * 1024) continue;
         
-        // Nombre único para el archivo
         const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
         const path = `historial-odontologia/${docId}/adjuntos/${fileName}`;
         const storageRef = storage.ref(path);
-        
-        console.log(`Subiendo: ${file.name} -> ${path}`);
 
-        // Mostrar progreso
         const progressElement = document.createElement('div');
         progressElement.className = 'upload-progress-item';
         progressElement.innerHTML = `
@@ -328,7 +273,6 @@ async function subirImagenes(docId, files) {
         `;
         progressContainer.appendChild(progressElement);
 
-        // Subir el archivo con metadata que incluya información de autenticación
         const uploadTask = storageRef.put(file, {
           contentType: file.type,
           customMetadata: {
@@ -340,39 +284,29 @@ async function subirImagenes(docId, files) {
           }
         });
 
-        // Esperar a que termine esta subida
         const downloadURL = await new Promise((resolve, reject) => {
           uploadTask.on('state_changed',
             (snapshot) => {
-              // Actualizar progreso
               const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
               const progressText = progressElement.querySelector('.upload-progress');
               const progressBar = progressElement.querySelector('.upload-progress-bar');
-              
               if (progressText) progressText.textContent = `${Math.round(progress)}%`;
               if (progressBar) progressBar.style.width = `${progress}%`;
             },
             (error) => {
-              // Error en subida
-              console.error(`Error subiendo ${file.name}:`, error);
               const statusSpan = progressElement.querySelector('.upload-status');
               if (statusSpan) statusSpan.textContent = '❌';
               progressElement.style.color = '#d32f2f';
               reject(error);
             },
             async () => {
-              // Subida completada
               try {
                 const url = await uploadTask.snapshot.ref.getDownloadURL();
-                console.log(`✅ Subida exitosa: ${file.name}`);
-                
                 const statusSpan = progressElement.querySelector('.upload-status');
                 if (statusSpan) statusSpan.textContent = '✅';
                 progressElement.style.color = '#2e7d32';
-                
                 resolve(url);
               } catch (urlError) {
-                console.error(`Error obteniendo URL:`, urlError);
                 const statusSpan = progressElement.querySelector('.upload-status');
                 if (statusSpan) statusSpan.textContent = '⚠️';
                 progressElement.style.color = '#f57c00';
@@ -382,44 +316,33 @@ async function subirImagenes(docId, files) {
           );
         });
 
-        if (downloadURL) {
-          urls.push(downloadURL);
-        }
+        if (downloadURL) urls.push(downloadURL);
 
       } catch (error) {
         console.error(`Error procesando ${file.name}:`, error);
-        // Continuar con el siguiente archivo
       }
     }
 
-    console.log(`Subida finalizada. ${urls.length}/${files.length} imágenes subidas.`);
     return urls;
 
   } catch (authError) {
-    console.error("Error de autenticación para subida de imágenes:", authError);
     throw new Error("No se pudo autenticar para subir imágenes: " + authError.message);
   }
 }
 
+// --- setupFormSubmission CORREGIDO ---
 function setupFormSubmission() {
   const form = document.getElementById("odontologiaForm");
   if (!form) return;
   
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
-    // DEBUG: Verificar el estado actual
-    console.log("=== DEBUG: INICIO DE SUBMIT ===");
-    console.log("auth.currentUser:", auth.currentUser);
-    console.log("typeof ensureAuth:", typeof ensureAuth);
-    
-    // Mostrar indicador de carga
+
     const submitButton = form.querySelector('button[type="submit"]');
     const originalText = submitButton.textContent;
     submitButton.textContent = "Guardando...";
     submitButton.disabled = true;
 
-    // Agregar mensaje de estado
     let statusDiv = document.getElementById('upload-status');
     if (!statusDiv) {
       statusDiv = document.createElement('div');
@@ -444,36 +367,29 @@ function setupFormSubmission() {
       statusDiv.style.color = color.text;
       statusDiv.style.borderLeft = `4px solid ${color.border}`;
       statusDiv.innerHTML = `<p><strong>Estado:</strong> ${message}</p>`;
-      
-      console.log(`Estado: ${message}`);
     }
 
     try {
       updateStatus("Iniciando proceso de guardado...", "info");
       
-      // Asegurar autenticación
-      updateStatus("Autenticando...", "info");
       await ensureAuth();
       updateStatus("Autenticación exitosa", "success");
 
-      // Recopilar datos del formulario
       const data = {};
       new FormData(form).forEach((value, key) => {
         data[key] = value;
       });
 
-      // Obtener el usuario después de autenticar
+      // OBTENER USUARIO CORRECTAMENTE
       const user = auth.currentUser;
       if (user) {
         data.userId = user.uid;
         data.userEmail = user.email || "anonimo@ejemplo.com";
       } else {
-        // Si no hay usuario, usar valores por defecto
         data.userId = "anonymous";
         data.userEmail = "anonimo@ejemplo.com";
       }
 
-      // Validación básica
       if (!data.email || !data.nombre) {
         updateStatus("Error: Nombre y correo son obligatorios", "error");
         submitButton.textContent = originalText;
@@ -481,21 +397,16 @@ function setupFormSubmission() {
         return;
       }
 
-      // Recopilar odontograma
       data.odontograma = {};
       document.querySelectorAll(".tooth-input").forEach(input => {
-        if (input.value.trim() !== "") {
-          data.odontograma[input.name] = input.value;
-        }
+        if (input.value.trim() !== "") data.odontograma[input.name] = input.value;
       });
 
-      // Recopilar costos
       const costos = [];
       document.querySelectorAll("#tablaCostos tbody tr").forEach(tr => {
         const fechaInput = tr.querySelector("[name='fechaCosto']");
         const conceptoInput = tr.querySelector("[name='conceptoCosto']");
         const costoInput = tr.querySelector("[name='costoCosto']");
-        
         if (fechaInput && conceptoInput && costoInput) {
           costos.push({
             fecha: fechaInput.value,
@@ -507,17 +418,13 @@ function setupFormSubmission() {
       data.costos = costos;
       data.totalGeneral = parseFloat(document.getElementById("granTotal").textContent) || 0;
 
-      // Metadatos
       data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
       data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
-      // 1) Guardar documento principal
       updateStatus("Guardando datos principales...", "info");
       const docRef = await db.collection("historial-odontologia").add(data);
-      console.log("📄 Documento guardado con ID:", docRef.id);
       updateStatus("Datos principales guardados correctamente", "success");
 
-      // 2) Subir imágenes si las hay
       const inputImgs = document.getElementById("imagenes");
       const files = inputImgs?.files ? Array.from(inputImgs.files) : [];
       
@@ -525,39 +432,30 @@ function setupFormSubmission() {
         updateStatus(`Subiendo ${files.length} imagen(es)...`, "info");
         try {
           const imageUrls = await subirImagenes(docRef.id, files);
-          
           if (imageUrls.length > 0) {
-            // Actualizar documento con URLs de imágenes
-            updateStatus("Actualizando documento con imágenes...", "info");
             await docRef.update({ 
               imagenesAdjuntas: imageUrls,
               updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
             });
             updateStatus(`✅ ${imageUrls.length} imagen(es) subidas correctamente`, "success");
           } else {
-            updateStatus("⚠️ No se subieron imágenes (posibles errores)", "warning");
+            updateStatus("⚠️ No se subieron imágenes", "warning");
           }
         } catch (error) {
-          console.error("Error en subida de imágenes:", error);
           updateStatus("⚠️ Error subiendo imágenes, pero los datos se guardaron", "warning");
         }
       } else {
         updateStatus("No hay imágenes para subir", "info");
       }
 
-      // 3) Redirigir al preview
       updateStatus("✅ Proceso completado. Redirigiendo...", "success");
-      
       setTimeout(() => {
         window.location.href = `preview-odontologia.html?id=${docRef.id}`;
       }, 1500);
 
     } catch (error) {
-      console.error("❌ Error en el proceso completo:", error);
       updateStatus(`Error: ${error.message}`, "error");
       alert("Ocurrió un error al guardar. Revisa la consola para más detalles.");
-      
-      // Restaurar botón
       submitButton.textContent = originalText;
       submitButton.disabled = false;
     }
