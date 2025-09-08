@@ -401,46 +401,18 @@ async function subirImagenes(docId, files) {
   }
 }
 
-// Función mejorada para autenticación anónima
-async function ensureAuth() {
-  return new Promise((resolve, reject) => {
-    // Verificar si ya hay un usuario autenticado
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      unsubscribe(); // Dejar de escuchar cambios
-      
-      if (user) {
-        console.log("Usuario ya autenticado:", user.uid);
-        resolve(user);
-        return;
-      }
-      
-      // Si no hay usuario, autenticar anónimamente
-      console.log("Iniciando autenticación anónima...");
-      auth.signInAnonymously()
-        .then((userCredential) => {
-          console.log("Autenticación anónima exitosa:", userCredential.user.uid);
-          resolve(userCredential.user);
-        })
-        .catch((error) => {
-          console.error("Error en autenticación anónima:", error);
-          reject(error);
-        });
-    }, (error) => {
-      unsubscribe();
-      console.error("Error en onAuthStateChanged:", error);
-      reject(error);
-    });
-  });
-}
-
-// --- MEJORA en setupFormSubmission ---
 function setupFormSubmission() {
   const form = document.getElementById("odontologiaForm");
   if (!form) return;
   
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
+    
+    // DEBUG: Verificar el estado actual
+    console.log("=== DEBUG: INICIO DE SUBMIT ===");
+    console.log("auth.currentUser:", auth.currentUser);
+    console.log("typeof ensureAuth:", typeof ensureAuth);
+    
     // Mostrar indicador de carga
     const submitButton = form.querySelector('button[type="submit"]');
     const originalText = submitButton.textContent;
