@@ -260,8 +260,13 @@ function setupImagePreview() {
 async function subirImagenes(docId, files) {
   const urls = [];
   
-  console.log(`Intentando subir ${files.length} imágenes...`);
+  console.log(`Intentando subir ${files.length} imágenes para documento: ${docId}`);
   
+  if (files.length === 0) {
+    console.log("No hay imágenes para subir");
+    return urls;
+  }
+
   // Asegurar autenticación antes de subir
   try {
     await ensureAuth();
@@ -271,9 +276,18 @@ async function subirImagenes(docId, files) {
     throw new Error("No se pudo autenticar para subir imágenes");
   }
   
-  // Crear array de promesas para todas las subidas
-  const uploadPromises = [];
-  
+  // Crear contenedor para progreso si no existe
+  let progressContainer = document.getElementById('upload-progress-container');
+  if (!progressContainer) {
+    progressContainer = document.createElement('div');
+    progressContainer.id = 'upload-progress-container';
+    progressContainer.style.marginTop = '1rem';
+    progressContainer.style.padding = '1rem';
+    progressContainer.style.background = '#f8f9fa';
+    progressContainer.style.borderRadius = '8px';
+    document.getElementById('previewImagenes').after(progressContainer);
+  }
+
   for (const file of files) {
     try {
       // Validación simple (5 MB)
@@ -282,7 +296,7 @@ async function subirImagenes(docId, files) {
         continue;
       }
       
-      const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+      const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
       const path = `historial-odontologia/${docId}/adjuntos/${fileName}`;
       const storageRef = storage.ref(path);
       
@@ -290,81 +304,79 @@ async function subirImagenes(docId, files) {
       
       // Mostrar progreso de subida
       const progressElement = document.createElement('div');
-      progressElement.innerHTML = `<p>Subiendo ${file.name}... <span class="upload-progress">0%</span></p>`;
-      document.getElementById('previewImagenes').appendChild(progressElement);
+      progressElement.className = 'upload-progress-item';
+      progressElement.innerHTML = `
+        <p>Subiendo ${file.name}... 
+          <span class="upload-progress">0%</span>
+          <span class="upload-status">⏳</span>
+        </p>
+      `;
+      progressContainer.appendChild(progressElement);
       
-      // Crear promesa para esta subida
-      const uploadPromise = new Promise((resolve, reject) => {
-        // Subir el archivo con metadata
-        const uploadTask = storageRef.put(file, {
-          contentType: file.type,
-          customMetadata: {
-            'uploadedBy': 'anonymous',
-            'uploadedAt': new Date().toISOString(),
-            'originalName': file.name
-          }
-        });
-        
-        // Monitorizar progreso
+      // Subir el archivo con metadata
+      const uploadTask = storageRef.put(file, {
+        contentType: file.type,
+        customMetadata: {
+          'uploadedBy': 'anonymous',
+          'uploadedAt': new Date().toISOString(),
+          'originalName': file.name
+        }
+      });
+      
+      // Esperar a que termine la subida
+      await new Promise((resolve, reject) => {
         uploadTask.on('state_changed',
           (snapshot) => {
             // Progreso de la subida
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            if (progressElement.querySelector('.upload-progress')) {
-              progressElement.querySelector('.upload-progress').textContent = Math.round(progress) + '%';
+            const progressSpan = progressElement.querySelector('.upload-progress');
+            if (progressSpan) {
+              progressSpan.textContent = Math.round(progress) + '%';
             }
-            console.log(`Progreso de ${file.name}: ${progress}%`);
           },
           (error) => {
             // Manejar errores
             console.error(`Error subiendo ${file.name}:`, error);
-            if (progressElement) {
-              progressElement.innerHTML = `<p style="color: red;">Error subiendo ${file.name}: ${error.message}</p>`;
+            const statusSpan = progressElement.querySelector('.upload-status');
+            if (statusSpan) {
+              statusSpan.textContent = '❌';
+              statusSpan.title = error.message;
             }
+            progressElement.style.color = 'red';
             reject(error);
           },
           async () => {
-            // Subida completada
             try {
               const url = await uploadTask.snapshot.ref.getDownloadURL();
               console.log(`Imagen subida exitosamente: ${fileName}`);
-              console.log(`URL obtenida: ${url}`);
               
               urls.push(url);
-              if (progressElement) {
-                progressElement.innerHTML = `<p style="color: green;">✓ ${file.name} subido correctamente</p>`;
+              const statusSpan = progressElement.querySelector('.upload-status');
+              if (statusSpan) {
+                statusSpan.textContent = '✅';
               }
+              progressElement.style.color = 'green';
               
               resolve(url);
             } catch (urlError) {
               console.error(`Error obteniendo URL para ${file.name}:`, urlError);
-              if (progressElement) {
-                progressElement.innerHTML = `<p style="color: orange;">✓ ${file.name} subido pero error obteniendo URL</p>`;
+              const statusSpan = progressElement.querySelector('.upload-status');
+              if (statusSpan) {
+                statusSpan.textContent = '⚠️';
+                statusSpan.title = 'Subida completa pero error obteniendo URL';
               }
-              reject(urlError);
+              progressElement.style.color = 'orange';
+              resolve(null); // Resolvemos pero con null para continuar
             }
           }
         );
       });
-      
-      uploadPromises.push(uploadPromise);
       
     } catch (error) {
       console.error(`Error en el proceso de subida para ${file.name}:`, error);
       // Continuamos con las demás imágenes
     }
   }
-  
-  // Esperar a que todas las subidas terminen
-  try {
-    await Promise.all(uploadPromises);
-    console.log(`Subida completada. ${urls.length} imágenes subidas correctamente.`);
-  } catch (error) {
-    console.error("Error en alguna de las subidas:", error);
-    // Continuamos con las que sí se subieron
-  }
-  
-  return urls;
 }
 
 // --- Función MEJORADA para ensureAuth ---

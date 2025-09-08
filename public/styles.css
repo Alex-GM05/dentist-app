@@ -30,6 +30,7 @@ body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -57,6 +58,7 @@ header img {
     transform: translateY(-50px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -161,6 +163,7 @@ button.danger:hover {
     font-size: 1.5rem;
   }
 }
+
 .form-buttons {
   display: flex;
   justify-content: space-between;
@@ -183,6 +186,7 @@ button.danger:hover {
 }
 
 @media print {
+
   header,
   .form-buttons,
   .no-print {
@@ -210,17 +214,20 @@ button.danger:hover {
     outline: none !important;
   }
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
 }
+
 table th,
 table td {
   border: 1px solid #aaa;
   padding: 5px;
   text-align: center;
 }
+
 input[type="text"],
 input[type="number"],
 textarea {
@@ -327,7 +334,7 @@ textarea {
   margin-top: 1.5rem;
 }
 
-.firmas > div {
+.firmas>div {
   text-align: center;
   flex: 1;
 }
@@ -494,18 +501,22 @@ textarea {
   .no-imprimir {
     display: none !important;
   }
+
   .no-print {
     display: none !important;
   }
+
   body {
     background: #fff !important;
   }
+
   .preview-container,
   .odontologia-container {
     box-shadow: none;
     margin: 0;
     border-radius: 0;
   }
+
   /* Estilos adicionales específicos para esta página */
   .historia-container {
     max-width: 1000px;
@@ -515,6 +526,7 @@ textarea {
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
   }
+
   .historia-header {
     display: flex;
     justify-content: space-between;
@@ -523,6 +535,7 @@ textarea {
     padding-bottom: 1rem;
     border-bottom: 2px solid var(--primary);
   }
+
   .alert-warning {
     background-color: #fef5e7;
     border-left: 4px solid #f39c12;
@@ -531,56 +544,67 @@ textarea {
     border-radius: 4px;
     margin-bottom: 20px;
   }
+
   .search-panel {
     background-color: #f8f9fa;
     padding: 1.5rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
   }
+
   .patient-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
   }
+
   .info-group {
     margin-bottom: 0.5rem;
   }
+
   .info-label {
     font-weight: bold;
     color: var(--secondary);
     margin-bottom: 0.25rem;
   }
+
   .consultas-table {
     width: 100%;
     border-collapse: collapse;
     margin: 1.5rem 0;
   }
+
   .consultas-table th,
   .consultas-table td {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
   }
+
   .consultas-table th {
     background-color: #f8f9fa;
     font-weight: 600;
     color: var(--secondary);
   }
+
   .nueva-consulta {
     background-color: #f8f9fa;
     padding: 1.5rem;
     border-radius: 8px;
     margin-top: 1.5rem;
   }
+
   .hidden {
     display: none;
   }
+
   .btn-group {
     display: flex;
     gap: 1rem;
     margin-top: 1.5rem;
   }
+
   /* Estilos específicos para la vista previa */
   .preview-section h2 {
     color: var(--primary);
@@ -669,36 +693,63 @@ textarea {
     padding-top: 1rem;
     border-top: 1px dashed #ccc;
   }
+
   /* Estilos para el progreso de subida */
+  .upload-progress-item {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: white;
+    border-left: 4px solid #2196f3;
+  }
+
   .upload-progress {
     font-weight: bold;
     color: var(--primary);
+    margin: 0 0.5rem;
   }
 
-  #upload-status {
+  .upload-status {
+    font-size: 1.2rem;
+  }
+
+  #upload-progress-container {
+    margin-top: 1rem;
     padding: 1rem;
-    margin: 1rem 0;
+    background: #f8f9fa;
     border-radius: 8px;
-    border-left: 4px solid var(--primary);
+    border: 1px solid #ddd;
   }
 
-  #upload-status.info {
-    background-color: #e3f2fd;
-    border-color: #2196f3;
+  /* Mejoras para la vista previa */
+  .info-content {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 0.5rem 0;
   }
 
-  #upload-status.success {
-    background-color: #e8f5e9;
-    border-color: #4caf50;
+  .preview-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
   }
 
-  #upload-status.warning {
-    background-color: #fff3e0;
-    border-color: #ff9800;
+  .preview-images-grid .thumb {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
   }
 
-  #upload-status.error {
-    background-color: #ffebee;
-    border-color: #f44336;
+  .preview-images-grid .thumb:hover {
+    transform: scale(1.02);
+  }
+
+  .preview-images-grid img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
   }
 }
