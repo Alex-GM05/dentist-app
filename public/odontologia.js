@@ -256,7 +256,7 @@ function setupImagePreview() {
   }
 }
 
-// Función MEJORADA para subir imágenes a Firebase Storage
+// --- Función MEJORADA para subir imágenes a Firebase Storage ---
 async function subirImagenes(docId, files) {
   const urls = [];
   
@@ -270,6 +270,9 @@ async function subirImagenes(docId, files) {
     console.error("Error en autenticación para subida:", error);
     throw new Error("No se pudo autenticar para subir imágenes");
   }
+  
+  // Crear array de promesas para todas las subidas
+  const uploadPromises = [];
   
   for (const file of files) {
     try {
@@ -290,48 +293,61 @@ async function subirImagenes(docId, files) {
       progressElement.innerHTML = `<p>Subiendo ${file.name}... <span class="upload-progress">0%</span></p>`;
       document.getElementById('previewImagenes').appendChild(progressElement);
       
-      // Subir el archivo con metadata y seguimiento de progreso
-      const uploadTask = storageRef.put(file, {
-        contentType: file.type,
-        customMetadata: {
-          'uploadedBy': 'anonymous',
-          'uploadedAt': new Date().toISOString(),
-          'originalName': file.name
-        }
+      // Crear promesa para esta subida
+      const uploadPromise = new Promise((resolve, reject) => {
+        // Subir el archivo con metadata
+        const uploadTask = storageRef.put(file, {
+          contentType: file.type,
+          customMetadata: {
+            'uploadedBy': 'anonymous',
+            'uploadedAt': new Date().toISOString(),
+            'originalName': file.name
+          }
+        });
+        
+        // Monitorizar progreso
+        uploadTask.on('state_changed',
+          (snapshot) => {
+            // Progreso de la subida
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            if (progressElement.querySelector('.upload-progress')) {
+              progressElement.querySelector('.upload-progress').textContent = Math.round(progress) + '%';
+            }
+            console.log(`Progreso de ${file.name}: ${progress}%`);
+          },
+          (error) => {
+            // Manejar errores
+            console.error(`Error subiendo ${file.name}:`, error);
+            if (progressElement) {
+              progressElement.innerHTML = `<p style="color: red;">Error subiendo ${file.name}: ${error.message}</p>`;
+            }
+            reject(error);
+          },
+          async () => {
+            // Subida completada
+            try {
+              const url = await uploadTask.snapshot.ref.getDownloadURL();
+              console.log(`Imagen subida exitosamente: ${fileName}`);
+              console.log(`URL obtenida: ${url}`);
+              
+              urls.push(url);
+              if (progressElement) {
+                progressElement.innerHTML = `<p style="color: green;">✓ ${file.name} subido correctamente</p>`;
+              }
+              
+              resolve(url);
+            } catch (urlError) {
+              console.error(`Error obteniendo URL para ${file.name}:`, urlError);
+              if (progressElement) {
+                progressElement.innerHTML = `<p style="color: orange;">✓ ${file.name} subido pero error obteniendo URL</p>`;
+              }
+              reject(urlError);
+            }
+          }
+        );
       });
       
-      // Monitorizar progreso
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          // Progreso de la subida
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          progressElement.querySelector('.upload-progress').textContent = Math.round(progress) + '%';
-          console.log(`Progreso de ${file.name}: ${progress}%`);
-        },
-        (error) => {
-          // Manejar errores
-          console.error(`Error subiendo ${file.name}:`, error);
-          progressElement.innerHTML = `<p style="color: red;">Error subiendo ${file.name}</p>`;
-        },
-        async () => {
-          // Subida completada
-          try {
-            const url = await uploadTask.snapshot.ref.getDownloadURL();
-            console.log(`Imagen subida exitosamente: ${fileName}`);
-            console.log(`URL obtenida: ${url}`);
-            
-            urls.push(url);
-            progressElement.innerHTML = `<p style="color: green;">✓ ${file.name} subido correctamente</p>`;
-            
-          } catch (urlError) {
-            console.error(`Error obteniendo URL para ${file.name}:`, urlError);
-            progressElement.innerHTML = `<p style="color: orange;">✓ ${file.name} subido pero error obteniendo URL</p>`;
-          }
-        }
-      );
-      
-      // Esperar a que termine esta subida antes de continuar
-      await uploadTask;
+      uploadPromises.push(uploadPromise);
       
     } catch (error) {
       console.error(`Error en el proceso de subida para ${file.name}:`, error);
@@ -339,11 +355,55 @@ async function subirImagenes(docId, files) {
     }
   }
   
-  console.log(`Subida completada. ${urls.length} imágenes subidas correctamente.`);
+  // Esperar a que todas las subidas terminen
+  try {
+    await Promise.all(uploadPromises);
+    console.log(`Subida completada. ${urls.length} imágenes subidas correctamente.`);
+  } catch (error) {
+    console.error("Error en alguna de las subidas:", error);
+    // Continuamos con las que sí se subieron
+  }
+  
   return urls;
 }
 
-// --- Guardar en Firestore + Storage (VERSIÓN MEJORADA) ---
+// --- Función MEJORADA para ensureAuth ---
+async function ensureAuth() {
+  return new Promise((resolve, reject) => {
+    const user = auth.currentUser;
+    
+    if (user && !user.isAnonymous) {
+      console.log("Usuario ya autenticado:", user.uid);
+      resolve(user);
+      return;
+    }
+    
+    if (user && user.isAnonymous) {
+      console.log("Usuario anónimo ya autenticado:", user.uid);
+      resolve(user);
+      return;
+    }
+    
+    // Forzar autenticación anónima con timeout
+    const authTimeout = setTimeout(() => {
+      reject(new Error("Timeout en autenticación anónima"));
+    }, 10000);
+    
+    auth.signInAnonymously()
+      .then((userCredential) => {
+        clearTimeout(authTimeout);
+        console.log("Autenticación anónima exitosa:", userCredential.user.uid);
+        resolve(userCredential.user);
+      })
+      .catch((error) => {
+        clearTimeout(authTimeout);
+        console.error("Error en autenticación anónima:", error);
+        reject(error);
+      });
+  });
+}
+
+// --- MEJORA en setupFormSubmission para mejor manejo de errores ---
 function setupFormSubmission() {
   const form = document.getElementById("odontologiaForm");
   if (!form) return;
@@ -366,6 +426,28 @@ function setupFormSubmission() {
     statusDiv.style.backgroundColor = '#f8f9fa';
     form.appendChild(statusDiv);
 
+    function updateStatus(message, type) {
+      const colors = {
+        info: '#e3f2fd',
+        success: '#e8f5e9',
+        warning: '#fff3e0',
+        error: '#ffebee'
+      };
+      
+      const textColors = {
+        info: '#1565c0',
+        success: '#2e7d32',
+        warning: '#f57c00',
+        error: '#c62828'
+      };
+      
+      statusDiv.style.backgroundColor = colors[type] || '#f8f9fa';
+      statusDiv.style.color = textColors[type] || '#333';
+      statusDiv.innerHTML = `<p><strong>Estado:</strong> ${message}</p>`;
+      
+      console.log(`Estado: ${message}`);
+    }
+
     try {
       console.log("Iniciando proceso de guardado...");
       updateStatus("Iniciando proceso de guardado...", "info");
@@ -376,11 +458,11 @@ function setupFormSubmission() {
       console.log("Usuario autenticado");
       updateStatus("Autenticación exitosa", "success");
 
-      // *** CORRECCIÓN: Declarar e inicializar la variable data ***
+      // Recopilar datos del formulario
       const data = {};
       new FormData(form).forEach((v, k) => data[k] = v);
 
-      // Validación mínima (AHORA SÍ data está definida)
+      // Validación mínima
       if (!data.email) {
         alert("Captura el correo del paciente.");
         submitButton.textContent = originalText;
@@ -400,11 +482,17 @@ function setupFormSubmission() {
       // Costos
       const costos = [];
       document.querySelectorAll("#tablaCostos tbody tr").forEach(tr => {
-        costos.push({
-          fecha: tr.querySelector("[name='fechaCosto']").value,
-          concepto: tr.querySelector("[name='conceptoCosto']").value,
-          costo: parseFloat(tr.querySelector("[name='costoCosto']").value) || 0
-        });
+        const fechaInput = tr.querySelector("[name='fechaCosto']");
+        const conceptoInput = tr.querySelector("[name='conceptoCosto']");
+        const costoInput = tr.querySelector("[name='costoCosto']");
+        
+        if (fechaInput && conceptoInput && costoInput) {
+          costos.push({
+            fecha: fechaInput.value,
+            concepto: conceptoInput.value,
+            costo: parseFloat(costoInput.value) || 0
+          });
+        }
       });
       data.costos = costos;
       data.totalGeneral = parseFloat(document.getElementById("granTotal").textContent) || 0;
@@ -421,7 +509,7 @@ function setupFormSubmission() {
 
       // 2) Subir imágenes si las hay
       const inputImgs = document.getElementById("imagenes");
-      const files = inputImgs.files ? [...inputImgs.files] : [];
+      const files = inputImgs && inputImgs.files ? [...inputImgs.files] : [];
       
       if (files.length > 0) {
         try {
@@ -435,7 +523,7 @@ function setupFormSubmission() {
               imagenesAdjuntas: imageUrls,
               updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
             });
-            updateStatus("Imágenes subidas correctamente", "success");
+            updateStatus(`Imágenes subidas correctamente (${imageUrls.length}/${files.length})`, "success");
           } else {
             updateStatus("No se subieron imágenes (posiblemente por errores)", "warning");
           }
@@ -465,32 +553,6 @@ function setupFormSubmission() {
       submitButton.disabled = false;
     }
   });
-
-  // Función auxiliar para actualizar el estado
-  function updateStatus(message, type) {
-    const statusDiv = document.getElementById('upload-status');
-    if (!statusDiv) return;
-    
-    const colors = {
-      info: '#e3f2fd',
-      success: '#e8f5e9',
-      warning: '#fff3e0',
-      error: '#ffebee'
-    };
-    
-    const textColors = {
-      info: '#1565c0',
-      success: '#2e7d32',
-      warning: '#f57c00',
-      error: '#c62828'
-    };
-    
-    statusDiv.style.backgroundColor = colors[type] || '#f8f9fa';
-    statusDiv.style.color = textColors[type] || '#333';
-    statusDiv.innerHTML = `<p><strong>Estado:</strong> ${message}</p>`;
-    
-    console.log(`Estado: ${message}`);
-  }
 }
 
 // Función para generar el odontograma en vista previa

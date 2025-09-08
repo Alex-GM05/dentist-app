@@ -675,29 +675,29 @@ textarea {
     color: var(--primary);
   }
 
-  .upload-status {
+  #upload-status {
     padding: 1rem;
     margin: 1rem 0;
     border-radius: 8px;
     border-left: 4px solid var(--primary);
   }
 
-  .upload-status.info {
+  #upload-status.info {
     background-color: #e3f2fd;
     border-color: #2196f3;
   }
 
-  .upload-status.success {
+  #upload-status.success {
     background-color: #e8f5e9;
     border-color: #4caf50;
   }
 
-  .upload-status.warning {
+  #upload-status.warning {
     background-color: #fff3e0;
     border-color: #ff9800;
   }
 
-  .upload-status.error {
+  #upload-status.error {
     background-color: #ffebee;
     border-color: #f44336;
   }
