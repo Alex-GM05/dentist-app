@@ -133,7 +133,8 @@ function renderPreview(data) {
 
   const html = `
     <div class="preview-section">
-      <div style="background: linear-gradient(135deg, #2a9d8f 50%, #264653 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+      <div style="background: linear-gradient(135deg, #2a9d8f 0%, #2a9d8f 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <h1 style="margin: 0 0 0.5rem 0; color: white;">Historia Clínica Odontológica</h1>
         <p style="margin: 0; opacity: 0.9;">Paciente: <strong>${data.nombre || 'No especificado'}</strong></p>
         <p style="margin: 0; opacity: 0.9;">Fecha de creación: ${data.fechaCreacion || data.fecha || 'No disponible'}</p>
       </div>
@@ -189,7 +190,7 @@ function renderPreview(data) {
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💰 Costos del Tratamiento</h2>
       <table class="odontologia-table" style="width: 100%; border-collapse: collapse; margin: 1rem 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <thead>
-          <tr style="background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%); color: white;">
+          <tr style="background: linear-gradient(135deg, #2a9d8f 0%, #2a9d8f 100%); color: white;">
             <th style="padding: 1rem; text-align: left;">Fecha</th>
             <th style="padding: 1rem; text-align: left;">Concepto</th>
             <th style="padding: 1rem; text-align: right;">Costo</th>
