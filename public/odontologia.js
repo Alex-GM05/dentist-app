@@ -260,8 +260,16 @@ function setupImagePreview() {
 async function subirImagenes(docId, files) {
   const urls = [];
   
+  console.log(`Intentando subir ${files.length} imágenes...`);
+  
   // Asegurar autenticación antes de subir
-  await ensureAuth();
+  try {
+    await ensureAuth();
+    console.log("Autenticación verificada para subida de imágenes");
+  } catch (error) {
+    console.error("Error en autenticación para subida:", error);
+    throw new Error("No se pudo autenticar para subir imágenes");
+  }
   
   for (const file of files) {
     try {
@@ -271,36 +279,67 @@ async function subirImagenes(docId, files) {
         continue;
       }
       
-      const fileName = `${Date.now()}_${file.name}`;
+      const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
       const path = `historial-odontologia/${docId}/adjuntos/${fileName}`;
       const storageRef = storage.ref(path);
       
-      console.log(`Subiendo imagen: ${fileName}`);
+      console.log(`Subiendo imagen: ${fileName} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
       
-      // Subir el archivo con metadata
-      const metadata = {
+      // Mostrar progreso de subida
+      const progressElement = document.createElement('div');
+      progressElement.innerHTML = `<p>Subiendo ${file.name}... <span class="upload-progress">0%</span></p>`;
+      document.getElementById('previewImagenes').appendChild(progressElement);
+      
+      // Subir el archivo con metadata y seguimiento de progreso
+      const uploadTask = storageRef.put(file, {
         contentType: file.type,
         customMetadata: {
           'uploadedBy': 'anonymous',
-          'uploadedAt': new Date().toISOString()
+          'uploadedAt': new Date().toISOString(),
+          'originalName': file.name
         }
-      };
+      });
       
-      const snapshot = await storageRef.put(file, metadata);
-      console.log(`Imagen subida: ${fileName}`);
+      // Monitorizar progreso
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Progreso de la subida
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          progressElement.querySelector('.upload-progress').textContent = Math.round(progress) + '%';
+          console.log(`Progreso de ${file.name}: ${progress}%`);
+        },
+        (error) => {
+          // Manejar errores
+          console.error(`Error subiendo ${file.name}:`, error);
+          progressElement.innerHTML = `<p style="color: red;">Error subiendo ${file.name}</p>`;
+        },
+        async () => {
+          // Subida completada
+          try {
+            const url = await uploadTask.snapshot.ref.getDownloadURL();
+            console.log(`Imagen subida exitosamente: ${fileName}`);
+            console.log(`URL obtenida: ${url}`);
+            
+            urls.push(url);
+            progressElement.innerHTML = `<p style="color: green;">✓ ${file.name} subido correctamente</p>`;
+            
+          } catch (urlError) {
+            console.error(`Error obteniendo URL para ${file.name}:`, urlError);
+            progressElement.innerHTML = `<p style="color: orange;">✓ ${file.name} subido pero error obteniendo URL</p>`;
+          }
+        }
+      );
       
-      // Obtener la URL de descarga
-      const url = await storageRef.getDownloadURL();
-      console.log(`URL obtenida para ${fileName}: ${url}`);
-      
-      urls.push(url);
+      // Esperar a que termine esta subida antes de continuar
+      await uploadTask;
       
     } catch (error) {
-      console.error(`Error subiendo imagen ${file.name}:`, error);
-      // No relanzamos el error para continuar con las demás imágenes
+      console.error(`Error en el proceso de subida para ${file.name}:`, error);
+      // Continuamos con las demás imágenes
     }
   }
   
+  console.log(`Subida completada. ${urls.length} imágenes subidas correctamente.`);
   return urls;
 }
 
@@ -318,18 +357,30 @@ function setupFormSubmission() {
     submitButton.textContent = "Guardando...";
     submitButton.disabled = true;
 
+    // Agregar mensaje de estado
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'upload-status';
+    statusDiv.style.padding = '1rem';
+    statusDiv.style.margin = '1rem 0';
+    statusDiv.style.borderRadius = '8px';
+    statusDiv.style.backgroundColor = '#f8f9fa';
+    form.appendChild(statusDiv);
+
     try {
       console.log("Iniciando proceso de guardado...");
+      updateStatus("Iniciando proceso de guardado...", "info");
       
       // Asegurar autenticación AL INICIO del proceso
-      console.log("Autenticando...");
+      updateStatus("Autenticando...", "info");
       await ensureAuth();
       console.log("Usuario autenticado");
+      updateStatus("Autenticación exitosa", "success");
 
+      // *** CORRECCIÓN: Declarar e inicializar la variable data ***
       const data = {};
       new FormData(form).forEach((v, k) => data[k] = v);
 
-      // Validación mínima
+      // Validación mínima (AHORA SÍ data está definida)
       if (!data.email) {
         alert("Captura el correo del paciente.");
         submitButton.textContent = originalText;
@@ -363,9 +414,10 @@ function setupFormSubmission() {
       data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
       // 1) Guardar documento primero (sin imágenes) para obtener docId
-      console.log("Guardando datos en Firestore...");
+      updateStatus("Guardando datos principales...", "info");
       const docRef = await db.collection("historial-odontologia").add(data);
       console.log("Datos guardados correctamente con ID:", docRef.id);
+      updateStatus("Datos principales guardados", "success");
 
       // 2) Subir imágenes si las hay
       const inputImgs = document.getElementById("imagenes");
@@ -373,33 +425,39 @@ function setupFormSubmission() {
       
       if (files.length > 0) {
         try {
-          console.log(`Subiendo ${files.length} imágenes...`);
+          updateStatus(`Subiendo ${files.length} imágenes...`, "info");
           const imageUrls = await subirImagenes(docRef.id, files);
           
           if (imageUrls.length > 0) {
             // Actualizar documento con URLs de imágenes
+            updateStatus("Actualizando documento con imágenes...", "info");
             await docRef.update({ 
               imagenesAdjuntas: imageUrls,
               updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
             });
-            console.log("Imágenes subidas correctamente y documento actualizado");
+            updateStatus("Imágenes subidas correctamente", "success");
           } else {
-            console.log("No se subieron imágenes (posiblemente por errores)");
+            updateStatus("No se subieron imágenes (posiblemente por errores)", "warning");
           }
         } catch (error) {
           console.error("Error en el proceso de imágenes:", error);
+          updateStatus("Error subiendo imágenes, pero los datos se guardaron", "error");
           // Continuamos aunque haya error en imágenes
         }
       } else {
         console.log("No hay imágenes para subir");
+        updateStatus("No hay imágenes para subir", "info");
       }
 
-      // 3) Ir al preview
-      console.log("Redirigiendo a preview...");
-      window.location.href = `preview-odontologia.html?id=${docRef.id}`;
+      // 3) Ir al preview después de un breve delay
+      updateStatus("Redirigiendo a vista previa...", "success");
+      setTimeout(() => {
+        window.location.href = `preview-odontologia.html?id=${docRef.id}`;
+      }, 2000);
 
     } catch (error) {
       console.error("Error en el proceso de guardado:", error);
+      updateStatus("Error al guardar: " + error.message, "error");
       alert("Ocurrió un error al guardar. Por favor, revisa la consola para más detalles.");
       
       // Restaurar botón
@@ -407,6 +465,32 @@ function setupFormSubmission() {
       submitButton.disabled = false;
     }
   });
+
+  // Función auxiliar para actualizar el estado
+  function updateStatus(message, type) {
+    const statusDiv = document.getElementById('upload-status');
+    if (!statusDiv) return;
+    
+    const colors = {
+      info: '#e3f2fd',
+      success: '#e8f5e9',
+      warning: '#fff3e0',
+      error: '#ffebee'
+    };
+    
+    const textColors = {
+      info: '#1565c0',
+      success: '#2e7d32',
+      warning: '#f57c00',
+      error: '#c62828'
+    };
+    
+    statusDiv.style.backgroundColor = colors[type] || '#f8f9fa';
+    statusDiv.style.color = textColors[type] || '#333';
+    statusDiv.innerHTML = `<p><strong>Estado:</strong> ${message}</p>`;
+    
+    console.log(`Estado: ${message}`);
+  }
 }
 
 // Función para generar el odontograma en vista previa
