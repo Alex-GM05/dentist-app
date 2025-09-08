@@ -294,7 +294,7 @@ dynamicStyles.textContent = `
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%);
+    background: linear-gradient(135deg, #2a9d8f 0%, #2a9d8f 100%);
     color: white;
     border: none;
     padding: 12px 24px;
