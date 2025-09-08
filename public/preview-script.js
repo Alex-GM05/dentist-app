@@ -133,8 +133,7 @@ function renderPreview(data) {
 
   const html = `
     <div class="preview-section">
-      <div style="background: linear-gradient(135deg, #2a9d8f 0%, #264653 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-        <h1 style="margin: 0 0 0.5rem 0; color: white;">Historia Clínica Odontológica</h1>
+      <div style="background: linear-gradient(135deg, #2a9d8f 50%, #264653 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
         <p style="margin: 0; opacity: 0.9;">Paciente: <strong>${data.nombre || 'No especificado'}</strong></p>
         <p style="margin: 0; opacity: 0.9;">Fecha de creación: ${data.fechaCreacion || data.fecha || 'No disponible'}</p>
       </div>
