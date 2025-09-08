@@ -20,26 +20,44 @@ try {
   console.error("Error inicializando Firebase:", error);
 }
 
-// Función mejorada para autenticación anónima
+// Función mejorada para autenticación
 async function ensureAuth() {
   return new Promise((resolve, reject) => {
     const user = auth.currentUser;
     
+    // Si ya hay un usuario autenticado (email o anónimo)
     if (user) {
-      console.log("Usuario ya autenticado:", user.uid);
+      console.log("Usuario ya autenticado:", user.uid, "Anónimo:", user.isAnonymous);
       resolve(user);
       return;
     }
     
-    // Forzar autenticación anónima
+    console.log("Iniciando autenticación anónima...");
+    
+    // Timeout para evitar bloqueos infinitos
+    const authTimeout = setTimeout(() => {
+      reject(new Error("Timeout en autenticación anónima"));
+    }, 10000);
+    
+    // Intentar autenticación anónima
     auth.signInAnonymously()
       .then((userCredential) => {
+        clearTimeout(authTimeout);
         console.log("Autenticación anónima exitosa:", userCredential.user.uid);
         resolve(userCredential.user);
       })
       .catch((error) => {
+        clearTimeout(authTimeout);
         console.error("Error en autenticación anónima:", error);
-        reject(error);
+        
+        // Si falla la autenticación anónima, intentar con el usuario actual del login
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          console.log("Usando usuario existente:", currentUser.uid);
+          resolve(currentUser);
+        } else {
+          reject(error);
+        }
       });
   });
 }
@@ -256,7 +274,7 @@ function setupImagePreview() {
   }
 }
 
-// --- Función CORREGIDA para subir imágenes ---
+// --- Función MEJORADA para subir imágenes ---
 async function subirImagenes(docId, files) {
   const urls = [];
   
@@ -267,117 +285,128 @@ async function subirImagenes(docId, files) {
     return urls;
   }
 
-  // Crear contenedor para progreso
-  let progressContainer = document.getElementById('upload-progress-container');
-  if (!progressContainer) {
-    progressContainer = document.createElement('div');
-    progressContainer.id = 'upload-progress-container';
-    progressContainer.style.marginTop = '1rem';
-    progressContainer.style.padding = '1rem';
-    progressContainer.style.background = '#f8f9fa';
-    progressContainer.style.borderRadius = '8px';
-    progressContainer.style.border = '1px solid #ddd';
-    const previewContainer = document.getElementById('previewImagenes');
-    if (previewContainer) {
-      previewContainer.after(progressContainer);
-    }
-  }
-
-  // Subir imágenes una por una (no en paralelo para mejor control)
-  for (const file of files) {
-    try {
-      // Validación de tamaño
-      if (file.size > 5 * 1024 * 1024) {
-        console.warn(`El archivo ${file.name} excede 5 MB. No se subirá.`);
-        continue;
+  try {
+    // Asegurar autenticación
+    const user = await ensureAuth();
+    console.log("Usuario autenticado para subida:", user.uid, "Anónimo:", user.isAnonymous);
+    
+    // Crear contenedor para progreso
+    let progressContainer = document.getElementById('upload-progress-container');
+    if (!progressContainer) {
+      progressContainer = document.createElement('div');
+      progressContainer.id = 'upload-progress-container';
+      progressContainer.style.marginTop = '1rem';
+      progressContainer.style.padding = '1rem';
+      progressContainer.style.background = '#f8f9fa';
+      progressContainer.style.borderRadius = '8px';
+      progressContainer.style.border = '1px solid #ddd';
+      const form = document.getElementById('odontologiaForm');
+      if (form) {
+        form.appendChild(progressContainer);
       }
-      
-      // Nombre único para el archivo
-      const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-      const path = `historial-odontologia/${docId}/adjuntos/${fileName}`;
-      const storageRef = storage.ref(path);
-      
-      console.log(`Subiendo: ${file.name} -> ${path}`);
+    }
 
-      // Mostrar progreso
-      const progressElement = document.createElement('div');
-      progressElement.className = 'upload-progress-item';
-      progressElement.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="flex: 1;">${file.name}</span>
-          <span class="upload-progress" style="margin: 0 10px;">0%</span>
-          <span class="upload-status">⏳</span>
-        </div>
-        <div style="height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 5px;">
-          <div class="upload-progress-bar" style="height: 100%; width: 0%; background: #4caf50; border-radius: 2px; transition: width 0.3s;"></div>
-        </div>
-      `;
-      progressContainer.appendChild(progressElement);
-
-      // Subir el archivo
-      const uploadTask = storageRef.put(file, {
-        contentType: file.type,
-        customMetadata: {
-          'uploadedBy': 'anonymous',
-          'uploadedAt': new Date().toISOString(),
-          'originalName': file.name
+    for (const file of files) {
+      try {
+        // Validación de tamaño
+        if (file.size > 5 * 1024 * 1024) {
+          console.warn(`El archivo ${file.name} excede 5 MB. No se subirá.`);
+          continue;
         }
-      });
+        
+        // Nombre único para el archivo
+        const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const path = `historial-odontologia/${docId}/adjuntos/${fileName}`;
+        const storageRef = storage.ref(path);
+        
+        console.log(`Subiendo: ${file.name} -> ${path}`);
 
-      // Esperar a que termine esta subida
-      const downloadURL = await new Promise((resolve, reject) => {
-        uploadTask.on('state_changed',
-          (snapshot) => {
-            // Actualizar progreso
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            const progressText = progressElement.querySelector('.upload-progress');
-            const progressBar = progressElement.querySelector('.upload-progress-bar');
-            
-            if (progressText) progressText.textContent = `${Math.round(progress)}%`;
-            if (progressBar) progressBar.style.width = `${progress}%`;
-          },
-          (error) => {
-            // Error en subida
-            console.error(`Error subiendo ${file.name}:`, error);
-            const statusSpan = progressElement.querySelector('.upload-status');
-            if (statusSpan) statusSpan.textContent = '❌';
-            progressElement.style.color = '#d32f2f';
-            reject(error);
-          },
-          async () => {
-            // Subida completada
-            try {
-              const url = await uploadTask.snapshot.ref.getDownloadURL();
-              console.log(`✅ Subida exitosa: ${file.name}`);
-              
-              const statusSpan = progressElement.querySelector('.upload-status');
-              if (statusSpan) statusSpan.textContent = '✅';
-              progressElement.style.color = '#2e7d32';
-              
-              resolve(url);
-            } catch (urlError) {
-              console.error(`Error obteniendo URL:`, urlError);
-              const statusSpan = progressElement.querySelector('.upload-status');
-              if (statusSpan) statusSpan.textContent = '⚠️';
-              progressElement.style.color = '#f57c00';
-              resolve(null);
-            }
+        // Mostrar progreso
+        const progressElement = document.createElement('div');
+        progressElement.className = 'upload-progress-item';
+        progressElement.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="flex: 1; font-size: 0.9rem;">${file.name}</span>
+            <span class="upload-progress" style="margin: 0 10px; font-weight: bold;">0%</span>
+            <span class="upload-status">⏳</span>
+          </div>
+          <div style="height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 5px;">
+            <div class="upload-progress-bar" style="height: 100%; width: 0%; background: #4caf50; border-radius: 2px; transition: width 0.3s;"></div>
+          </div>
+        `;
+        progressContainer.appendChild(progressElement);
+
+        // Subir el archivo con metadata que incluya información de autenticación
+        const uploadTask = storageRef.put(file, {
+          contentType: file.type,
+          customMetadata: {
+            'uploadedBy': user.uid,
+            'isAnonymous': user.isAnonymous ? 'true' : 'false',
+            'uploadedAt': new Date().toISOString(),
+            'originalName': file.name,
+            'documentId': docId
           }
-        );
-      });
+        });
 
-      if (downloadURL) {
-        urls.push(downloadURL);
+        // Esperar a que termine esta subida
+        const downloadURL = await new Promise((resolve, reject) => {
+          uploadTask.on('state_changed',
+            (snapshot) => {
+              // Actualizar progreso
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              const progressText = progressElement.querySelector('.upload-progress');
+              const progressBar = progressElement.querySelector('.upload-progress-bar');
+              
+              if (progressText) progressText.textContent = `${Math.round(progress)}%`;
+              if (progressBar) progressBar.style.width = `${progress}%`;
+            },
+            (error) => {
+              // Error en subida
+              console.error(`Error subiendo ${file.name}:`, error);
+              const statusSpan = progressElement.querySelector('.upload-status');
+              if (statusSpan) statusSpan.textContent = '❌';
+              progressElement.style.color = '#d32f2f';
+              reject(error);
+            },
+            async () => {
+              // Subida completada
+              try {
+                const url = await uploadTask.snapshot.ref.getDownloadURL();
+                console.log(`✅ Subida exitosa: ${file.name}`);
+                
+                const statusSpan = progressElement.querySelector('.upload-status');
+                if (statusSpan) statusSpan.textContent = '✅';
+                progressElement.style.color = '#2e7d32';
+                
+                resolve(url);
+              } catch (urlError) {
+                console.error(`Error obteniendo URL:`, urlError);
+                const statusSpan = progressElement.querySelector('.upload-status');
+                if (statusSpan) statusSpan.textContent = '⚠️';
+                progressElement.style.color = '#f57c00';
+                resolve(null);
+              }
+            }
+          );
+        });
+
+        if (downloadURL) {
+          urls.push(downloadURL);
+        }
+
+      } catch (error) {
+        console.error(`Error procesando ${file.name}:`, error);
+        // Continuar con el siguiente archivo
       }
-
-    } catch (error) {
-      console.error(`Error procesando ${file.name}:`, error);
-      // Continuar con el siguiente archivo
     }
-  }
 
-  console.log(`Subida finalizada. ${urls.length}/${files.length} imágenes subidas.`);
-  return urls;
+    console.log(`Subida finalizada. ${urls.length}/${files.length} imágenes subidas.`);
+    return urls;
+
+  } catch (authError) {
+    console.error("Error de autenticación para subida de imágenes:", authError);
+    throw new Error("No se pudo autenticar para subir imágenes: " + authError.message);
+  }
 }
 
 // Función mejorada para autenticación anónima
@@ -506,6 +535,10 @@ function setupFormSubmission() {
       // Metadatos
       data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
       data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+
+      // En setupFormSubmission(), después de recopilar los datos, agrega:
+      data.userId = user.uid;
+      data.userEmail = user.email || "anonimo@ejemplo.com";
 
       // 1) Guardar documento principal
       updateStatus("Guardando datos principales...", "info");
