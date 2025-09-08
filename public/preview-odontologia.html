@@ -2,35 +2,30 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vista Previa - Historia Clínica Odontológica</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="preview-styles.css">
   
-  <!-- Firebase (compat) -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Historia Clínica Odontológica</h1>
-  </header>
-
   <div class="preview-container">
-    <div class="preview-hdr">
-      <h2>Vista Previa del Paciente</h2>
+    <div class="preview-header">
+      <h1>Historia Clínica Odontológica</h1>
       <div class="no-print">
-        <button onclick="window.print()">🖨️ Imprimir</button>
-        <button onclick="window.history.back()" class="btn-secondary">↩️ Regresar</button>
+        <button onclick="window.print()" class="btn-primary">🖨️ Imprimir</button>
+        <button onclick="window.history.back()" class="btn-secondary">← Volver</button>
       </div>
     </div>
 
     <div id="contenido">
-      <!-- Se rellena vía JS -->
+      <!-- Los datos se cargarán aquí mediante JavaScript -->
     </div>
 
     <div class="no-print" style="margin-top: 2rem;">
-      <button onclick="window.history.back()" class="btn-secondary">↩️ Regresar</button>
+      <button onclick="window.history.back()" class="btn-secondary">← Volver al formulario</button>
     </div>
   </div>
 
