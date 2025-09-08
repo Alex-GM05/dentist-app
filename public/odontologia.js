@@ -256,27 +256,18 @@ function setupImagePreview() {
   }
 }
 
-// --- Función MEJORADA para subir imágenes a Firebase Storage ---
+// --- Función CORREGIDA para subir imágenes ---
 async function subirImagenes(docId, files) {
   const urls = [];
   
   console.log(`Intentando subir ${files.length} imágenes para documento: ${docId}`);
   
-  if (files.length === 0) {
+  if (!files || files.length === 0) {
     console.log("No hay imágenes para subir");
     return urls;
   }
 
-  // Asegurar autenticación antes de subir
-  try {
-    await ensureAuth();
-    console.log("Autenticación verificada para subida de imágenes");
-  } catch (error) {
-    console.error("Error en autenticación para subida:", error);
-    throw new Error("No se pudo autenticar para subir imágenes");
-  }
-  
-  // Crear contenedor para progreso si no existe
+  // Crear contenedor para progreso
   let progressContainer = document.getElementById('upload-progress-container');
   if (!progressContainer) {
     progressContainer = document.createElement('div');
@@ -285,35 +276,45 @@ async function subirImagenes(docId, files) {
     progressContainer.style.padding = '1rem';
     progressContainer.style.background = '#f8f9fa';
     progressContainer.style.borderRadius = '8px';
-    document.getElementById('previewImagenes').after(progressContainer);
+    progressContainer.style.border = '1px solid #ddd';
+    const previewContainer = document.getElementById('previewImagenes');
+    if (previewContainer) {
+      previewContainer.after(progressContainer);
+    }
   }
 
+  // Subir imágenes una por una (no en paralelo para mejor control)
   for (const file of files) {
     try {
-      // Validación simple (5 MB)
+      // Validación de tamaño
       if (file.size > 5 * 1024 * 1024) {
         console.warn(`El archivo ${file.name} excede 5 MB. No se subirá.`);
         continue;
       }
       
+      // Nombre único para el archivo
       const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
       const path = `historial-odontologia/${docId}/adjuntos/${fileName}`;
       const storageRef = storage.ref(path);
       
-      console.log(`Subiendo imagen: ${fileName} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
-      
-      // Mostrar progreso de subida
+      console.log(`Subiendo: ${file.name} -> ${path}`);
+
+      // Mostrar progreso
       const progressElement = document.createElement('div');
       progressElement.className = 'upload-progress-item';
       progressElement.innerHTML = `
-        <p>Subiendo ${file.name}... 
-          <span class="upload-progress">0%</span>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="flex: 1;">${file.name}</span>
+          <span class="upload-progress" style="margin: 0 10px;">0%</span>
           <span class="upload-status">⏳</span>
-        </p>
+        </div>
+        <div style="height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 5px;">
+          <div class="upload-progress-bar" style="height: 100%; width: 0%; background: #4caf50; border-radius: 2px; transition: width 0.3s;"></div>
+        </div>
       `;
       progressContainer.appendChild(progressElement);
-      
-      // Subir el archivo con metadata
+
+      // Subir el archivo
       const uploadTask = storageRef.put(file, {
         contentType: file.type,
         customMetadata: {
@@ -322,100 +323,96 @@ async function subirImagenes(docId, files) {
           'originalName': file.name
         }
       });
-      
-      // Esperar a que termine la subida
-      await new Promise((resolve, reject) => {
+
+      // Esperar a que termine esta subida
+      const downloadURL = await new Promise((resolve, reject) => {
         uploadTask.on('state_changed',
           (snapshot) => {
-            // Progreso de la subida
+            // Actualizar progreso
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            const progressSpan = progressElement.querySelector('.upload-progress');
-            if (progressSpan) {
-              progressSpan.textContent = Math.round(progress) + '%';
-            }
+            const progressText = progressElement.querySelector('.upload-progress');
+            const progressBar = progressElement.querySelector('.upload-progress-bar');
+            
+            if (progressText) progressText.textContent = `${Math.round(progress)}%`;
+            if (progressBar) progressBar.style.width = `${progress}%`;
           },
           (error) => {
-            // Manejar errores
+            // Error en subida
             console.error(`Error subiendo ${file.name}:`, error);
             const statusSpan = progressElement.querySelector('.upload-status');
-            if (statusSpan) {
-              statusSpan.textContent = '❌';
-              statusSpan.title = error.message;
-            }
-            progressElement.style.color = 'red';
+            if (statusSpan) statusSpan.textContent = '❌';
+            progressElement.style.color = '#d32f2f';
             reject(error);
           },
           async () => {
+            // Subida completada
             try {
               const url = await uploadTask.snapshot.ref.getDownloadURL();
-              console.log(`Imagen subida exitosamente: ${fileName}`);
+              console.log(`✅ Subida exitosa: ${file.name}`);
               
-              urls.push(url);
               const statusSpan = progressElement.querySelector('.upload-status');
-              if (statusSpan) {
-                statusSpan.textContent = '✅';
-              }
-              progressElement.style.color = 'green';
+              if (statusSpan) statusSpan.textContent = '✅';
+              progressElement.style.color = '#2e7d32';
               
               resolve(url);
             } catch (urlError) {
-              console.error(`Error obteniendo URL para ${file.name}:`, urlError);
+              console.error(`Error obteniendo URL:`, urlError);
               const statusSpan = progressElement.querySelector('.upload-status');
-              if (statusSpan) {
-                statusSpan.textContent = '⚠️';
-                statusSpan.title = 'Subida completa pero error obteniendo URL';
-              }
-              progressElement.style.color = 'orange';
-              resolve(null); // Resolvemos pero con null para continuar
+              if (statusSpan) statusSpan.textContent = '⚠️';
+              progressElement.style.color = '#f57c00';
+              resolve(null);
             }
           }
         );
       });
-      
+
+      if (downloadURL) {
+        urls.push(downloadURL);
+      }
+
     } catch (error) {
-      console.error(`Error en el proceso de subida para ${file.name}:`, error);
-      // Continuamos con las demás imágenes
+      console.error(`Error procesando ${file.name}:`, error);
+      // Continuar con el siguiente archivo
     }
   }
+
+  console.log(`Subida finalizada. ${urls.length}/${files.length} imágenes subidas.`);
+  return urls;
 }
 
-// --- Función MEJORADA para ensureAuth ---
+// Función mejorada para autenticación anónima
 async function ensureAuth() {
   return new Promise((resolve, reject) => {
-    const user = auth.currentUser;
-    
-    if (user && !user.isAnonymous) {
-      console.log("Usuario ya autenticado:", user.uid);
-      resolve(user);
-      return;
-    }
-    
-    if (user && user.isAnonymous) {
-      console.log("Usuario anónimo ya autenticado:", user.uid);
-      resolve(user);
-      return;
-    }
-    
-    // Forzar autenticación anónima con timeout
-    const authTimeout = setTimeout(() => {
-      reject(new Error("Timeout en autenticación anónima"));
-    }, 10000);
-    
-    auth.signInAnonymously()
-      .then((userCredential) => {
-        clearTimeout(authTimeout);
-        console.log("Autenticación anónima exitosa:", userCredential.user.uid);
-        resolve(userCredential.user);
-      })
-      .catch((error) => {
-        clearTimeout(authTimeout);
-        console.error("Error en autenticación anónima:", error);
-        reject(error);
-      });
+    // Verificar si ya hay un usuario autenticado
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      unsubscribe(); // Dejar de escuchar cambios
+      
+      if (user) {
+        console.log("Usuario ya autenticado:", user.uid);
+        resolve(user);
+        return;
+      }
+      
+      // Si no hay usuario, autenticar anónimamente
+      console.log("Iniciando autenticación anónima...");
+      auth.signInAnonymously()
+        .then((userCredential) => {
+          console.log("Autenticación anónima exitosa:", userCredential.user.uid);
+          resolve(userCredential.user);
+        })
+        .catch((error) => {
+          console.error("Error en autenticación anónima:", error);
+          reject(error);
+        });
+    }, (error) => {
+      unsubscribe();
+      console.error("Error en onAuthStateChanged:", error);
+      reject(error);
+    });
   });
 }
 
-// --- MEJORA en setupFormSubmission para mejor manejo de errores ---
+// --- MEJORA en setupFormSubmission ---
 function setupFormSubmission() {
   const form = document.getElementById("odontologiaForm");
   if (!form) return;
@@ -430,68 +427,65 @@ function setupFormSubmission() {
     submitButton.disabled = true;
 
     // Agregar mensaje de estado
-    const statusDiv = document.createElement('div');
-    statusDiv.id = 'upload-status';
-    statusDiv.style.padding = '1rem';
-    statusDiv.style.margin = '1rem 0';
-    statusDiv.style.borderRadius = '8px';
-    statusDiv.style.backgroundColor = '#f8f9fa';
-    form.appendChild(statusDiv);
+    let statusDiv = document.getElementById('upload-status');
+    if (!statusDiv) {
+      statusDiv = document.createElement('div');
+      statusDiv.id = 'upload-status';
+      statusDiv.style.padding = '1rem';
+      statusDiv.style.margin = '1rem 0';
+      statusDiv.style.borderRadius = '8px';
+      statusDiv.style.backgroundColor = '#f8f9fa';
+      form.appendChild(statusDiv);
+    }
 
-    function updateStatus(message, type) {
+    function updateStatus(message, type = 'info') {
       const colors = {
-        info: '#e3f2fd',
-        success: '#e8f5e9',
-        warning: '#fff3e0',
-        error: '#ffebee'
+        info: { bg: '#e3f2fd', text: '#1565c0', border: '#2196f3' },
+        success: { bg: '#e8f5e9', text: '#2e7d32', border: '#4caf50' },
+        warning: { bg: '#fff3e0', text: '#f57c00', border: '#ff9800' },
+        error: { bg: '#ffebee', text: '#c62828', border: '#f44336' }
       };
       
-      const textColors = {
-        info: '#1565c0',
-        success: '#2e7d32',
-        warning: '#f57c00',
-        error: '#c62828'
-      };
-      
-      statusDiv.style.backgroundColor = colors[type] || '#f8f9fa';
-      statusDiv.style.color = textColors[type] || '#333';
+      const color = colors[type] || colors.info;
+      statusDiv.style.backgroundColor = color.bg;
+      statusDiv.style.color = color.text;
+      statusDiv.style.borderLeft = `4px solid ${color.border}`;
       statusDiv.innerHTML = `<p><strong>Estado:</strong> ${message}</p>`;
       
       console.log(`Estado: ${message}`);
     }
 
     try {
-      console.log("Iniciando proceso de guardado...");
       updateStatus("Iniciando proceso de guardado...", "info");
       
-      // Asegurar autenticación AL INICIO del proceso
+      // Asegurar autenticación
       updateStatus("Autenticando...", "info");
       await ensureAuth();
-      console.log("Usuario autenticado");
       updateStatus("Autenticación exitosa", "success");
 
       // Recopilar datos del formulario
       const data = {};
-      new FormData(form).forEach((v, k) => data[k] = v);
+      new FormData(form).forEach((value, key) => {
+        data[key] = value;
+      });
 
-      // Validación mínima
-      if (!data.email) {
-        alert("Captura el correo del paciente.");
+      // Validación básica
+      if (!data.email || !data.nombre) {
+        updateStatus("Error: Nombre y correo son obligatorios", "error");
         submitButton.textContent = originalText;
         submitButton.disabled = false;
         return;
       }
 
-      // Recopilar datos del odontograma (solo DX y TX)
+      // Recopilar odontograma
       data.odontograma = {};
       document.querySelectorAll(".tooth-input").forEach(input => {
         if (input.value.trim() !== "") {
           data.odontograma[input.name] = input.value;
         }
       });
-      data.observacionesOdontograma = data.observacionesOdontograma || "";
 
-      // Costos
+      // Recopilar costos
       const costos = [];
       document.querySelectorAll("#tablaCostos tbody tr").forEach(tr => {
         const fechaInput = tr.querySelector("[name='fechaCosto']");
@@ -513,19 +507,19 @@ function setupFormSubmission() {
       data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
       data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
-      // 1) Guardar documento primero (sin imágenes) para obtener docId
+      // 1) Guardar documento principal
       updateStatus("Guardando datos principales...", "info");
       const docRef = await db.collection("historial-odontologia").add(data);
-      console.log("Datos guardados correctamente con ID:", docRef.id);
-      updateStatus("Datos principales guardados", "success");
+      console.log("📄 Documento guardado con ID:", docRef.id);
+      updateStatus("Datos principales guardados correctamente", "success");
 
       // 2) Subir imágenes si las hay
       const inputImgs = document.getElementById("imagenes");
-      const files = inputImgs && inputImgs.files ? [...inputImgs.files] : [];
+      const files = inputImgs?.files ? Array.from(inputImgs.files) : [];
       
       if (files.length > 0) {
+        updateStatus(`Subiendo ${files.length} imagen(es)...`, "info");
         try {
-          updateStatus(`Subiendo ${files.length} imágenes...`, "info");
           const imageUrls = await subirImagenes(docRef.id, files);
           
           if (imageUrls.length > 0) {
@@ -535,30 +529,29 @@ function setupFormSubmission() {
               imagenesAdjuntas: imageUrls,
               updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
             });
-            updateStatus(`Imágenes subidas correctamente (${imageUrls.length}/${files.length})`, "success");
+            updateStatus(`✅ ${imageUrls.length} imagen(es) subidas correctamente`, "success");
           } else {
-            updateStatus("No se subieron imágenes (posiblemente por errores)", "warning");
+            updateStatus("⚠️ No se subieron imágenes (posibles errores)", "warning");
           }
         } catch (error) {
-          console.error("Error en el proceso de imágenes:", error);
-          updateStatus("Error subiendo imágenes, pero los datos se guardaron", "error");
-          // Continuamos aunque haya error en imágenes
+          console.error("Error en subida de imágenes:", error);
+          updateStatus("⚠️ Error subiendo imágenes, pero los datos se guardaron", "warning");
         }
       } else {
-        console.log("No hay imágenes para subir");
         updateStatus("No hay imágenes para subir", "info");
       }
 
-      // 3) Ir al preview después de un breve delay
-      updateStatus("Redirigiendo a vista previa...", "success");
+      // 3) Redirigir al preview
+      updateStatus("✅ Proceso completado. Redirigiendo...", "success");
+      
       setTimeout(() => {
         window.location.href = `preview-odontologia.html?id=${docRef.id}`;
-      }, 2000);
+      }, 1500);
 
     } catch (error) {
-      console.error("Error en el proceso de guardado:", error);
-      updateStatus("Error al guardar: " + error.message, "error");
-      alert("Ocurrió un error al guardar. Por favor, revisa la consola para más detalles.");
+      console.error("❌ Error en el proceso completo:", error);
+      updateStatus(`Error: ${error.message}`, "error");
+      alert("Ocurrió un error al guardar. Revisa la consola para más detalles.");
       
       // Restaurar botón
       submitButton.textContent = originalText;

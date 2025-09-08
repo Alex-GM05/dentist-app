@@ -186,7 +186,6 @@ button.danger:hover {
 }
 
 @media print {
-
   header,
   .form-buttons,
   .no-print {
@@ -334,7 +333,7 @@ textarea {
   margin-top: 1.5rem;
 }
 
-.firmas>div {
+.firmas > div {
   text-align: center;
   flex: 1;
 }
@@ -696,60 +695,91 @@ textarea {
 
   /* Estilos para el progreso de subida */
   .upload-progress-item {
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 4px;
+    margin-bottom: 1rem;
+    padding: 1rem;
     background: white;
-    border-left: 4px solid #2196f3;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .upload-progress {
     font-weight: bold;
-    color: var(--primary);
-    margin: 0 0.5rem;
+    color: #2196f3;
+    min-width: 40px;
+    text-align: right;
   }
 
   .upload-status {
     font-size: 1.2rem;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .upload-progress-bar {
+    height: 4px;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    border-radius: 2px;
+    transition: width 0.3s ease;
   }
 
   #upload-progress-container {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin: 1.5rem 0;
+    padding: 1.5rem;
     background: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
   }
 
-  /* Mejoras para la vista previa */
-  .info-content {
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin: 0.5rem 0;
-  }
-
-  .preview-images-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .preview-images-grid .thumb {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.2s;
-  }
-
-  .preview-images-grid .thumb:hover {
-    transform: scale(1.02);
-  }
-
-  .preview-images-grid img {
+  /* Mejoras para tablas */
+  .odontologia-table {
     width: 100%;
-    height: 150px;
-    object-fit: cover;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .odontologia-table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+  }
+
+  .odontologia-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .odontologia-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .total-row {
+    background-color: #e8f5e9;
+    font-weight: bold;
+  }
+
+  .total-row td {
+    font-size: 1.1em;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .preview-kv {
+      padding: 1rem;
+    }
+
+    .odontologia-table {
+      font-size: 0.9em;
+    }
+
+    .odontologia-table th,
+    .odontologia-table td {
+      padding: 0.75rem 0.5rem;
+    }
   }
 }
