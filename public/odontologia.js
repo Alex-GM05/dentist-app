@@ -374,18 +374,24 @@ function setupFormSubmission() {
       
       await ensureAuth();
       updateStatus("Autenticación exitosa", "success");
+          
+      // DEBUG: Verificar el usuario actual
+      console.log("Usuario autenticado:", auth.currentUser);
+      console.log("UID:", auth.currentUser?.uid);
+      console.log("Es anónimo:", auth.currentUser?.isAnonymous);
 
       const data = {};
       new FormData(form).forEach((value, key) => {
         data[key] = value;
       });
 
-      // OBTENER USUARIO CORRECTAMENTE
-      const user = auth.currentUser;
-      if (user) {
-        data.userId = user.uid;
-        data.userEmail = user.email || "anonimo@ejemplo.com";
+      // OBTENER USUARIO CORRECTAMENTE - FORMA CORRECTA
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        data.userId = currentUser.uid;
+        data.userEmail = currentUser.email || "anonimo@ejemplo.com";
       } else {
+        // Si no hay usuario, usar valores por defecto
         data.userId = "anonymous";
         data.userEmail = "anonimo@ejemplo.com";
       }
