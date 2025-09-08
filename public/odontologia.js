@@ -49,15 +49,7 @@ async function ensureAuth() {
       .catch((error) => {
         clearTimeout(authTimeout);
         console.error("Error en autenticación anónima:", error);
-        
-        // Si falla la autenticación anónima, intentar con el usuario actual del login
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          console.log("Usando usuario existente:", currentUser.uid);
-          resolve(currentUser);
-        } else {
-          reject(error);
-        }
+        reject(error);
       });
   });
 }
@@ -498,6 +490,17 @@ function setupFormSubmission() {
         data[key] = value;
       });
 
+      // Obtener el usuario después de autenticar
+      const user = auth.currentUser;
+      if (user) {
+        data.userId = user.uid;
+        data.userEmail = user.email || "anonimo@ejemplo.com";
+      } else {
+        // Si no hay usuario, usar valores por defecto
+        data.userId = "anonymous";
+        data.userEmail = "anonimo@ejemplo.com";
+      }
+
       // Validación básica
       if (!data.email || !data.nombre) {
         updateStatus("Error: Nombre y correo son obligatorios", "error");
@@ -535,10 +538,6 @@ function setupFormSubmission() {
       // Metadatos
       data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
       data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-
-      // En setupFormSubmission(), después de recopilar los datos, agrega:
-      data.userId = user.uid;
-      data.userEmail = user.email || "anonimo@ejemplo.com";
 
       // 1) Guardar documento principal
       updateStatus("Guardando datos principales...", "info");
