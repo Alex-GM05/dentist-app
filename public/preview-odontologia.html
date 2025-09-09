@@ -15,23 +15,21 @@
   <header>
     <img src="BELADENT.jpg" alt="Logo Beladent" style="max-width: 150px;">
     <h1>Clínica BELADENT</h1>
-    <h2>Vista Previa del Paciente</h2>
+    <h2>Vista Previa de Historia Clínica</h2>
   </header>
 
   <div class="preview-container">
-    <div class="preview-header">
-      <div class="no-print">
-        <button onclick="window.print()" class="btn-primary">🖨️ Imprimir</button>
-        <button onclick="window.history.back()" class="btn-secondary">← Volver</button>
-      </div>
+    <div class="no-print" style="text-align: center; margin-bottom: 2rem;">
+      <button onclick="window.print()" class="btn-print">🖨️ Imprimir Documento</button>
+      <button onclick="window.history.back()" class="btn-back">← Volver al Formulario</button>
     </div>
 
     <div id="contenido">
       <!-- Los datos se cargarán aquí mediante JavaScript -->
     </div>
 
-    <div class="no-print" style="margin-top: 2rem; text-align: center;">
-      <button onclick="window.history.back()" class="btn-secondary">← Volver al formulario</button>
+    <div class="no-print" style="text-align: center; margin-top: 2rem;">
+      <button onclick="window.history.back()" class="btn-back">← Volver al Formulario</button>
     </div>
   </div>
 

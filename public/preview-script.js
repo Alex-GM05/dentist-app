@@ -119,7 +119,7 @@ function kv(label, value) {
   }
   return `
     <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #eee;">
-      <strong style="min-width: 150px; color: #264653;">${label}:</strong>
+      <strong style="min-width: 150px; color: #2a9d8f;">${label}:</strong>
       <span style="text-align: right;">${value}</span>
     </div>
   `;
@@ -133,15 +133,15 @@ function renderPreview(data) {
 
   const html = `
     <div class="preview-section">
-      <div style="background: linear-gradient(135deg, #2a9d8f 0%, #2a9d8f 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-        <h1 style="margin: 0 0 0.5rem 0; color: white;">Historia Clínica Odontológica</h1>
-        <p style="margin: 0; opacity: 0.9;">Paciente: <strong>${data.nombre || 'No especificado'}</strong></p>
-        <p style="margin: 0; opacity: 0.9;">Fecha de creación: ${data.fechaCreacion || data.fecha || 'No disponible'}</p>
+      <div style="background: #2a9d8f; color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; text-align: center;">
+        <h1 style="margin: 0 0 0.5rem 0; color: white; font-size: 2rem;">Historia Clínica Odontológica</h1>
+        <p style="margin: 0; opacity: 0.9; font-size: 1.1rem;">Paciente: <strong>${data.nombre || 'No especificado'}</strong></p>
+        <p style="margin: 0; opacity: 0.9;">Fecha: ${data.fechaCreacion || data.fecha || 'No disponible'}</p>
       </div>
     </div>
 
     <div class="preview-section">
-      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">📋 Datos Generales del Paciente</h2>
+      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">📋 Datos Generales</h2>
       <div class="preview-kv">
         ${kv("Nombre completo", data.nombre)}
         ${kv("Edad", data.edad)}
@@ -158,8 +158,8 @@ function renderPreview(data) {
     <div class="preview-section">
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🏥 Antecedentes Médicos</h2>
       <div class="preview-kv">
-        ${kv("Estado de salud general", data.estadoSalud)}
-        ${kv("Tratamiento médico actual", data.tratamiento)}
+        ${kv("Estado de salud", data.estadoSalud)}
+        ${kv("Tratamiento médico", data.tratamiento)}
         ${kv("Medicamentos", data.medicamentos)}
         ${kv("Alergias", data.alergias)}
         ${kv("Operaciones previas", data.operaciones)}
@@ -168,7 +168,7 @@ function renderPreview(data) {
         ${kv("Enfermedades importantes", data.enfermedadImportante)}
         ${kv("Diabetes", data.diabetico)}
         ${kv("Hipertensión", data.hipertenso)}
-        ${kv("Primera vez con anestesia", data.primeraAnestesia)}
+        ${kv("Primera vez anestesia", data.primeraAnestesia)}
         ${kv("Problemas con anestesia", data.problemasAnestesia)}
         ${kv("Hábito de fumar", data.fuma)}
         ${kv("Consumo de drogas", data.drogas)}
@@ -180,7 +180,7 @@ function renderPreview(data) {
 
     <div class="preview-section">
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🎯 Motivo de Consulta</h2>
-      <div class="info-content" style="background: #f0f5f9; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #2a9d8f;">
+      <div class="info-content">
         ${data.motivoConsulta ? data.motivoConsulta.replace(/\n/g, "<br>") : "No se registró motivo de consulta"}
       </div>
     </div>
@@ -188,25 +188,25 @@ function renderPreview(data) {
     ${costos.length > 0 ? `
     <div class="preview-section">
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💰 Costos del Tratamiento</h2>
-      <table class="odontologia-table" style="width: 100%; border-collapse: collapse; margin: 1rem 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <table class="costos-table">
         <thead>
-          <tr style="background: linear-gradient(135deg, #2a9d8f 0%, #2a9d8f 100%); color: white;">
-            <th style="padding: 1rem; text-align: left;">Fecha</th>
-            <th style="padding: 1rem; text-align: left;">Concepto</th>
-            <th style="padding: 1rem; text-align: right;">Costo</th>
+          <tr>
+            <th>Fecha</th>
+            <th>Concepto</th>
+            <th>Costo</th>
           </tr>
         </thead>
         <tbody>
           ${costos.map((costo, index) => `
-            <tr style="${index % 2 === 0 ? 'background: #f8f9fa;' : 'background: white;'}">
-              <td style="padding: 1rem; border-bottom: 1px solid #eee;">${costo.fecha || "No especificado"}</td>
-              <td style="padding: 1rem; border-bottom: 1px solid #eee;">${costo.concepto || "No especificado"}</td>
-              <td style="padding: 1rem; border-bottom: 1px solid #eee; text-align: right;">$${Number(costo.costo || 0).toFixed(2)}</td>
+            <tr>
+              <td>${costo.fecha || "No especificado"}</td>
+              <td>${costo.concepto || "No especificado"}</td>
+              <td>$${Number(costo.costo || 0).toFixed(2)}</td>
             </tr>
           `).join("")}
-          <tr style="background: #e8f5e9; font-weight: bold;">
-            <td colspan="2" style="padding: 1rem; text-align: right;">Total general:</td>
-            <td style="padding: 1rem; text-align: right;">$${Number(data.totalGeneral || 0).toFixed(2)}</td>
+          <tr class="total-row">
+            <td colspan="2" style="text-align: right; font-weight: bold;">Total general:</td>
+            <td style="font-weight: bold;">$${Number(data.totalGeneral || 0).toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
@@ -215,43 +215,40 @@ function renderPreview(data) {
 
     <div class="preview-section">
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💊 Receta Médica</h2>
-      <div class="info-content" style="background: #f0f5f9; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745; white-space: pre-line;">
+      <div class="info-content" style="white-space: pre-line;">
         ${data.receta || "No se recetaron medicamentos"}
       </div>
     </div>
 
-    <div class="preview-section firmas" style="display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #ddd;">
-      <div style="text-align: center;">
-        <div style="border-top: 2px solid #264653; width: 250px; margin: 0 auto 1rem; padding-top: 2rem;"></div>
-        <p style="font-weight: bold; margin: 0; color: #264653;">Firma del paciente</p>
-        <p style="margin: 0.5rem 0 0; color: #666;">${data.nombre || ''}</p>
+    <div class="preview-section firmas">
+      <div>
+        <div class="firma-line"></div>
+        <p style="font-weight: bold; color: #2a9d8f;">Firma del paciente</p>
+        <p>${data.nombre || ''}</p>
       </div>
       
-      <div style="text-align: center;">
-        <div style="border-top: 2px solid #264653; width: 250px; margin: 0 auto 1rem; padding-top: 2rem;"></div>
-        <p style="font-weight: bold; margin: 0; color: #264653;">Firma del odontólogo</p>
-        <p style="margin: 0.5rem 0 0; color: #666;">Dr. Beladent</p>
+      <div>
+        <div class="firma-line"></div>
+        <p style="font-weight: bold; color: #2a9d8f;">Firma del odontólogo</p>
+        <p>Dr. Beladent</p>
       </div>
     </div>
 
-    <div class="preview-section" style="margin-top: 3rem; padding: 1.5rem; background: #f0f5f9; border-radius: 8px; border-left: 4px solid #2a9d8f;">
-      <h2 style="color: #2a9d8f;">🔒 Aviso de Privacidad</h2>
-      <p>Sus datos personales serán utilizados únicamente con fines clínicos y administrativos conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares. Los datos recabados serán protegidos y no se compartirán con terceros sin su consentimiento explícito.</p>
-      <p style="margin-top: 1rem; font-style: italic; color: #264653;">
-        "Yo, ${data.nombre || "el paciente"}, confirmo que he leído y entendido este aviso de privacidad y doy mi consentimiento para el tratamiento de mis datos personales."
-      </p>
+    <div class="preview-section aviso-privacidad">
+      <h3 style="color: #2a9d8f;">🔒 Aviso de Privacidad</h3>
+      <p>Sus datos personales serán utilizados únicamente con fines clínicos y administrativos conforme a la normativa aplicable. Para más información consulte el aviso completo en el consultorio.</p>
     </div>
 
-    <div class="no-print" style="margin-top: 2rem; text-align: center;">
-      <button onclick="window.print()" class="btn-primary">🖨️ Imprimir documento</button>
-      <button onclick="window.history.back()" class="btn-secondary" style="margin-left: 1rem;">← Volver</button>
+    <div class="no-print" style="text-align: center; margin-top: 2rem;">
+      <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
+      <button onclick="window.history.back()" class="btn-back">← Volver</button>
     </div>
   `;
 
   document.getElementById("contenido").innerHTML = html;
 }
 
-// Agregar estilos dinámicos que usan tu paleta de colores
+// Agregar estilos dinámicos con el color #2a9d8f
 const dynamicStyles = document.createElement('style');
 dynamicStyles.textContent = `
   .preview-container {
@@ -260,16 +257,7 @@ dynamicStyles.textContent = `
     background: white;
     padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-  }
-
-  .preview-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #2a9d8f;
+    box-shadow: 0 4px 20px rgba(42, 157, 143, 0.1);
   }
 
   .preview-section {
@@ -280,10 +268,11 @@ dynamicStyles.textContent = `
     border: 1px solid #e0e0e0;
   }
 
-  .preview-kv {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
+  .preview-section h2 {
+    color: #2a9d8f;
+    border-bottom: 2px solid #2a9d8f;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   .info-content {
@@ -291,26 +280,87 @@ dynamicStyles.textContent = `
     padding: 1.5rem;
     border-radius: 8px;
     border-left: 4px solid #2a9d8f;
+    margin: 1rem 0;
   }
 
-  .btn-primary {
-    background: linear-gradient(135deg, #2a9d8f 0%, #2a9d8f 100%);
+  .preview-kv {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .costos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(42, 157, 143, 0.1);
+  }
+
+  .costos-table th {
+    background: #2a9d8f;
+    color: white;
+    padding: 1rem;
+    text-align: left;
+  }
+
+  .costos-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .costos-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .total-row {
+    background-color: #e8f5e9;
+    font-weight: bold;
+  }
+
+  .firmas {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #ddd;
+  }
+
+  .firma-line {
+    border-top: 2px solid #2a9d8f;
+    width: 200px;
+    margin: 0 auto 1rem;
+    padding-top: 2rem;
+  }
+
+  .aviso-privacidad {
+    background: #f0f5f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #2a9d8f;
+    margin-top: 2rem;
+  }
+
+  .btn-print {
+    background: #2a9d8f;
     color: white;
     border: none;
     padding: 12px 24px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    transition: transform 0.2s;
-    margin: 0.25rem;
+    margin: 0.5rem;
+    transition: background 0.3s;
   }
 
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    background: linear-gradient(135deg, #21867a 0%, #1e3c47 100%);
+  .btn-print:hover {
+    background: #21867a;
   }
 
-  .btn-secondary {
+  .btn-back {
     background: #6c757d;
     color: white;
     border: none;
@@ -318,11 +368,11 @@ dynamicStyles.textContent = `
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    transition: background 0.2s;
-    margin: 0.25rem;
+    margin: 0.5rem;
+    transition: background 0.3s;
   }
 
-  .btn-secondary:hover {
+  .btn-back:hover {
     background: #5a6268;
   }
 
@@ -341,7 +391,6 @@ dynamicStyles.textContent = `
     }
     body {
       background: white !important;
-      color: #264653 !important;
     }
     .preview-section {
       border: none;
@@ -354,26 +403,25 @@ dynamicStyles.textContent = `
       padding: 1rem;
       margin: 1rem;
     }
-    .preview-header {
-      flex-direction: column;
-      gap: 1rem;
-    }
     .firmas {
       flex-direction: column;
       gap: 2rem;
     }
-    .btn-primary, .btn-secondary {
+    .firma-line {
+      width: 150px;
+    }
+    .btn-print, .btn-back {
       width: 100%;
       margin: 0.5rem 0;
     }
   }
 
-  /* Animaciones suaves */
+  /* Animaciones */
   .preview-section {
-    animation: fadeIn 0.5s ease-in;
+    animation: fadeInUp 0.5s ease;
   }
 
-  @keyframes fadeIn {
+  @keyframes fadeInUp {
     from {
       opacity: 0;
       transform: translateY(20px);
@@ -381,17 +429,6 @@ dynamicStyles.textContent = `
     to {
       opacity: 1;
       transform: translateY(0);
-    }
-  }
-
-  /* Mejora para tablas en móviles */
-  @media (max-width: 600px) {
-    .odontologia-table {
-      font-size: 0.8em;
-    }
-    .odontologia-table th,
-    .odontologia-table td {
-      padding: 0.5rem;
     }
   }
 `;
