@@ -10,6 +10,12 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  
+  <style>
+    .seccion-oculta {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -19,11 +25,19 @@
   <main class="odontologia-container">
     <form id="formPodologia">
       <div class="odontologia-section">
-        <h2>📋 Datos Generales del Paciente</h2>
+        <h2>Datos Generales del Paciente</h2>
         <div class="grid-2">
           <div>
             <label class="odontologia-label">Nombre completo del paciente *</label>
             <input type="text" class="odontologia-input" id="nombre" required>
+          </div>
+          <div>
+            <label class="odontologia-label">Sexo *</label>
+            <select class="odontologia-select" id="sexo" required onchange="toggleSeccionesMujer()">
+              <option value="">Seleccionar</option>
+              <option value="Hombre">Hombre</option>
+              <option value="Mujer">Mujer</option>
+            </select>
           </div>
           <div>
             <label class="odontologia-label">Dirección</label>
@@ -74,13 +88,15 @@
       </div>
 
       <div class="odontologia-section">
-        <h2>🏥 Antecedentes Médicos</h2>
+        <h2>Antecedentes Médicos</h2>
         <div class="grid-3">
-          <div class="checkbox-group">
+          <!-- Sección de Embarazo (solo para mujeres) -->
+          <div class="checkbox-group seccion-oculta" id="seccion-embarazo">
             <label>Embarazo:</label>
             <label><input type="radio" name="embarazo" value="Sí"> Sí</label>
             <label><input type="radio" name="embarazo" value="No" checked> No</label>
           </div>
+          
           <div class="checkbox-group">
             <label>Hipertensión:</label>
             <label><input type="radio" name="hipertension" value="Sí"> Sí</label>
@@ -134,8 +150,9 @@
         </div>
       </div>
 
-      <div class="odontologia-section">
-        <h2>👩 Solo Mujeres</h2>
+      <!-- Sección Solo Mujeres (oculta por defecto) -->
+      <div class="odontologia-section seccion-oculta" id="seccion-mujeres">
+        <h2>Solo Mujeres</h2>
         <div class="grid-2">
           <div class="checkbox-group">
             <label>Uso de tacón:</label>
@@ -158,7 +175,7 @@
       </div>
 
       <div class="odontologia-section">
-        <h2>📊 Exploración Física</h2>
+        <h2>Exploración Física</h2>
         <div class="grid-3">
           <div>
             <label class="odontologia-label">Peso (kg)</label>
@@ -188,7 +205,7 @@
       </div>
 
       <div class="odontologia-section">
-        <h2>🍽️ Hábitos y Alimentación</h2>
+        <h2>Hábitos y Alimentación</h2>
         <div class="grid-2">
           <div>
             <label class="odontologia-label">Consumo de alcohol</label>
@@ -279,7 +296,7 @@
       </div>
 
       <div class="odontologia-section">
-        <h2>💰 Costos del Tratamiento</h2>
+        <h2>Costos del Tratamiento</h2>
         <div id="costos-container">
           <div class="costo-item">
             <div class="grid-3">
@@ -302,7 +319,7 @@
       </div>
 
       <div class="odontologia-section">
-        <h2>📝 Observaciones y Tratamiento</h2>
+        <h2>Observaciones y Tratamiento</h2>
         <div>
           <label class="odontologia-label">Observaciones y plan de tratamiento</label>
           <textarea class="odontologia-textarea" id="observaciones" rows="4"></textarea>
@@ -310,11 +327,40 @@
       </div>
 
       <div class="form-buttons">
-        <button type="submit" id="btnGuardar">💾 Guardar Ficha</button>
-        <button type="button" onclick="window.location.href='admin.html'" class="danger">❌ Cancelar</button>
+        <button type="submit" id="btnGuardar">Guardar Historia</button>
+        <button type="button" onclick="window.location.href='select-add.html'" class="danger">Cancelar</button>
       </div>
     </form>
   </main>
+
+  <script>
+    // Función para mostrar/ocultar secciones según el sexo
+    function toggleSeccionesMujer() {
+      const sexo = document.getElementById('sexo').value;
+      const seccionMujeres = document.getElementById('seccion-mujeres');
+      const seccionEmbarazo = document.getElementById('seccion-embarazo');
+      
+      if (sexo === 'Mujer') {
+        seccionMujeres.classList.remove('seccion-oculta');
+        seccionEmbarazo.classList.remove('seccion-oculta');
+      } else {
+        seccionMujeres.classList.add('seccion-oculta');
+        seccionEmbarazo.classList.add('seccion-oculta');
+        
+        // Resetear valores de las secciones ocultas
+        document.querySelector('input[name="usoTacon"][value="No"]').checked = true;
+        document.getElementById('alturaTacon').value = '';
+        document.getElementById('horasUsoTacon').value = '';
+        document.getElementById('diasTacon').value = '';
+        document.querySelector('input[name="embarazo"][value="No"]').checked = true;
+      }
+    }
+    
+    // Inicializar al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      toggleSeccionesMujer(); // Asegurar que las secciones estén ocultas al inicio
+    });
+  </script>
 
   <script src="podologia.js"></script>
 </body>
