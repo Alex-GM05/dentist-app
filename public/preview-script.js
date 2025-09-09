@@ -238,11 +238,6 @@ function renderPreview(data) {
       <h3 style="color: #2a9d8f;">🔒 Aviso de Privacidad</h3>
       <p>Sus datos personales serán utilizados únicamente con fines clínicos y administrativos conforme a la normativa aplicable. Para más información consulte el aviso completo en el consultorio.</p>
     </div>
-
-    <div class="no-print" style="text-align: center; margin-top: 2rem;">
-      <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
-      <button onclick="window.history.back()" class="btn-back">← Volver</button>
-    </div>
   `;
 
   document.getElementById("contenido").innerHTML = html;
