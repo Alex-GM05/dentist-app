@@ -137,7 +137,7 @@ function renderPreview(data) {
     </div>
 
     <div class="preview-section">
-      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">📋 Datos Generales</h2>
+      <h2 style="color: #2f3030ff; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">📋 Datos Generales</h2>
       <div class="preview-kv">
         ${kv("Nombre completo", data.nombre)}
         ${kv("Edad", data.edad)}
@@ -152,7 +152,7 @@ function renderPreview(data) {
     </div>
 
     <div class="preview-section">
-      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🏥 Antecedentes Médicos</h2>
+      <h2 style="color: #2f3030ff; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🏥 Antecedentes Médicos</h2>
       <div class="preview-kv">
         ${kv("Estado de salud", data.estadoSalud)}
         ${kv("Tratamiento médico", data.tratamiento)}
@@ -175,7 +175,7 @@ function renderPreview(data) {
     </div>
 
     <div class="preview-section">
-      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🎯 Motivo de Consulta</h2>
+      <h2 style="color: #2f3030ff; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🎯 Motivo de Consulta</h2>
       <div class="info-content">
         ${data.motivoConsulta ? data.motivoConsulta.replace(/\n/g, "<br>") : "No se registró motivo de consulta"}
       </div>
@@ -183,7 +183,7 @@ function renderPreview(data) {
 
     ${costos.length > 0 ? `
     <div class="preview-section">
-      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💰 Costos del Tratamiento</h2>
+      <h2 style="color: #2f3030ff; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💰 Costos del Tratamiento</h2>
       <table class="costos-table">
         <thead>
           <tr>
@@ -210,7 +210,7 @@ function renderPreview(data) {
     ` : ''}
 
     <div class="preview-section">
-      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💊 Receta Médica</h2>
+      <h2 style="color: #2f3030ff; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💊 Receta Médica</h2>
       <div class="info-content" style="white-space: pre-line;">
         ${data.receta || "No se recetaron medicamentos"}
       </div>
@@ -226,7 +226,6 @@ function renderPreview(data) {
       <div>
         <div class="firma-line"></div>
         <p style="font-weight: bold; color: #2a9d8f;">Firma del odontólogo</p>
-        <p>Dr. Beladent</p>
       </div>
     </div>
 
