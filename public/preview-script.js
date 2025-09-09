@@ -103,10 +103,6 @@ function mostrarError(mensaje) {
         <div style="font-size: 3rem; margin-bottom: 1rem;">😕</div>
         <h3 style="color: #e63946; margin-bottom: 1rem;">Error</h3>
         <p style="margin-bottom: 2rem; color: #666;">${mensaje}</p>
-        <div style="display: flex; gap: 1rem; justify-content: center;">
-          <button onclick="window.history.back()" class="btn-secondary">← Volver</button>
-          <button onclick="window.location.href='add-odontologia.html'" class="btn-primary">Nueva Consulta</button>
-        </div>
       </div>
     </div>
   `;
