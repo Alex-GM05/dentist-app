@@ -239,8 +239,6 @@ function renderPreview(data) {
   document.getElementById("contenido").innerHTML = html;
 }
 
-// ... (código existente)
-
 // Agregar estilos dinámicos con el color #2a9d8f
 const dynamicStyles = document.createElement('style');
 dynamicStyles.textContent = `
