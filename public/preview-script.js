@@ -248,6 +248,8 @@ function renderPreview(data) {
   document.getElementById("contenido").innerHTML = html;
 }
 
+// ... (código existente)
+
 // Agregar estilos dinámicos con el color #2a9d8f
 const dynamicStyles = document.createElement('style');
 dynamicStyles.textContent = `
@@ -261,11 +263,12 @@ dynamicStyles.textContent = `
   }
 
   .preview-section {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
     background: white;
     border-radius: 8px;
     border: 1px solid #e0e0e0;
+    page-break-inside: avoid;
   }
 
   .preview-section h2 {
@@ -273,41 +276,46 @@ dynamicStyles.textContent = `
     border-bottom: 2px solid #2a9d8f;
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
+    font-size: 1.2rem;
   }
 
   .info-content {
     background: #f0f5f9;
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 8px;
     border-left: 4px solid #2a9d8f;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
   }
 
   .preview-kv {
     background: white;
     border-radius: 8px;
-    padding: 1rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
   }
 
   .costos-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1rem 0;
+    margin: 0.5rem 0;
     background: white;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(42, 157, 143, 0.1);
+    font-size: 0.8rem;
   }
 
   .costos-table th {
     background: #2a9d8f;
     color: white;
-    padding: 1rem;
+    padding: 0.5rem;
     text-align: left;
+    font-size: 0.9rem;
   }
 
   .costos-table td {
-    padding: 0.75rem;
+    padding: 0.5rem;
     border-bottom: 1px solid #eee;
   }
 
@@ -323,37 +331,40 @@ dynamicStyles.textContent = `
   .firmas {
     display: flex;
     justify-content: space-between;
-    gap: 2rem;
-    margin-top: 2rem;
-    padding-top: 2rem;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
     border-top: 2px solid #ddd;
+    font-size: 0.9rem;
   }
 
   .firma-line {
     border-top: 2px solid #2a9d8f;
-    width: 200px;
-    margin: 0 auto 1rem;
-    padding-top: 2rem;
+    width: 150px;
+    margin: 0 auto 0.5rem;
+    padding-top: 1.5rem;
   }
 
   .aviso-privacidad {
     background: #f0f5f9;
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 8px;
     border-left: 4px solid #2a9d8f;
-    margin-top: 2rem;
+    margin-top: 1rem;
+    font-size: 0.8rem;
   }
 
   .btn-print {
     background: #2a9d8f;
     color: white;
     border: none;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
     margin: 0.5rem;
     transition: background 0.3s;
+    font-size: 0.9rem;
   }
 
   .btn-print:hover {
@@ -364,16 +375,34 @@ dynamicStyles.textContent = `
     background: #6c757d;
     color: white;
     border: none;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
     margin: 0.5rem;
     transition: background 0.3s;
+    font-size: 0.9rem;
   }
 
   .btn-back:hover {
     background: #5a6268;
+  }
+
+  .btn-cancel {
+    background: #e63946;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    margin: 0.5rem;
+    transition: background 0.3s;
+    font-size: 0.9rem;
+  }
+
+  .btn-cancel:hover {
+    background: #c53030;
   }
 
   .no-print {
@@ -388,13 +417,56 @@ dynamicStyles.textContent = `
       box-shadow: none;
       margin: 0;
       padding: 0;
+      max-width: 100%;
     }
     body {
       background: white !important;
+      font-size: 12px;
     }
     .preview-section {
       border: none;
-      padding: 1rem 0;
+      padding: 0.5rem 0;
+      margin-bottom: 0.5rem;
+    }
+    .preview-section h2 {
+      font-size: 14px;
+      margin-bottom: 0.5rem;
+    }
+    .info-content, .preview-kv {
+      padding: 0.5rem;
+      font-size: 11px;
+    }
+    .costos-table {
+      font-size: 10px;
+    }
+    .costos-table th, .costos-table td {
+      padding: 0.25rem;
+    }
+    .firmas {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      font-size: 11px;
+    }
+    .firma-line {
+      width: 120px;
+      padding-top: 1rem;
+    }
+    .aviso-privacidad {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      font-size: 10px;
+    }
+    header {
+      padding: 0.5rem;
+    }
+    header img {
+      max-width: 100px;
+    }
+    header h1 {
+      font-size: 1.5rem;
+    }
+    header h2 {
+      font-size: 1rem;
     }
   }
 
@@ -405,12 +477,12 @@ dynamicStyles.textContent = `
     }
     .firmas {
       flex-direction: column;
-      gap: 2rem;
+      gap: 1rem;
     }
     .firma-line {
-      width: 150px;
+      width: 120px;
     }
-    .btn-print, .btn-back {
+    .btn-print, .btn-back, .btn-cancel {
       width: 100%;
       margin: 0.5rem 0;
     }
