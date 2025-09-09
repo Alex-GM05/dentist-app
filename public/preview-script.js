@@ -226,7 +226,6 @@ function renderPreview(data) {
       <div>
         <div class="firma-line"></div>
         <p style="font-weight: bold; color: #2a9d8f;">Firma del odontólogo</p>
-        <p></p>
       </div>
     </div>
 
