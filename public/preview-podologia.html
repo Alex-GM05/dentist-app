@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vista Previa - Historia Podológica</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <header>
+    <img src="BELADENT.jpg" alt="Logo Beladent" style="max-width: 150px;">
+    <h1>Clínica BELADENT</h1>
+    <h2>Vista Previa de Historia Podológica</h2>
+  </header>
+
+  <div class="preview-container">
+    <div id="contenido">
+      <!-- Los datos se cargarán aquí mediante JavaScript -->
+    </div>
+
+    <div class="no-print" style="text-align: center; margin-top: 2rem;">
+      <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
+      <button onclick="window.location.href='add-podologia.html'" class="btn-back">← Volver al Formulario</button>
+      <button onclick="window.location.href='admin.html'" class="btn-cancel">Cancelar</button>
+    </div>
+  </div>
+
+  <script src="preview-podologia.js"></script>
+</body>
+</html>
