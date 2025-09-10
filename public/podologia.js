@@ -9,11 +9,12 @@ const firebaseConfig = {
 };
 
 // Inicializar Firebase
-let db, auth;
+let db, auth, storage;
 try {
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
   auth = firebase.auth();
+  storage = firebase.storage();
   console.log("Firebase inicializado correctamente para podología");
 } catch (error) {
   console.error("Error inicializando Firebase:", error);
@@ -94,12 +95,96 @@ document.getElementById('agregar-costo').addEventListener('click', function() {
   });
 });
 
+// Subir imágenes a Firebase Storage
+async function subirImagenes() {
+  const fileInput = document.getElementById('imagenes');
+  const files = fileInput.files;
+  const imageUrls = [];
+  
+  if (files.length === 0) {
+    return imageUrls;
+  }
+  
+  // Mostrar contenedor de progreso
+  const progressContainer = document.getElementById('progress-container');
+  const uploadProgress = document.getElementById('upload-progress');
+  uploadProgress.style.display = 'block';
+  progressContainer.innerHTML = '';
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (!file.type.match('image.*')) continue;
+    
+    // Crear elemento de progreso para esta imagen
+    const progressDiv = document.createElement('div');
+    progressDiv.innerHTML = `
+      <p>Subiendo: ${file.name}</p>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" id="progress-${i}"></div>
+      </div>
+      <span id="status-${i}">0%</span>
+    `;
+    progressContainer.appendChild(progressDiv);
+    
+    try {
+      // Subir archivo a Firebase Storage
+      const storageRef = storage.ref();
+      const imageRef = storageRef.child(`podologia/${Date.now()}_${file.name}`);
+      const uploadTask = imageRef.put(file);
+      
+      // Esperar a que se complete la subida
+      const snapshot = await new Promise((resolve, reject) => {
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            // Actualizar progreso
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            document.getElementById(`progress-${i}`).style.width = progress + '%';
+            document.getElementById(`status-${i}`).textContent = Math.round(progress) + '%';
+          },
+          (error) => reject(error),
+          () => resolve(uploadTask.snapshot)
+        );
+      });
+      
+      // Obtener URL de descarga
+      const downloadURL = await snapshot.ref.getDownloadURL();
+      imageUrls.push({
+        name: file.name,
+        url: downloadURL
+      });
+      
+      // Marcar como completado
+      document.getElementById(`status-${i}`).textContent = '✓ Completado';
+      
+    } catch (error) {
+      console.error('Error subiendo imagen:', error);
+      document.getElementById(`status-${i}`).textContent = '✗ Error: ' + error.message;
+      throw error;
+    }
+  }
+  
+  return imageUrls;
+}
+
 // Enviar formulario
 document.getElementById('formPodologia').addEventListener('submit', async function(e) {
   e.preventDefault();
   
+  const btnGuardar = document.getElementById('btnGuardar');
+  btnGuardar.disabled = true;
+  btnGuardar.textContent = 'Guardando...';
+  
   try {
     await ensureAuth();
+    
+    // Subir imágenes primero
+    let imagenes = [];
+    try {
+      imagenes = await subirImagenes();
+    } catch (error) {
+      console.warn('Error subiendo imágenes, continuando sin ellas:', error);
+    }
     
     // Recopilar datos de costos
     const costos = [];
@@ -120,6 +205,7 @@ document.getElementById('formPodologia').addEventListener('submit', async functi
     const formData = {
       // Datos generales
       nombre: document.getElementById('nombre').value,
+      sexo: document.getElementById('sexo').value,
       direccion: document.getElementById('direccion').value,
       email: document.getElementById('email').value,
       ocupacion: document.getElementById('ocupacion').value,
@@ -131,7 +217,7 @@ document.getElementById('formPodologia').addEventListener('submit', async functi
       alergias: document.getElementById('alergias').value,
       
       // Antecedentes médicos
-      embarazo: document.querySelector('input[name="embarazo"]:checked').value,
+      embarazo: document.querySelector('input[name="embarazo"]:checked')?.value || 'No',
       hipertension: document.querySelector('input[name="hipertension"]:checked').value,
       insuficienciaCardiaca: document.querySelector('input[name="insuficienciaCardiaca"]:checked').value,
       marcapasos: document.querySelector('input[name="marcapasos"]:checked').value,
@@ -144,7 +230,7 @@ document.getElementById('formPodologia').addEventListener('submit', async functi
       trombosis: document.querySelector('input[name="trombosis"]:checked').value,
       
       // Datos para mujeres
-      usoTacon: document.querySelector('input[name="usoTacon"]:checked').value,
+      usoTacon: document.querySelector('input[name="usoTacon"]:checked')?.value || 'No',
       alturaTacon: parseInt(document.getElementById('alturaTacon').value) || 0,
       horasUsoTacon: parseInt(document.getElementById('horasUsoTacon').value) || 0,
       diasTacon: parseInt(document.getElementById('diasTacon').value) || 0,
@@ -180,7 +266,8 @@ document.getElementById('formPodologia').addEventListener('submit', async functi
       habitosLimpieza: document.getElementById('habitosLimpieza').value,
       productosEspecificos: document.getElementById('productosEspecificos').value,
       
-      // Costos y observaciones
+      // Imágenes y costos
+      imagenes: imagenes,
       costos: costos,
       totalGeneral: totalGeneral,
       observaciones: document.getElementById('observaciones').value,
@@ -199,6 +286,9 @@ document.getElementById('formPodologia').addEventListener('submit', async functi
   } catch (error) {
     console.error('Error al guardar la ficha:', error);
     alert('❌ Error al guardar: ' + error.message);
+  } finally {
+    btnGuardar.disabled = false;
+    btnGuardar.textContent = 'Guardar Historia';
   }
 });
 
