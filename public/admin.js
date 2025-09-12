@@ -48,19 +48,19 @@ async function cargarPacientes() {
   const especialidadSelect = document.getElementById("especialidadSelect");
   const pacienteSelect = document.getElementById("pacienteSelect");
   const especialidad = especialidadSelect.value;
-  
+
   pacienteSelect.innerHTML = '<option value="">Seleccione un paciente</option>';
-  
+
   if (!especialidad) return;
-  
+
   try {
     let pacientes = [];
-    
+
     if (especialidad === "odontologia" || especialidad === "todos") {
       const querySnapshotOdonto = await db.collection("historial-odontologia")
         .orderBy("createdAt", "desc")
         .get();
-      
+
       querySnapshotOdonto.forEach((doc) {
         const data = doc.data();
         pacientes.push({
@@ -73,12 +73,12 @@ async function cargarPacientes() {
         });
       });
     }
-    
+
     if (especialidad === "podologia" || especialidad === "todos") {
       const querySnapshotPodo = await db.collection("historial-podologia")
         .orderBy("createdAt", "desc")
         .get();
-      
+
       querySnapshotPodo.forEach((doc) {
         const data = doc.data();
         pacientes.push({
@@ -91,21 +91,21 @@ async function cargarPacientes() {
         });
       });
     }
-    
+
     // Eliminar duplicados por nombre (opcional)
     const pacientesUnicos = [];
     const nombresVistos = new Set();
-    
+
     pacientes.forEach(paciente => {
       if (!nombresVistos.has(paciente.nombre)) {
         nombresVistos.add(paciente.nombre);
         pacientesUnicos.push(paciente);
       }
     });
-    
+
     // Ordenar alfabéticamente
     pacientesUnicos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-    
+
     // Llenar el select
     pacientesUnicos.forEach(paciente => {
       const option = document.createElement("option");
@@ -114,7 +114,7 @@ async function cargarPacientes() {
       option.dataset.nombre = paciente.nombre;
       pacienteSelect.appendChild(option);
     });
-    
+
   } catch (error) {
     console.error("Error cargando pacientes:", error);
     alert("Error al cargar pacientes: " + error.message);
@@ -126,16 +126,16 @@ async function cargarHistorial() {
   const pacienteSelect = document.getElementById("pacienteSelect");
   const detalleHistorial = document.getElementById("detalleHistorial");
   const selectedValue = pacienteSelect.value;
-  
+
   if (!selectedValue) {
     detalleHistorial.innerHTML = "";
     return;
   }
-  
+
   try {
     const [especialidad, id] = selectedValue.split("-");
     let historialData;
-    
+
     if (especialidad === "odontologia") {
       const doc = await db.collection("historial-odontologia").doc(id).get();
       if (doc.exists) {
@@ -149,7 +149,7 @@ async function cargarHistorial() {
         mostrarHistorialPodologia(historialData, id);
       }
     }
-    
+
   } catch (error) {
     console.error("Error cargando historial:", error);
     detalleHistorial.innerHTML = `<p class="error">Error al cargar el historial: ${error.message}</p>`;
@@ -161,7 +161,7 @@ function generarOdontogramaPreview(odontogramaData) {
   if (!odontogramaData || Object.keys(odontogramaData).length === 0) {
     return "<p>No hay datos del odontograma.</p>";
   }
-  
+
   let html = `
     <table class="odontograma-table-preview">
       <thead>
@@ -176,17 +176,17 @@ function generarOdontogramaPreview(odontogramaData) {
       </thead>
       <tbody>
   `;
-  
+
   // Dientes superiores (18 a 28)
   const dientesSuperiores = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
-  
+
   // Dientes inferiores (48 to 38)
   const dientesInferiores = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
-  
+
   // Crear filas para dientes superiores
   for (let i = 0; i < 8; i++) {
     html += '<tr>';
-    
+
     // Lado izquierdo (OD, DX, TX)
     for (let j = 0; j < 3; j++) {
       if (j === 0) {
@@ -198,29 +198,29 @@ function generarOdontogramaPreview(odontogramaData) {
         html += `<td>${odontogramaData[key] || "-"}</td>`;
       }
     }
-    
+
     // Lado derecho (OD, DX, TX)
     for (let j = 0; j < 3; j++) {
       if (j === 0) {
         // OD - Solo mostrar número
-        html += `<td style="background-color: #f0f0f0; font-weight: bold;">${dientesSuperiores[i+8]}</td>`;
+        html += `<td style="background-color: #f0f0f0; font-weight: bold;">${dientesSuperiores[i + 8]}</td>`;
       } else {
         // DX y TX - Mostrar datos
-        const key = `diente_${dientesSuperiores[i+8]}_${['OD', 'DX', 'TX'][j]}`;
+        const key = `diente_${dientesSuperiores[i + 8]}_${['OD', 'DX', 'TX'][j]}`;
         html += `<td>${odontogramaData[key] || "-"}</td>`;
       }
     }
-    
+
     html += '</tr>';
   }
-  
+
   // Separador entre arcadas
   html += '<tr><td colspan="6" style="background-color: #f0f0f0; text-align: center; font-weight: bold;">Arcada Inferior</td></tr>';
-  
+
   // Crear filas para dientes inferiores
   for (let i = 0; i < 8; i++) {
     html += '<tr>';
-    
+
     // Lado izquierdo (OD, DX, TX)
     for (let j = 0; j < 3; j++) {
       if (j === 0) {
@@ -232,24 +232,24 @@ function generarOdontogramaPreview(odontogramaData) {
         html += `<td>${odontogramaData[key] || "-"}</td>`;
       }
     }
-    
+
     // Lado derecho (OD, DX, TX)
     for (let j = 0; j < 3; j++) {
       if (j === 0) {
         // OD - Solo mostrar número
-        html += `<td style="background-color: #f0f0f0; font-weight: bold;">${dientesInferiores[i+8]}</td>`;
+        html += `<td style="background-color: #f0f0f0; font-weight: bold;">${dientesInferiores[i + 8]}</td>`;
       } else {
         // DX y TX - Mostrar datos
-        const key = `diente_${dientesInferiores[i+8]}_${['OD', 'DX', 'TX'][j]}`;
+        const key = `diente_${dientesInferiores[i + 8]}_${['OD', 'DX', 'TX'][j]}`;
         html += `<td>${odontogramaData[key] || "-"}</td>`;
       }
     }
-    
+
     html += '</tr>';
   }
-  
+
   html += `</tbody></table>`;
-  
+
   return html;
 }
 
@@ -259,7 +259,7 @@ function mostrarHistorialOdontologia(data, id) {
   const costos = Array.isArray(data.costos) ? data.costos : [];
   const imagenes = Array.isArray(data.imagenesAdjuntas) ? data.imagenesAdjuntas : [];
   const odontograma = data.odontograma || {};
-  
+
   const html = `
     <div class="historial-details">
       <div class="historial-header">
@@ -343,7 +343,7 @@ function mostrarHistorialOdontologia(data, id) {
       </div>
     </div>
   `;
-  
+
   detalleHistorial.innerHTML = html;
 }
 
@@ -352,7 +352,7 @@ function mostrarHistorialPodologia(data, id) {
   const detalleHistorial = document.getElementById("detalleHistorial");
   const costos = Array.isArray(data.costos) ? data.costos : [];
   const imagenes = Array.isArray(data.imagenes) ? data.imagenes : [];
-  
+
   const html = `
     <div class="historial-details">
       <div class="historial-header">
@@ -438,7 +438,7 @@ function mostrarHistorialPodologia(data, id) {
       </div>
     </div>
   `;
-  
+
   detalleHistorial.innerHTML = html;
 }
 
@@ -454,12 +454,12 @@ async function eliminarRegistroCompleto(especialidad, id, nombrePaciente) {
     confirmButtonText: 'Sí, eliminar todo',
     cancelButtonText: 'Cancelar'
   });
-  
+
   if (confirmacion.isConfirmed) {
     try {
       // Primero eliminar las imágenes del Storage
       let imagenes = [];
-      
+
       if (especialidad === "odontologia") {
         const doc = await db.collection("historial-odontologia").doc(id).get();
         if (doc.exists) {
@@ -473,7 +473,7 @@ async function eliminarRegistroCompleto(especialidad, id, nombrePaciente) {
           imagenes = Array.isArray(data.imagenes) ? data.imagenes : [];
         }
       }
-      
+
       // Eliminar cada imagen del Storage
       for (const imgUrl of imagenes) {
         try {
@@ -485,24 +485,24 @@ async function eliminarRegistroCompleto(especialidad, id, nombrePaciente) {
           console.warn("No se pudo eliminar la imagen:", imgUrl, imgError);
         }
       }
-      
+
       // Finalmente eliminar el documento de Firestore
       if (especialidad === "odontologia") {
         await db.collection("historial-odontologia").doc(id).delete();
       } else if (especialidad === "podologia") {
         await db.collection("historial-podologia").doc(id).delete();
       }
-      
+
       Swal.fire(
         '¡Eliminado completamente!',
         `El registro de ${nombrePaciente} y todas sus imágenes han sido eliminados.`,
         'success'
       );
-      
+
       // Recargar la lista de pacientes
       cargarPacientes();
       document.getElementById("detalleHistorial").innerHTML = "";
-      
+
     } catch (error) {
       console.error("Error eliminando registro completo:", error);
       Swal.fire(
@@ -518,12 +518,12 @@ async function eliminarRegistroCompleto(especialidad, id, nombrePaciente) {
 function modificarPaciente() {
   const pacienteSelect = document.getElementById("pacienteSelect");
   const selectedValue = pacienteSelect.value;
-  
+
   if (!selectedValue) {
     Swal.fire('Info', 'Por favor selecciona un paciente primero.', 'info');
     return;
   }
-  
+
   const [especialidad, id] = selectedValue.split("-");
   if (especialidad === "odontologia") {
     // Pasar el ID como parámetro para edición
@@ -538,19 +538,19 @@ function modificarPaciente() {
 function eliminarPaciente() {
   const pacienteSelect = document.getElementById("pacienteSelect");
   const selectedValue = pacienteSelect.value;
-  
+
   if (!selectedValue) {
     Swal.fire('Info', 'Por favor selecciona un paciente primero.', 'info');
     return;
   }
-  
+
   const [especialidad, id] = selectedValue.split("-");
   const nombre = pacienteSelect.options[pacienteSelect.selectedIndex].dataset.nombre;
-  
+
   eliminarRegistroCompleto(especialidad, id, nombre);
 }
 
 // Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   console.log("Panel de administrador cargado");
 });
