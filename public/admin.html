@@ -6,6 +6,11 @@
   <title>Administrador - Clínica Dental</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 <body>
   <header>
@@ -14,25 +19,49 @@
     <h2>Panel del Administrador</h2>
   </header>
 
-  <main>
-    <h3>Gestión de Pacientes</h3>
+  <main class="admin-container">
+    <div class="admin-section">
+      <h3>Gestión de Pacientes</h3>
+      
+      <div class="search-panel">
+        <div class="grid-2">
+          <div>
+            <label class="odontologia-label">Seleccionar especialidad:</label>
+            <select id="especialidadSelect" class="odontologia-select" onchange="cargarPacientes()">
+              <option value="">Seleccione especialidad</option>
+              <option value="odontologia">Odontología</option>
+              <option value="podologia">Podología</option>
+              <option value="todos">Todos los pacientes</option>
+            </select>
+          </div>
+          <div>
+            <label class="odontologia-label">Buscar paciente:</label>
+            <select id="pacienteSelect" class="odontologia-select" onchange="cargarHistorial()">
+              <option value="">Seleccione un paciente</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1rem;">
+          <label class="odontologia-label">O buscar por nombre:</label>
+          <input type="text" id="buscarNombre" class="odontologia-input" placeholder="Escriba el nombre del paciente" onkeyup="buscarPorNombre()">
+        </div>
+      </div>
 
-    <label for="pacienteSelect">Buscar paciente:</label>
-    <select id="pacienteSelect">
-      <option value="">Seleccione un paciente</option>
-    </select>
-
-    <div id="historialClinico">
-      <h4>Historial Clínico</h4>
-      <div id="detalleHistorial"></div>
+      <div id="historialClinico" class="historial-container">
+        <h4>Historial Clínico</h4>
+        <div id="detalleHistorial"></div>
+      </div>
     </div>
 
-    <button type="button" onclick="window.location.href='select-add.html'">Agregar Paciente</button>
-    <button onclick="modificarPaciente()">Modificar Paciente</button>
-    <button onclick="eliminarPaciente()">Eliminar Paciente</button>
-    <button onclick="logout()">Cerrar Sesión</button>
+    <div class="admin-buttons">
+      <button type="button" onclick="window.location.href='select-add.html'" class="btn-primary">➕ Agregar Nuevo Paciente</button>
+      <button onclick="modificarPaciente()" class="btn-secondary">✏️ Modificar Paciente</button>
+      <button onclick="eliminarPaciente()" class="btn-danger">🗑️ Eliminar Paciente</button>
+      <button onclick="logout()" class="btn-cancel">🚪 Cerrar Sesión</button>
+    </div>
   </main>
 
-  <script type="module" src="admin.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
