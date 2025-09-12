@@ -120,31 +120,6 @@ async function cargarPacientes() {
   }
 }
 
-// Buscar por nombre en tiempo real
-function buscarPorNombre() {
-  const buscarInput = document.getElementById("buscarNombre");
-  const pacienteSelect = document.getElementById("pacienteSelect");
-  const searchTerm = buscarInput.value.toLowerCase();
-  
-  if (!searchTerm) {
-    // Mostrar todos si no hay término de búsqueda
-    for (let i = 0; i < pacienteSelect.options.length; i++) {
-      pacienteSelect.options[i].style.display = "";
-    }
-    return;
-  }
-  
-  // Filtrar opciones
-  for (let i = 0; i < pacienteSelect.options.length; i++) {
-    const option = pacienteSelect.options[i];
-    if (option.value && option.dataset.nombre.toLowerCase().includes(searchTerm)) {
-      option.style.display = "";
-    } else {
-      option.style.display = "none";
-    }
-  }
-}
-
 // Cargar historial del paciente seleccionado
 async function cargarHistorial() {
   const pacienteSelect = document.getElementById("pacienteSelect");
