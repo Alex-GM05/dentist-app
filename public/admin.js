@@ -14,7 +14,7 @@ try {
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
   auth = firebase.auth();
-  storage = firebase.storage();
+  storage = firebase.storage(); // Esta línea debe funcionar ahora
   console.log("Firebase inicializado correctamente para admin");
 } catch (error) {
   console.error("Error inicializando Firebase:", error);
@@ -37,7 +37,7 @@ function logout() {
     .then(() => {
       window.location.href = "index.html";
     })
-    .catch((error) => {
+    .catch((error) {
       console.error("Error al cerrar sesión:", error);
       alert("Error al cerrar sesión: " + error.message);
     });
@@ -61,7 +61,7 @@ async function cargarPacientes() {
         .orderBy("createdAt", "desc")
         .get();
       
-      querySnapshotOdonto.forEach((doc) => {
+      querySnapshotOdonto.forEach((doc) {
         const data = doc.data();
         pacientes.push({
           id: doc.id,
@@ -79,7 +79,7 @@ async function cargarPacientes() {
         .orderBy("createdAt", "desc")
         .get();
       
-      querySnapshotPodo.forEach((doc) => {
+      querySnapshotPodo.forEach((doc) {
         const data = doc.data();
         pacientes.push({
           id: doc.id,
