@@ -313,11 +313,11 @@ button {
     padding: 1rem;
     margin: 1rem;
   }
-  
+
   .admin-buttons {
     grid-template-columns: 1fr;
   }
-  
+
   .historial-actions {
     flex-direction: column;
   }
@@ -388,6 +388,7 @@ button.danger:hover {
 }
 
 @media print {
+
   header,
   .form-buttons,
   .no-print {
@@ -535,7 +536,7 @@ textarea {
   margin-top: 1.5rem;
 }
 
-.firmas > div {
+.firmas>div {
   text-align: center;
   flex: 1;
 }
@@ -983,5 +984,59 @@ textarea {
     .odontologia-table td {
       padding: 0.75rem 0.5rem;
     }
+  }
+
+  /* Estilos para la página de modificar podología */
+  .abonos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  .abonos-table th,
+  .abonos-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .abonos-table th {
+    background-color: #f2f2f2;
+  }
+
+  .abonos-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .btn-eliminar {
+    background: #e63946;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .btn-eliminar:hover {
+    background: #d62828;
+  }
+
+  .cargo-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .seccion-oculta {
+    display: none;
+  }
+
+  .resumen-pagos {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
   }
 }

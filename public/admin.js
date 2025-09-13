@@ -527,10 +527,10 @@ function modificarPaciente() {
   const [especialidad, id] = selectedValue.split("-");
   if (especialidad === "odontologia") {
     // Pasar el ID como parámetro para edición
-    window.location.href = `add-odontologia.html?edit=${id}`;
+    window.location.href = `modificar-odontologia.html?edit=${id}`;
   } else if (especialidad === "podologia") {
     // Pasar el ID como parámetro para edición
-    window.location.href = `add-podologia.html?edit=${id}`;
+    window.location.href = `modificar-podologia.html?edit=${id}`;
   }
 }
 
