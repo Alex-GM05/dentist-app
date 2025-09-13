@@ -292,6 +292,11 @@ function mostrarHistorialOdontologia(data, id) {
           ${data.observacionesOdontograma ? `<p><strong>Observaciones:</strong> ${data.observacionesOdontograma}</p>` : ''}
         </div>
       </div>
+
+      <div>
+      <h4>📋 Receta medica</h4>
+      <p>${data.receta || "Sin receta"}</p>
+      </div>
       
       ${costos.length > 0 ? `
       <div class="historial-section">
@@ -371,6 +376,7 @@ function mostrarHistorialPodologia(data, id) {
           <p><strong>Teléfono:</strong> ${data.telefono || "No especificado"}</p>
           <p><strong>Fecha de consulta:</strong> ${data.fecha || "No especificado"}</p>
           <p><strong>Objetivo de la visita:</strong> ${data.objetivoVisita || "No especificado"}</p>
+          <p><strong>Observaciones y plan de tratamiento</strong> ${data.observaciones || "Sin observaciones"}</p>
         </div>
       </div>
       
