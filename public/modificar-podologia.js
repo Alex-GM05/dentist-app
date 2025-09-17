@@ -502,7 +502,7 @@ async function subirImagenes() {
     try {
       // Crear referencia en Storage
       const storageRef = firebase.storage().ref();
-      const imagenRef = storageRef.child(`podologia/${pacienteId}/${Date.now()}_${imagen.file.name}`);
+      const imagenRef = storageRef.child(`historial-podologia/${pacienteId}/${Date.now()}_${imagen.file.name}`);
       
       // Subir imagen
       const snapshot = await imagenRef.put(imagen.file);
