@@ -1099,3 +1099,80 @@ textarea {
   height: 25px;
   cursor: pointer;
 }
+
+/* Estilos para el sistema de costos y abonos */
+.grid-4 {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.costo-item {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.btn-eliminar {
+  background: #e63946;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-eliminar:hover {
+  background: #d62828;
+}
+
+/* Estilos para imágenes */
+.imagenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.imagen-item {
+  position: relative;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.imagen-item img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.eliminar-imagen {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+/* Resumen de pagos */
+.resumen-pagos {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.resumen-pagos p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}

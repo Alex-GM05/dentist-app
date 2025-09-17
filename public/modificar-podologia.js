@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Configurar eventos
   document.getElementById('formPodologia').addEventListener('submit', actualizarPaciente);
-  document.getElementById('agregar-cargo').addEventListener('click', agregarCosto);
+  document.getElementById('agregar-costo').addEventListener('click', agregarCosto);
   document.getElementById('agregar-abono').addEventListener('click', agregarAbono);
   document.getElementById('sexo').addEventListener('change', toggleSeccionesMujer);
   
@@ -66,6 +66,7 @@ async function cargarPaciente() {
     }
     
     const paciente = doc.data();
+    console.log('Datos del paciente:', paciente);
     
     // Llenar campos del formulario
     document.getElementById('nombre').value = paciente.nombre || '';
@@ -139,21 +140,32 @@ async function cargarPaciente() {
     // Observaciones
     document.getElementById('observaciones').value = paciente.observaciones || '';
     
-    // Cargar imágenes existentes (si las hay)
-    if (paciente.imagenes) {
+   // Cargar imágenes existentes (si las hay)
+    if (paciente.imagenes && Array.isArray(paciente.imagenes)) {
+      console.log('Imágenes encontradas:', paciente.imagenes);
       cargarImagenesExistentes(paciente.imagenes);
+    } else {
+      console.log('No hay imágenes o no es un array');
+      document.getElementById('imagenes-existentes').innerHTML = '<p>No hay imágenes registradas.</p>';
     }
     
-    // Cargar cargos y abonos
-    if (paciente.costos) {
-      // Compatibilidad con ambos nombres (cargos o costos)
-      costos = paciente.costos || [];
+    // Cargar costos y abonos - CORREGIR ESTA PARTE
+    if (paciente.costos && Array.isArray(paciente.costos)) {
+      console.log('Costos encontrados:', paciente.costos);
+      costos = paciente.costos;
       renderCostos();
+    } else {
+      console.log('No hay costos o no es un array');
+      costos = [];
     }
     
-    if (paciente.abonos) {
+    if (paciente.abonos && Array.isArray(paciente.abonos)) {
+      console.log('Abonos encontrados:', paciente.abonos);
       abonos = paciente.abonos;
       renderAbonos();
+    } else {
+      console.log('No hay abonos o no es un array');
+      abonos = [];
     }
     
     // Calcular totales
@@ -207,21 +219,26 @@ function calcularIMC() {
   }
 }
 
-// AGREGAR NUEVO COSTO - FUNCIÓN NUEVA
+// AGREGAR NUEVO COSTO
 function agregarCosto() {
   const nuevoCosto = {
     concepto: '',
     costo: 0,
-    fecha: new Date().toISOString().split('T')[0] // Fecha actual por defecto
+    fecha: new Date().toISOString().split('T')[0]
   };
   
   costos.push(nuevoCosto);
   renderCostos();
 }
 
-// RENDERIZAR COSTOS EXISTENTES - FUNCIÓN CORREGIDA
+// RENDERIZAR COSTOS EXISTENTES - MEJORADA
 function renderCostos() {
   const contenedor = document.getElementById('costos-container');
+  if (!contenedor) {
+    console.error('No se encontró el contenedor de costos');
+    return;
+  }
+  
   contenedor.innerHTML = '<h3>Costos (Tratamientos)</h3>';
   
   if (costos.length === 0) {
@@ -233,24 +250,27 @@ function renderCostos() {
     const costoDiv = document.createElement('div');
     costoDiv.className = 'costo-item';
     costoDiv.innerHTML = `
-      <div class="grid-3" style="margin-bottom: 0.5rem;">
+      <div class="grid-4" style="margin-bottom: 0.5rem; gap: 10px; align-items: end;">
         <div>
+          <label class="odontologia-label">Fecha</label>
           <input type="date" class="odontologia-input" 
                  value="${costo.fecha || new Date().toISOString().split('T')[0]}" 
                  oninput="costos[${index}].fecha = this.value">
         </div>
         <div>
+          <label class="odontologia-label">Concepto</label>
           <input type="text" class="odontologia-input" placeholder="Concepto del costo" 
                  value="${costo.concepto || ''}" 
                  oninput="costos[${index}].concepto = this.value; calcularTotales()">
         </div>
         <div>
+          <label class="odontologia-label">Monto ($)</label>
           <input type="number" class="odontologia-input" placeholder="Monto" min="0" step="0.01" 
                  value="${costo.costo || 0}" 
                  oninput="costos[${index}].costo = parseFloat(this.value) || 0; calcularTotales()">
         </div>
         <div>
-          <button type="button" class="btn-eliminar" onclick="eliminarCostoExistente(${index})">❌</button>
+          <button type="button" class="btn-eliminar" onclick="eliminarCostoExistente(${index})" style="margin-top: 24px;">❌ Eliminar</button>
         </div>
       </div>
     `;
@@ -261,38 +281,7 @@ function renderCostos() {
   calcularTotales();
 }
 
-// Función para eliminar cargos existentes
-function eliminarCargoExistente(index) {
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: "Esta acción no se puede deshacer.",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Sí, eliminar',
-    cancelButtonText: 'Cancelar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      cargos.splice(index, 1);
-      renderCargos();
-      Swal.fire('Eliminado', 'El cargo ha sido eliminado.', 'success');
-    }
-  });
-}
-
-// Agregar un nuevo cargo
-function agregarCosto() {
-  const nuevoCargo = {
-    descripcion: '',
-    monto: 0
-  };
-  
-  cargos.push(nuevoCargo);
-  renderCargos();
-}
-
-// ELIMINAR COSTO EXISTENTE - FUNCIÓN CORREGIDA
+// ELIMINAR COSTO EXISTENTE
 function eliminarCostoExistente(index) {
   Swal.fire({
     title: '¿Estás seguro?',
@@ -419,7 +408,7 @@ function eliminarAbono(index) {
   });
 }
 
-// CALCULAR TOTALES - FUNCIÓN CORREGIDA
+// CALCULAR TOTALES - CORREGIDA
 function calcularTotales() {
   // Calcular total de costos
   let totalCostos = costos.reduce((total, costo) => {
@@ -434,28 +423,37 @@ function calcularTotales() {
   // Calcular saldo pendiente
   const saldoPendiente = totalCostos - totalAbonos;
   
-  // Actualizar la UI
-  document.getElementById('totalCargos').textContent = totalCostos.toFixed(2);
-  document.getElementById('totalAbonos').textContent = totalAbonos.toFixed(2);
-  document.getElementById('saldoPendiente').textContent = saldoPendiente.toFixed(2);
+  // Actualizar la UI - VERIFICAR QUE LOS ELEMENTOS EXISTEN
+  const totalCargosElement = document.getElementById('totalCargos');
+  const totalAbonosElement = document.getElementById('totalAbonos');
+  const saldoPendienteElement = document.getElementById('saldoPendiente');
   
-  // Resaltar saldo pendiente
-  const saldoElement = document.getElementById('saldoPendiente');
-  if (saldoPendiente > 0) {
-    saldoElement.parentElement.style.color = '#e63946';
-    saldoElement.parentElement.style.fontWeight = 'bold';
-  } else {
-    saldoElement.parentElement.style.color = 'inherit';
-    saldoElement.parentElement.style.fontWeight = 'inherit';
+  if (totalCargosElement) totalCargosElement.textContent = totalCostos.toFixed(2);
+  if (totalAbonosElement) totalAbonosElement.textContent = totalAbonos.toFixed(2);
+  if (saldoPendienteElement) {
+    saldoPendienteElement.textContent = saldoPendiente.toFixed(2);
+    
+    // Resaltar saldo pendiente
+    if (saldoPendiente > 0) {
+      saldoPendienteElement.parentElement.style.color = '#e63946';
+      saldoPendienteElement.parentElement.style.fontWeight = 'bold';
+    } else {
+      saldoPendienteElement.parentElement.style.color = 'inherit';
+      saldoPendienteElement.parentElement.style.fontWeight = 'inherit';
+    }
   }
 }
 
-// Función para cargar imágenes existentes
+// Función para cargar imágenes existentes - MEJORADA
 function cargarImagenesExistentes(imagenes) {
   const contenedor = document.getElementById('imagenes-existentes');
-  contenedor.innerHTML = '';
+  if (!contenedor) {
+    console.error('No se encontró el contenedor de imágenes');
+    return;
+  }
   
-  imagenesExistentes = imagenes || [];
+  contenedor.innerHTML = '';
+  imagenesExistentes = imagenes;
   
   if (imagenesExistentes.length === 0) {
     contenedor.innerHTML = '<p>No hay imágenes registradas.</p>';
@@ -465,9 +463,15 @@ function cargarImagenesExistentes(imagenes) {
   imagenesExistentes.forEach((imagen, index) => {
     const imagenDiv = document.createElement('div');
     imagenDiv.className = 'imagen-item';
+    imagenDiv.style.position = 'relative';
+    imagenDiv.style.margin = '10px';
     imagenDiv.innerHTML = `
-      <img src="${imagen.url}" alt="Imagen del paciente">
-      <button type="button" class="eliminar-imagen" onclick="marcarImagenParaEliminar(${index})">❌</button>
+      <img src="${imagen.url}" alt="Imagen del paciente" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px;">
+      <button type="button" class="eliminar-imagen" 
+              onclick="marcarImagenParaEliminar(${index})"
+              style="position: absolute; top: 5px; right: 5px; background: #e63946; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">
+        ❌
+      </button>
     `;
     contenedor.appendChild(imagenDiv);
   });
