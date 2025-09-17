@@ -11,7 +11,8 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage(); // ← AÑADIR ESTO
+// Para Firebase version 9+ usa esta sintaxis:
+const storage = firebase.storage();
 
 // Variables globales
 let pacienteId = null;
@@ -52,9 +53,11 @@ document.addEventListener('DOMContentLoaded', function() {
   cargarPaciente();
 });
 
-// Función para cargar los datos del paciente
+// Función para cargar los datos del paciente - VERSIÓN MEJORADA
 async function cargarPaciente() {
   try {
+    console.log('Cargando paciente con ID:', pacienteId);
+    
     const docRef = db.collection('historial-podologia').doc(pacienteId);
     const doc = await docRef.get();
     
@@ -67,7 +70,7 @@ async function cargarPaciente() {
     }
     
     const paciente = doc.data();
-    console.log('Datos del paciente:', paciente);
+    console.log('Datos completos del paciente:', paciente);
     
     // Llenar campos del formulario
     document.getElementById('nombre').value = paciente.nombre || '';
@@ -82,8 +85,9 @@ async function cargarPaciente() {
     document.getElementById('objetivoVisita').value = paciente.objetivoVisita || '';
     document.getElementById('alergias').value = paciente.alergias || '';
     
-    // Antecedentes médicos
+    // Antecedentes médicos - VERIFICACIÓN MEJORADA
     if (paciente.antecedentesMedicos) {
+      console.log('Antecedentes médicos:', paciente.antecedentesMedicos);
       setRadioValue('embarazo', paciente.antecedentesMedicos.embarazo);
       setRadioValue('hipertension', paciente.antecedentesMedicos.hipertension);
       setRadioValue('insuficienciaCardiaca', paciente.antecedentesMedicos.insuficienciaCardiaca);
@@ -95,14 +99,13 @@ async function cargarPaciente() {
       setRadioValue('micosis', paciente.antecedentesMedicos.micosis);
       setRadioValue('isquemias', paciente.antecedentesMedicos.isquemias);
       setRadioValue('trombosis', paciente.antecedentesMedicos.trombosis);
+    } else {
+      console.log('No hay antecedentes médicos en el documento');
     }
     
-    // Sección solo mujeres - LLAMAR A LA FUNCIÓN después de establecer el valor
+    // Sección solo mujeres
     if (paciente.sexo === 'Mujer') {
-      // Mostrar secciones de mujer
       toggleSeccionesMujer();
-      
-      // Llenar datos específicos de mujeres
       setRadioValue('usoTacon', paciente.usoTacon);
       document.getElementById('alturaTacon').value = paciente.alturaTacon || '';
       document.getElementById('horasUsoTacon').value = paciente.horasUsoTacon || '';
@@ -141,32 +144,47 @@ async function cargarPaciente() {
     // Observaciones
     document.getElementById('observaciones').value = paciente.observaciones || '';
     
-    // Cargar imágenes existentes (si las hay)
-    if (paciente.imagenes && Array.isArray(paciente.imagenes)) {
-      console.log('Imágenes encontradas:', paciente.imagenes);
+    // Cargar imágenes existentes - MEJORADO
+    if (paciente.imagenes && Array.isArray(paciente.imagenes) && paciente.imagenes.length > 0) {
+      console.log('Imágenes encontradas:', paciente.imagenes.length);
       cargarImagenesExistentes(paciente.imagenes);
     } else {
-      console.log('No hay imágenes o no es un array');
+      console.log('No hay imágenes en el documento');
       document.getElementById('imagenes-existentes').innerHTML = '<p>No hay imágenes registradas.</p>';
     }
     
-    // Cargar costos y abonos
-    if (paciente.costos && Array.isArray(paciente.costos)) {
+    // Cargar costos - DETECCIÓN MEJORADA
+    if (paciente.costos && Array.isArray(paciente.costos) && paciente.costos.length > 0) {
       console.log('Costos encontrados:', paciente.costos);
       costos = paciente.costos;
       renderCostos();
-    } else {
-      console.log('No hay costos o no es un array');
+    } 
+    // Compatibilidad con el nombre anterior "cargos"
+    else if (paciente.cargos && Array.isArray(paciente.cargos) && paciente.cargos.length > 0) {
+      console.log('Cargos encontrados (nombre antiguo):', paciente.cargos);
+      // Convertir cargos a costos
+      costos = paciente.cargos.map(cargo => ({
+        concepto: cargo.descripcion || cargo.concepto || '',
+        costo: cargo.monto || cargo.costo || 0,
+        fecha: cargo.fecha || new Date().toISOString().split('T')[0]
+      }));
+      renderCostos();
+    }
+    else {
+      console.log('No hay costos en el documento');
       costos = [];
+      renderCostos();
     }
     
-    if (paciente.abonos && Array.isArray(paciente.abonos)) {
+    // Cargar abonos
+    if (paciente.abonos && Array.isArray(paciente.abonos) && paciente.abonos.length > 0) {
       console.log('Abonos encontrados:', paciente.abonos);
       abonos = paciente.abonos;
       renderAbonos();
     } else {
-      console.log('No hay abonos o no es un array');
+      console.log('No hay abonos en el documento');
       abonos = [];
+      renderAbonos();
     }
     
     // Calcular totales
@@ -174,65 +192,11 @@ async function cargarPaciente() {
     
   } catch (error) {
     console.error('Error al cargar el paciente:', error);
-    Swal.fire('Error', 'No se pudo cargar la información del paciente.', 'error');
+    Swal.fire('Error', 'No se pudo cargar la información del paciente: ' + error.message, 'error');
   }
 }
 
-// Función para establecer valores de radio buttons
-function setRadioValue(name, value) {
-  if (!value) return;
-  
-  const radios = document.querySelectorAll(`input[name="${name}"]`);
-  for (const radio of radios) {
-    if (radio.value === value) {
-      radio.checked = true;
-      break;
-    }
-  }
-}
-
-// Función para mostrar/ocultar secciones de mujeres
-function toggleSeccionesMujer() {
-  const sexo = document.getElementById('sexo').value;
-  const seccionMujeres = document.getElementById('seccion-mujeres');
-  const seccionEmbarazo = document.getElementById('seccion-embarazo');
-  
-  if (sexo === 'Mujer') {
-    seccionMujeres.classList.remove('seccion-oculta');
-    seccionEmbarazo.classList.remove('seccion-oculta');
-  } else {
-    seccionMujeres.classList.add('seccion-oculta');
-    seccionEmbarazo.classList.add('seccion-oculta');
-  }
-}
-
-// Calcular IMC automáticamente
-function calcularIMC() {
-  const peso = parseFloat(document.getElementById('peso').value) || 0;
-  const estatura = parseFloat(document.getElementById('estatura').value) || 0;
-  
-  if (peso > 0 && estatura > 0) {
-    const estaturaMetros = estatura / 100;
-    const imc = peso / (estaturaMetros * estaturaMetros);
-    document.getElementById('imc').value = imc.toFixed(2);
-  } else {
-    document.getElementById('imc').value = '';
-  }
-}
-
-// AGREGAR NUEVO COSTO
-function agregarCosto() {
-  const nuevoCosto = {
-    concepto: '',
-    costo: 0,
-    fecha: new Date().toISOString().split('T')[0]
-  };
-  
-  costos.push(nuevoCosto);
-  renderCostos();
-}
-
-// RENDERIZAR COSTOS EXISTENTES
+// RENDERIZAR COSTOS EXISTENTES - VERSIÓN MEJORADA
 function renderCostos() {
   const contenedor = document.getElementById('costos-container');
   if (!contenedor) {
@@ -251,7 +215,7 @@ function renderCostos() {
     const costoDiv = document.createElement('div');
     costoDiv.className = 'costo-item';
     costoDiv.innerHTML = `
-      <div class="grid-4" style="margin-bottom: 0.5rem; gap: 10px; align-items: end;">
+      <div class="grid-4" style="margin-bottom: 1rem; gap: 10px; align-items: end;">
         <div>
           <label class="odontologia-label">Fecha</label>
           <input type="date" class="odontologia-input" 
@@ -351,6 +315,11 @@ function agregarAbono() {
 // RENDERIZAR ABONOS
 function renderAbonos() {
   const contenedor = document.getElementById('abonos-container');
+  if (!contenedor) {
+    console.error('No se encontró el contenedor de abonos');
+    return;
+  }
+  
   contenedor.innerHTML = '<h3 style="margin-top: 2rem;">Abonos (Pagos realizados)</h3>';
   
   if (abonos.length === 0) {
@@ -601,7 +570,7 @@ function getRadioValue(name) {
   return selected ? selected.value : 'No';
 }
 
-// ACTUALIZAR PACIENTE
+// ACTUALIZAR PACIENTE - VERSIÓN SIMPLIFICADA
 async function actualizarPaciente(e) {
   e.preventDefault();
   
@@ -632,7 +601,7 @@ async function actualizarPaciente(e) {
     }).concat(nuevasImagenesSubidas);
     
     // 4. Preparar datos para actualizar
-    const datosActualizados = {    
+    const datosActualizados = {
       nombre: document.getElementById('nombre').value,
       sexo: document.getElementById('sexo').value,
       direccion: document.getElementById('direccion').value,
@@ -694,7 +663,6 @@ async function actualizarPaciente(e) {
       costos: costos,
       abonos: abonos,
       imagenes: imagenesFinales,
-      
       ultimaActualizacion: new Date()
     };
     
@@ -708,6 +676,6 @@ async function actualizarPaciente(e) {
       
   } catch (error) {
     console.error('Error al actualizar:', error);
-    Swal.fire('Error', 'No se pudo actualizar la historia podológica.', 'error');
+    Swal.fire('Error', 'No se pudo actualizar la historia podológica: ' + error.message, 'error');
   }
 }
