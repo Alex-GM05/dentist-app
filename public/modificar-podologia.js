@@ -1,7 +1,5 @@
 // Firebase init
-co
-
-nst firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
   authDomain: "dentist-app-2bb07.firebaseapp.com",
   projectId: "dentist-app-2bb07",
