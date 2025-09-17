@@ -254,15 +254,38 @@ function renderCargos() {
           <input type="text" class="odontologia-input" placeholder="Descripción del cargo" value="${cargo.descripcion || ''}" id="cargo-desc-${index}">
         </div>
         <div>
-          <input type="number" class="odontologia-input" placeholder="Monto" min="0" step="0.01" value="${cargo.monto || ''}" id="cargo-monto-${index}">
+          <input type="number" class="odontologia-input" placeholder="Monto" min="0" step="0.01" value="${cargo.monto || ''}" id="cargo-monto-${index}" oninput="calcularTotales()">
         </div>
         <div>
-          <button type="button" class="btn-eliminar" onclick="eliminarCargo(${index})">❌</button>
+          <button type="button" class="btn-eliminar" onclick="eliminarCargoExistente(${index})">❌</button>
         </div>
       </div>
     `;
     
     contenedor.appendChild(cargoDiv);
+  });
+  
+  // Calcular totales después de renderizar
+  calcularTotales();
+}
+
+// Función para eliminar cargos existentes
+function eliminarCargoExistente(index) {
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "Esta acción no se puede deshacer.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      cargos.splice(index, 1);
+      renderCargos();
+      Swal.fire('Eliminado', 'El cargo ha sido eliminado.', 'success');
+    }
   });
 }
 
@@ -366,12 +389,18 @@ function renderAbonos() {
   contenedor.appendChild(tabla);
 }
 
-// Calcular totales de cargos y abonos
+// Calcular totales de cargos y abonos (FUNCIÓN MEJORADA)
 function calcularTotales() {
-  // Calcular total de cargos
+  // Calcular total de cargos (existentes + nuevos)
   let totalCargos = 0;
-  const elementosCargos = document.querySelectorAll('.cargo-item');
   
+  // Sumar cargos existentes
+  cargos.forEach(cargo => {
+    totalCargos += parseFloat(cargo.monto) || 0;
+  });
+  
+  // Sumar cargos nuevos (en el formulario)
+  const elementosCargos = document.querySelectorAll('.cargo-item');
   elementosCargos.forEach(item => {
     const montoInput = item.querySelector('input[type="number"]');
     if (montoInput && montoInput.value) {
@@ -525,9 +554,16 @@ async function subirImagenes() {
 async function eliminarImagenesStorage() {
   for (const url of imagenesAEliminar) {
     try {
-      // Obtener referencia a la imagen desde la URL
-      const imagenRef = firebase.storage().refFromURL(url);
-      await imagenRef.delete();
+      // Verificar si es una URL completa o solo una ruta
+      if (url.startsWith('http')) {
+        // Es una URL completa - usar refFromURL
+        const imagenRef = storage.refFromURL(url);
+        await imagenRef.delete();
+      } else {
+        // Es solo una ruta - usar ref
+        const imagenRef = storage.ref(url);
+        await imagenRef.delete();
+      }
     } catch (error) {
       console.error('Error al eliminar imagen:', error);
     }
@@ -568,27 +604,33 @@ async function actualizarPaciente(e) {
     
     // 3. Preparar array final de imágenes
     const imagenesFinales = imagenesExistentes.filter(imagen => 
-      !imagenesAEliminar.includes(imagen.url)
+      !imagenesAEliminar.includes(imagen)
     ).concat(nuevasImagenesSubidas);
     
-    // 4. Obtener valores de cargos
-    const nuevosCargos = [];
-    const elementosCargos = document.querySelectorAll('.cargo-item');
+    // 4. Obtener valores de cargos (existentes + nuevos)
+    const nuevosCargos = [...cargos]; // Copiar cargos existentes
     
+    // Agregar cargos nuevos del formulario
+    const elementosCargos = document.querySelectorAll('.cargo-item');
     elementosCargos.forEach(item => {
       const descInput = item.querySelector('input[type="text"]');
       const montoInput = item.querySelector('input[type="number"]');
       
       if (descInput && descInput.value && montoInput && montoInput.value) {
-        nuevosCargos.push({
-          descripcion: descInput.value,
-          monto: parseFloat(montoInput.value)
-        });
+        // Verificar si es un cargo nuevo (no existente)
+        const esCargoNuevo = !descInput.id.startsWith('cargo-desc-') || isNaN(parseInt(descInput.id.split('-')[2]));
+        
+        if (esCargoNuevo) {
+          nuevosCargos.push({
+            descripcion: descInput.value,
+            monto: parseFloat(montoInput.value)
+          });
+        }
       }
     });
     
     // 5. Preparar datos para actualizar
-    const datosActualizados = {
+    const datosActualizados = {    
       nombre: document.getElementById('nombre').value,
       sexo: document.getElementById('sexo').value,
       direccion: document.getElementById('direccion').value,
@@ -647,11 +689,9 @@ async function actualizarPaciente(e) {
       habitosLimpieza: document.getElementById('habitosLimpieza').value,
       productosEspecificos: document.getElementById('productosEspecificos').value,
       
-      cargos: nuevosCargos,
+            cargos: nuevosCargos,
       abonos: abonos,
-      imagenes: imagenesFinales, // ← AQUÍ SE AGREGAN LAS IMÁGENES
-      
-      observaciones: document.getElementById('observaciones').value,
+      imagenes: imagenesFinales,
       
       ultimaActualizacion: new Date()
     };
