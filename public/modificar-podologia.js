@@ -1,6 +1,11 @@
-// Inicialización de Firebase
+// Firebase init
 const firebaseConfig = {
-  // Tu configuración de Firebase
+  apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
+  authDomain: "dentist-app-2bb07.firebaseapp.com",
+  projectId: "dentist-app-2bb07",
+  storageBucket: "dentist-app-2bb07.firebasestorage.app",
+  messagingSenderId: "410183687912",
+  appId: "1:410183687912:web:43ee87e4a9122edb74b35d"
 };
 
 // Inicializar Firebase
@@ -26,17 +31,18 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
   
-  // Cargar datos del paciente
-  cargarPaciente();
-  
   // Configurar eventos
   document.getElementById('formPodologia').addEventListener('submit', actualizarPaciente);
   document.getElementById('agregar-cargo').addEventListener('click', agregarCargo);
   document.getElementById('agregar-abono').addEventListener('click', agregarAbono);
+  document.getElementById('sexo').addEventListener('change', toggleSeccionesMujer);
   
   // Calcular IMC automáticamente
   document.getElementById('peso').addEventListener('input', calcularIMC);
   document.getElementById('estatura').addEventListener('input', calcularIMC);
+  
+  // Cargar datos del paciente
+  cargarPaciente();
 });
 
 // Función para cargar los datos del paciente
@@ -83,9 +89,12 @@ async function cargarPaciente() {
       setRadioValue('trombosis', paciente.antecedentesMedicos.trombosis);
     }
     
-    // Sección solo mujeres
+    // Sección solo mujeres - LLAMAR A LA FUNCIÓN después de establecer el valor
     if (paciente.sexo === 'Mujer') {
+      // Mostrar secciones de mujer
       toggleSeccionesMujer();
+      
+      // Llenar datos específicos de mujeres
       setRadioValue('usoTacon', paciente.usoTacon);
       document.getElementById('alturaTacon').value = paciente.alturaTacon || '';
       document.getElementById('horasUsoTacon').value = paciente.horasUsoTacon || '';
