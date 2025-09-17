@@ -11,6 +11,7 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage(); // ← AÑADIR ESTO
 
 // Variables globales
 let pacienteId = null;
@@ -140,7 +141,7 @@ async function cargarPaciente() {
     // Observaciones
     document.getElementById('observaciones').value = paciente.observaciones || '';
     
-   // Cargar imágenes existentes (si las hay)
+    // Cargar imágenes existentes (si las hay)
     if (paciente.imagenes && Array.isArray(paciente.imagenes)) {
       console.log('Imágenes encontradas:', paciente.imagenes);
       cargarImagenesExistentes(paciente.imagenes);
@@ -149,7 +150,7 @@ async function cargarPaciente() {
       document.getElementById('imagenes-existentes').innerHTML = '<p>No hay imágenes registradas.</p>';
     }
     
-    // Cargar costos y abonos - CORREGIR ESTA PARTE
+    // Cargar costos y abonos
     if (paciente.costos && Array.isArray(paciente.costos)) {
       console.log('Costos encontrados:', paciente.costos);
       costos = paciente.costos;
@@ -231,7 +232,7 @@ function agregarCosto() {
   renderCostos();
 }
 
-// RENDERIZAR COSTOS EXISTENTES - MEJORADA
+// RENDERIZAR COSTOS EXISTENTES
 function renderCostos() {
   const contenedor = document.getElementById('costos-container');
   if (!contenedor) {
@@ -301,7 +302,7 @@ function eliminarCostoExistente(index) {
   });
 }
 
-// AGREGAR ABONO - FUNCIÓN MEJORADA
+// AGREGAR ABONO
 function agregarAbono() {
   Swal.fire({
     title: 'Agregar Abono',
@@ -347,7 +348,7 @@ function agregarAbono() {
   });
 }
 
-// RENDERIZAR ABONOS - FUNCIÓN MEJORADA
+// RENDERIZAR ABONOS
 function renderAbonos() {
   const contenedor = document.getElementById('abonos-container');
   contenedor.innerHTML = '<h3 style="margin-top: 2rem;">Abonos (Pagos realizados)</h3>';
@@ -408,7 +409,7 @@ function eliminarAbono(index) {
   });
 }
 
-// CALCULAR TOTALES - CORREGIDA
+// CALCULAR TOTALES
 function calcularTotales() {
   // Calcular total de costos
   let totalCostos = costos.reduce((total, costo) => {
@@ -423,7 +424,7 @@ function calcularTotales() {
   // Calcular saldo pendiente
   const saldoPendiente = totalCostos - totalAbonos;
   
-  // Actualizar la UI - VERIFICAR QUE LOS ELEMENTOS EXISTEN
+  // Actualizar la UI
   const totalCargosElement = document.getElementById('totalCargos');
   const totalAbonosElement = document.getElementById('totalAbonos');
   const saldoPendienteElement = document.getElementById('saldoPendiente');
@@ -444,7 +445,7 @@ function calcularTotales() {
   }
 }
 
-// Función para cargar imágenes existentes - MEJORADA
+// Función para cargar imágenes existentes
 function cargarImagenesExistentes(imagenes) {
   const contenedor = document.getElementById('imagenes-existentes');
   if (!contenedor) {
@@ -581,11 +582,11 @@ async function eliminarImagenesStorage() {
       // Verificar si es una URL completa o solo una ruta
       if (url.startsWith('http')) {
         // Es una URL completa - usar refFromURL
-        const imagenRef = storage.refFromURL(url);
+        const imagenRef = firebase.storage().refFromURL(url);
         await imagenRef.delete();
       } else {
         // Es solo una ruta - usar ref
-        const imagenRef = storage.ref(url);
+        const imagenRef = firebase.storage().ref(url);
         await imagenRef.delete();
       }
     } catch (error) {
@@ -600,7 +601,7 @@ function getRadioValue(name) {
   return selected ? selected.value : 'No';
 }
 
-// ACTUALIZAR PACIENTE - FUNCIÓN CORREGIDA
+// ACTUALIZAR PACIENTE
 async function actualizarPaciente(e) {
   e.preventDefault();
   
@@ -626,33 +627,11 @@ async function actualizarPaciente(e) {
     }
     
     // 3. Preparar array final de imágenes
-    const imagenesFinales = imagenesExistentes.filter((imagen, index) => {
-      return !imagenesAEliminar.includes(imagen.url); // ← CORREGIR esto
+    const imagenesFinales = imagenesExistentes.filter(imagen => {
+      return !imagenesAEliminar.includes(imagen.url);
     }).concat(nuevasImagenesSubidas);
     
-    // 4. Obtener valores de cargos (existentes + nuevos)
-    const nuevosCostos = [...costos]; // Copiar cargos existentes
-    
-    // Agregar cargos nuevos del formulario
-    const elementosCostos = document.querySelectorAll('.costo-item');
-    elementosCostos.forEach(item => {
-      const descInput = item.querySelector('input[type="text"]');
-      const montoInput = item.querySelector('input[type="number"]');
-      
-      if (descInput && descInput.value && montoInput && montoInput.value) {
-        // Verificar si es un cargo nuevo (no existente)
-        const esCostoNuevo = !descInput.id.startsWith('costo-desc-') || isNaN(parseInt(descInput.id.split('-')[2]));
-        
-        if (esCostoNuevo) {
-          nuevosCostos.push({
-            concepto: descInput.value,
-            costo: parseFloat(montoInput.value)
-          });
-        }
-      }
-    });
-    
-    // 5. Preparar datos para actualizar
+    // 4. Preparar datos para actualizar
     const datosActualizados = {    
       nombre: document.getElementById('nombre').value,
       sexo: document.getElementById('sexo').value,
@@ -712,14 +691,14 @@ async function actualizarPaciente(e) {
       habitosLimpieza: document.getElementById('habitosLimpieza').value,
       productosEspecificos: document.getElementById('productosEspecificos').value,
       
-      costos: nuevosCostos,
+      costos: costos,
       abonos: abonos,
       imagenes: imagenesFinales,
       
       ultimaActualizacion: new Date()
     };
     
-    // 6. Actualizar en Firebase
+    // 5. Actualizar en Firebase
     await db.collection('historial-podologia').doc(pacienteId).update(datosActualizados);
     
     Swal.fire('Éxito', 'Historia podológica actualizada correctamente.', 'success')
