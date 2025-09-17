@@ -20,7 +20,36 @@ try {
   console.error("Error inicializando Firebase:", error);
 }
 
-// --- FUNCIÓN ensureAuth MEJORADA (igual que en odontologia) ---
+// --- FUNCIÓN PARA VERIFICAR AUTENTICACIÓN ---
+function checkAuth() {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      unsubscribe(); // Dejar de escuchar después del primer evento
+      
+      if (user) {
+        console.log("Usuario autenticado:", user.uid);
+        resolve(user);
+      } else {
+        console.log("Usuario NO autenticado, redirigiendo...");
+        // Mostrar mensaje y redirigir
+        Swal.fire({
+          icon: 'warning',
+          title: 'Acceso no autorizado',
+          text: 'Debes iniciar sesión para acceder a esta página',
+          confirmButtonText: 'Ir al login'
+        }).then(() => {
+          window.location.href = "index.html";
+        });
+        reject(new Error("Usuario no autenticado"));
+      }
+    }, error => {
+      unsubscribe();
+      reject(error);
+    });
+  });
+}
+
+// --- FUNCIÓN ensureAuth MEJORADA ---
 async function ensureAuth() {
   return new Promise((resolve, reject) => {
     const user = auth.currentUser;
@@ -124,9 +153,21 @@ function setupCostos() {
 }
 
 // Configurar botón para agregar costos
-document.getElementById('agregar-costo').addEventListener('click', function() {
-  agregarFilaCosto();
-});
+function setupEventListeners() {
+  const agregarCostoBtn = document.getElementById('agregar-costo');
+  if (agregarCostoBtn) {
+    agregarCostoBtn.addEventListener('click', function() {
+      agregarFilaCosto();
+    });
+  }
+
+  // Configurar eventos para IMC
+  document.getElementById('peso').addEventListener('input', calcularIMC);
+  document.getElementById('estatura').addEventListener('input', calcularIMC);
+  
+  // Configurar formulario
+  document.getElementById('formPodologia').addEventListener('submit', handleFormSubmit);
+}
 
 // Subir imágenes a Firebase Storage (FUNCIÓN MEJORADA)
 async function subirImagenes(docId, files) {
@@ -230,7 +271,7 @@ async function subirImagenes(docId, files) {
 }
 
 // --- FUNCIÓN DE ENVIO DE FORMULARIO MEJORADA ---
-document.getElementById('formPodologia').addEventListener('submit', async function(e) {
+async function handleFormSubmit(e) {
   e.preventDefault();
 
   const btnGuardar = document.getElementById('btnGuardar');
@@ -289,7 +330,7 @@ document.getElementById('formPodologia').addEventListener('submit', async functi
         totalGeneral += costo;
       }
     });
-    
+        
     // Recopilar datos del formulario
     const formData = {
       // Datos generales
@@ -369,6 +410,7 @@ document.getElementById('formPodologia').addEventListener('submit', async functi
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
+
     updateStatus("Guardando datos principales...", "info");
     const docRef = await db.collection("historial-podologia").add(formData);
     updateStatus("Datos principales guardados correctamente", "success");
@@ -410,25 +452,29 @@ document.getElementById('formPodologia').addEventListener('submit', async functi
     btnGuardar.disabled = false;
     btnGuardar.textContent = originalText;
   }
-});
+}
 
 // Cargar datos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
   console.log("Formulario de podología cargado");
   
-  // Autenticar inmediatamente al cargar la página
-  ensureAuth().catch(error => {
-    console.error("Error en autenticación inicial:", error);
-  });
-  
-  // Configurar eventos para IMC
-  document.getElementById('peso').addEventListener('input', calcularIMC);
-  document.getElementById('estatura').addEventListener('input', calcularIMC);
-  
-  // Configurar sistema de costos
-  setupCostos();
-  
-  // Establecer fecha actual por defecto
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('fecha').value = today;
+  // Verificar autenticación antes de cargar la página
+  checkAuth()
+    .then(user => {
+      console.log("Usuario autenticado, cargando página...");
+      
+      // Configurar sistema de costos
+      setupCostos();
+      
+      // Configurar event listeners
+      setupEventListeners();
+      
+      // Establecer fecha actual por defecto
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('fecha').value = today;
+    })
+    .catch(error => {
+      console.error("Error de autenticación:", error);
+      // No es necesario hacer nada aquí porque checkAuth ya redirige
+    });
 });
