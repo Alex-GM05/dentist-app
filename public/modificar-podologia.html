@@ -1,344 +1,370 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modificar Historia Podológica</title>
-  <link rel="stylesheet" href="styles.css">
-  
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Historia Podológica</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
 </head>
+
 <body>
-  <header>
-    <img src="BELADENT.jpg" alt="Logo Beladent" style="max-width: 150px;">
-    <h1>Clínica BELADENT</h1>
-    <h2>Modificar Historia Podológica</h2>
-  </header>
+    <header>
+        <img src="BELADENT.jpg" alt="Logo Beladent" style="max-width: 150px;">
+        <h1>Clínica BELADENT</h1>
+        <h2>Modificar Historia Podológica</h2>
+    </header>
 
-  <main class="odontologia-container">
-    <form id="formPodologia">
-      <div class="odontologia-section">
-        <h2>📋 Datos Generales del Paciente</h2>
-        <div class="grid-2">
-          <div>
-            <label class="odontologia-label">Nombre completo del paciente *</label>
-            <input type="text" class="odontologia-input" id="nombre" required>
-          </div>
-          <div>
-            <label class="odontologia-label">Sexo *</label>
-            <select class="odontologia-select" id="sexo" required onchange="toggleSeccionesMujer()">
-              <option value="">Seleccionar</option>
-              <option value="Hombre">Hombre</option>
-              <option value="Mujer">Mujer</option>
-            </select>
-          </div>
-          <div>
-            <label class="odontologia-label">Dirección</label>
-            <input type="text" class="odontologia-input" id="direccion">
-          </div>
-          <div>
-            <label class="odontologia-label">Correo electrónico</label>
-            <input type="email" class="odontologia-input" id="email">
-          </div>
-          <div>
-            <label class="odontologia-label">Ocupación</label>
-            <input type="text" class="odontologia-input" id="ocupacion">
-          </div>
-          <div>
-            <label class="odontologia-label">Teléfono</label>
-            <input type="text" class="odontologia-input" id="telefono">
-          </div>
-          <div>
-            <label class="odontologia-label">Fecha de consulta *</label>
-            <input type="date" class="odontologia-input" id="fecha" required>
-          </div>
-          <div>
-            <label class="odontologia-label">Edad *</label>
-            <input type="number" class="odontologia-input" id="edad" required min="0" max="120">
-          </div>
-          <div>
-            <label class="odontologia-label">Estado civil</label>
-            <select class="odontologia-select" id="estadoCivil">
-              <option value="">Seleccionar</option>
-              <option value="Soltero/a">Soltero/a</option>
-              <option value="Casado/a">Casado/a</option>
-              <option value="Divorciado/a">Divorciado/a</option>
-              <option value="Viudo/a">Viudo/a</option>
-              <option value="Unión libre">Unión libre</option>
-            </select>
-          </div>
-        </div>
-        
-        <div style="margin-top: 1rem;">
-          <label class="odontologia-label">¿Cuál es el objetivo de su visita? *</label>
-          <textarea class="odontologia-textarea" id="objetivoVisita" required></textarea>
-        </div>
-        
-        <div style="margin-top: 1rem;">
-          <label class="odontologia-label">Reacciones alérgicas</label>
-          <textarea class="odontologia-textarea" id="alergias"></textarea>
-        </div>
-      </div>
+    <main class="odontologia-container">
+        <form id="formPodologia">
+            <div class="odontologia-section">
+                <h2>📋 Datos Generales del Paciente</h2>
+                <div class="grid-2">
+                    <div>
+                        <label class="odontologia-label">Nombre completo del paciente *</label>
+                        <input type="text" class="odontologia-input" id="nombre" required>
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Sexo *</label>
+                        <select class="odontologia-select" id="sexo" required onchange="toggleSeccionesMujer()">
+                            <option value="">Seleccionar</option>
+                            <option value="Hombre">Hombre</option>
+                            <option value="Mujer">Mujer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Dirección</label>
+                        <input type="text" class="odontologia-input" id="direccion">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Correo electrónico</label>
+                        <input type="email" class="odontologia-input" id="email">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Ocupación</label>
+                        <input type="text" class="odontologia-input" id="ocupacion">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Teléfono</label>
+                        <input type="text" class="odontologia-input" id="telefono">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Fecha de consulta *</label>
+                        <input type="date" class="odontologia-input" id="fecha" required>
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Edad *</label>
+                        <input type="number" class="odontologia-input" id="edad" required min="0" max="120">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Estado civil</label>
+                        <select class="odontologia-select" id="estadoCivil">
+                            <option value="">Seleccionar</option>
+                            <option value="Soltero/a">Soltero/a</option>
+                            <option value="Casado/a">Casado/a</option>
+                            <option value="Divorciado/a">Divorciado/a</option>
+                            <option value="Viudo/a">Viudo/a</option>
+                            <option value="Unión libre">Unión libre</option>
+                        </select>
+                    </div>
+                </div>
 
-      <div class="odontologia-section">
-        <h2>🏥 Antecedentes Médicos</h2>
-        <div class="grid-3">
-          <!-- Sección de Embarazo (solo para mujeres) -->
-          <div class="checkbox-group seccion-oculta" id="seccion-embarazo">
-            <label>Embarazo:</label>
-            <label><input type="radio" name="embarazo" value="Sí"> Sí</label>
-            <label><input type="radio" name="embarazo" value="No" checked> No</label>
-          </div>
-          
-          <div class="checkbox-group">
-            <label>Hipertensión:</label>
-            <label><input type="radio" name="hipertension" value="Sí"> Sí</label>
-            <label><input type="radio" name="hipertension" value="No" checked> No</label>
-          </div>
-          <div class="checkbox-group">
-            <label>Insuficiencia cardíaca desequilibrada:</label>
-            <label><input type="radio" name="insuficienciaCardiaca" value="Sí"> Sí</label>
-            <label><input type="radio" name="insuficienciaCardiaca" value="No" checked> No</label>
-          </div>
-          <div class="checkbox-group">
-            <label>Marcapasos u otros dispositivos eléctricos:</label>
-            <label><input type="radio" name="marcapasos" value="Sí"> Sí</label>
-            <label><input type="radio" name="marcapasos" value="No" checked> No</label>
-          </div>
-          <div class="checkbox-group">
-            <label>Diabetes:</label>
-            <label><input type="radio" name="diabetes" value="Sí"> Sí</label>
-            <label><input type="radio" name="diabetes" value="No" checked> No</label>
-          </div>
-          <div class="checkbox-group">
-            <label>Cáncer o tumores:</label>
-            <label><input type="radio" name="cancer" value="Sí"> Sí</label>
-            <label><input type="radio" name="cancer" value="No" checked> No</label>
-          </div>
-          <div class="checkbox-group">
-            <label>Dermatitis:</label>
-            <label><input type="radio" name="dermatitis" value="Sí"> Sí</label>
-            <label><input type="radio" name="dermatitis" value="No" checked> No</label>
-          </div>
-          <div class="checkbox-group">
-            <label>Epilepsia:</label>
-            <label><input type="radio" name="epilepsia" value="Sí"> Sí</label>
-            <label><input type="radio" name="epilepsia" value="No" checked> No</label>          </div>
-          <div class="checkbox-group">
-            <label>Micosis:</label>
-            <label><input type="radio" name="micosis" value="Sí"> Sí</label>
-            <label><input type="radio" name="micosis" value="No" checked> No</label>
-          </div>
-          <div class="checkbox-group">
-            <label>Isquemias:</label>
-            <label><input type="radio" name="isquemias" value="Sí"> Sí</label>
-            <label><input type="radio" name="isquemias" value="No" checked> No</label>
-          </div>
-          <div class="checkbox-group">
-            <label>Trombosis, tromboflebitis o hemorragias activas:</label>
-            <label><input type="radio" name="trombosis" value="Sí"> Sí</label>
-            <label><input type="radio" name="trombosis" value="No" checked> No</label>
-          </div>
-        </div>
-      </div>
+                <div style="margin-top: 1rem;">
+                    <label class="odontologia-label">¿Cuál es el objetivo de su visita? *</label>
+                    <textarea class="odontologia-textarea" id="objetivoVisita" required></textarea>
+                </div>
 
-      <!-- Sección Solo Mujeres (oculta por defecto) -->
-      <div class="odontologia-section seccion-oculta" id="seccion-mujeres">
-        <h2>👩 Solo Mujeres</h2>
-        <div class="grid-2">
-          <div class="checkbox-group">
-            <label>Uso de tacón:</label>
-            <label><input type="radio" name="usoTacon" value="Sí"> Sí</label>
-            <label><input type="radio" name="usoTacon" value="No" checked> No</label>
-          </div>
-          <div>
-            <label class="odontologia-label">Altura de tacón (cm)</label>
-            <input type="number" class="odontologia-input" id="alturaTacon" min="0">
-          </div>
-          <div>
-            <label class="odontologia-label">Horas de uso diario</label>
-            <input type="number" class="odontologia-input" id="horasUsoTacon" min="0" max="24">
-          </div>
-          <div>
-            <label class="odontologia-label">Días de la semana que usa tacón</label>
-            <input type="number" class="odontologia-input" id="diasTacon" min="0" max="7">
-          </div>
-        </div>
-      </div>
-
-      <div class="odontologia-section">
-        <h2>📊 Exploración Física</h2>
-        <div class="grid-3">
-          <div>
-            <label class="odontologia-label">Peso (kg)</label>
-            <input type="number" class="odontologia-input" id="peso" min="0" step="0.1">
-          </div>
-          <div>
-            <label class="odontologia-label">Estatura (cm)</label>
-            <input type="number" class="odontologia-input" id="estatura" min="0" step="0.1">
-          </div>
-          <div>
-            <label class="odontologia-label">I.M.C.</label>
-            <input type="text" class="odontologia-input" id="imc" readonly>
-          </div>
-          <div>
-            <label class="odontologia-label">F.C. (Frecuencia cardíaca)</label>
-            <input type="number" class="odontologia-input" id="frecuenciaCardiaca" min="0">
-          </div>
-          <div>
-            <label class="odontologia-label">Pulso</label>
-            <input type="text" class="odontologia-input" id="pulso">
-          </div>
-          <div>
-            <label class="odontologia-label">Temperatura (°C)</label>
-            <input type="number" class="odontologia-input" id="temperatura" min="0" step="0.1">
-          </div>
-        </div>
-      </div>
-
-      <div class="odontologia-section">
-        <h2>🍽️ Hábitos y Alimentación</h2>
-        <div class="grid-2">
-          <div>
-            <label class="odontologia-label">Consumo de alcohol</label>
-            <input type="text" class="odontologia-input" id="alcohol">
-          </div>
-          <div>
-            <label class="odontologia-label">Consumo de cigarro</label>
-            <input type="text" class="odontologia-input" id="cigarro">
-          </div>
-          <div>
-            <label class="odontologia-label">¿Se desvela frecuentemente?</label>
-            <input type="text" class="odontologia-input" id="desvela">
-          </div>
-          <div>
-            <label class="odontologia-label">¿Cuánta agua toma al día? (litros)</label>
-            <input type="number" class="odontologia-input" id="agua" min="0" step="0.1">
-          </div>
-          <div>
-            <label class="odontologia-label">¿Toma medicamentos, suplementos o vitaminas?</label>
-            <input type="text" class="odontologia-input" id="medicamentos">
-          </div>
-          <div>
-            <label class="odontologia-label">Calzado diario</label>
-            <input type="text" class="odontologia-input" id="calzado">
-          </div>
-        </div>
-        
-        <h3 style="margin-top: 1.5rem;">Tipo de Alimentación</h3>
-        <div class="grid-3">
-          <div>
-            <label class="odontologia-label">Consumo de carne</label>
-            <input type="text" class="odontologia-input" id="carne">
-          </div>
-          <div>
-            <label class="odontologia-label">Consumo de pescado</label>
-            <input type="text" class="odontologia-input" id="pescado">
-          </div>
-          <div>
-            <label class="odontologia-label">Consumo de verduras</label>
-            <input type="text" class="odontologia-input" id="verduras">
-          </div>
-          <div>
-            <label class="odontologia-label">Consumo de frutas</label>
-            <input type="text" class="odontologia-input" id="frutas">
-          </div>
-          <div>
-            <label class="odontologia-label">Consumo de pan</label>
-            <input type="text" class="odontologia-input" id="pan">
-          </div>
-          <div>
-            <label class="odontologia-label">¿Realiza ejercicio?</label>
-            <input type="text" class="odontologia-input" id="ejercicio">
-          </div>
-          <div>
-            <label class="odontologia-label">¿Qué tipo de ejercicio?</label>
-            <input type="text" class="odontologia-input" id="tipoEjercicio">
-          </div>
-          <div>
-            <label class="odontologia-label">¿Cuántas veces a la semana?</label>
-            <input type="number" class="odontologia-input" id="frecuenciaEjercicio" min="0" max="7">
-          </div>
-        </div>
-        
-        <div style="margin-top: 1rem;">
-          <label class="odontologia-label">¿Ha tenido cirugías estéticas o funcionales?</label>
-          <textarea class="odontologia-textarea" id="cirugias"></textarea>
-        </div>
-        
-        <div style="margin-top: 1rem;">
-          <label class="odontologia-label">¿Acostumbra a tomar té o café muy caliente o muy frío?</label>
-          <input type="text" class="odontologia-input" id="bebidas">
-        </div>
-        
-        <div style="margin-top: 1rem;">
-          <label class="odontologia-label">Frecuencia de consumo de bebidas calientes/frías</label>
-          <input type="text" class="odontologia-input" id="frecuenciaBebidas">
-        </div>
-        
-        <div style="margin-top: 1rem;">
-          <label class="odontologia-label">¿Cuáles son sus hábitos de limpieza?</label>
-          <textarea class="odontologia-textarea" id="habitosLimpieza"></textarea>
-        </div>
-        
-        <div style="margin-top: 1rem;">
-          <label class="odontologia-label">¿Utiliza algún producto específico?</label>
-          <input type="text" class="odontologia-input" id="productosEspecificos">
-        </div>
-      </div>
-
-      <div class="odontologia-section">
-        <h2>💰 Sistema de Pagos y Abonos</h2>
-        
-        <div id="cargos-container">
-          <h3>Cargos (Tratamientos)</h3>
-          <!-- Los cargos se agregarán aquí -->
-        </div>
-        
-        <button type="button" id="agregar-cargo" style="margin-top: 1rem; background: #6c757d;">+ Agregar cargo</button>
-        
-        <div id="abonos-container">
-          <h3 style="margin-top: 2rem;">Abonos (Pagos realizados)</h3>
-          <!-- Los abonos se agregarán aquí -->
-        </div>
-        
-        <button type="button" id="agregar-abono" style="margin-top: 1rem; background: #2a9d8f;">+ Agregar abono</button>
-        
-        <div class="resumen-pagos" style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-          <h4>Resumen de Pagos</h4>
-          <div class="grid-3">
-            <div>
-              <strong>Total Cargos:</strong> $<span id="totalCargos">0.00</span>
+                <div style="margin-top: 1rem;">
+                    <label class="odontologia-label">Reacciones alérgicas</label>
+                    <textarea class="odontologia-textarea" id="alergias"></textarea>
+                </div>
             </div>
-            <div>
-              <strong>Total Abonado:</strong> $<span id="totalAbonos">0.00</span>
+
+            <div class="odontologia-section">
+                <h2>🏥 Antecedentes Médicos</h2>
+                <div class="grid-3">
+                    <!-- Sección de Embarazo (solo para mujeres) -->
+                    <div class="checkbox-group seccion-oculta" id="seccion-embarazo">
+                        <label>Embarazo:</label>
+                        <label><input type="radio" name="embarazo" value="Sí"> Sí</label>
+                        <label><input type="radio" name="embarazo" value="No" checked> No</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label>Hipertensión:</label>
+                        <label><input type="radio" name="hipertension" value="Sí"> Sí</label>
+                        <label><input type="radio" name="hipertension" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Insuficiencia cardíaca desequilibrada:</label>
+                        <label><input type="radio" name="insuficienciaCardiaca" value="Sí"> Sí</label>
+                        <label><input type="radio" name="insuficienciaCardiaca" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Marcapasos u otros dispositivos eléctricos:</label>
+                        <label><input type="radio" name="marcapasos" value="Sí"> Sí</label>
+                        <label><input type="radio" name="marcapasos" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Diabetes:</label>
+                        <label><input type="radio" name="diabetes" value="Sí"> Sí</label>
+                        <label><input type="radio" name="diabetes" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Cáncer o tumores:</label>
+                        <label><input type="radio" name="cancer" value="Sí"> Sí</label>
+                        <label><input type="radio" name="cancer" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Dermatitis:</label>
+                        <label><input type="radio" name="dermatitis" value="Sí"> Sí</label>
+                        <label><input type="radio" name="dermatitis" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Epilepsia:</label>
+                        <label><input type="radio" name="epilepsia" value="Sí"> Sí</label>
+                        <label><input type="radio" name="epilepsia" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Micosis:</label>
+                        <label><input type="radio" name="micosis" value="Sí"> Sí</label>
+                        <label><input type="radio" name="micosis" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Isquemias:</label>
+                        <label><input type="radio" name="isquemias" value="Sí"> Sí</label>
+                        <label><input type="radio" name="isquemias" value="No" checked> No</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label>Trombosis, tromboflebitis o hemorragias activas:</label>
+                        <label><input type="radio" name="trombosis" value="Sí"> Sí</label>
+                        <label><input type="radio" name="trombosis" value="No" checked> No</label>
+                    </div>
+                </div>
             </div>
-            <div>
-              <strong>Saldo Pendiente:</strong> $<span id="saldoPendiente">0.00</span>
+
+            <!-- Sección Solo Mujeres (oculta por defecto) -->
+            <div class="odontologia-section seccion-oculta" id="seccion-mujeres">
+                <h2>👩 Solo Mujeres</h2>
+                <div class="grid-2">
+                    <div class="checkbox-group">
+                        <label>Uso de tacón:</label>
+                        <label><input type="radio" name="usoTacon" value="Sí"> Sí</label>
+                        <label><input type="radio" name="usoTacon" value="No" checked> No</label>
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Altura de tacón (cm)</label>
+                        <input type="number" class="odontologia-input" id="alturaTacon" min="0">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Horas de uso diario</label>
+                        <input type="number" class="odontologia-input" id="horasUsoTacon" min="0" max="24">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Días de la semana que usa tacón</label>
+                        <input type="number" class="odontologia-input" id="diasTacon" min="0" max="7">
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="odontologia-section">
-        <h2>📝 Observaciones y Tratamiento</h2>
-        <div>
-          <label class="odontologia-label">Observaciones y plan de tratamiento</label>
-          <textarea class="odontologia-textarea" id="observaciones" rows="4"></textarea>
-        </div>
-      </div>
+            <div class="odontologia-section">
+                <h2>📊 Exploración Física</h2>
+                <div class="grid-3">
+                    <div>
+                        <label class="odontologia-label">Peso (kg)</label>
+                        <input type="number" class="odontologia-input" id="peso" min="0" step="0.1">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Estatura (cm)</label>
+                        <input type="number" class="odontologia-input" id="estatura" min="0" step="0.1">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">I.M.C.</label>
+                        <input type="text" class="odontologia-input" id="imc" readonly>
+                    </div>
+                    <div>
+                        <label class="odontologia-label">F.C. (Frecuencia cardíaca)</label>
+                        <input type="number" class="odontologia-input" id="frecuenciaCardiaca" min="0">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Pulso</label>
+                        <input type="text" class="odontologia-input" id="pulso">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Temperatura (°C)</label>
+                        <input type="number" class="odontologia-input" id="temperatura" min="0" step="0.1">
+                    </div>
+                </div>
+            </div>
 
-      <div class="form-buttons">
-        <button type="submit" id="btnActualizar">💾 Actualizar Historia</button>
-        <button type="button" onclick="window.location.href='admin.html'" class="btn-cancel">❌ Cancelar</button>
-      </div>
-    </form>
-  </main>
+            <div class="odontologia-section">
+                <h2>🍽️ Hábitos y Alimentación</h2>
+                <div class="grid-2">
+                    <div>
+                        <label class="odontologia-label">Consumo de alcohol</label>
+                        <input type="text" class="odontologia-input" id="alcohol">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Consumo de cigarro</label>
+                        <input type="text" class="odontologia-input" id="cigarro">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">¿Se desvela frecuentemente?</label>
+                        <input type="text" class="odontologia-input" id="desvela">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">¿Cuánta agua toma al día? (litros)</label>
+                        <input type="number" class="odontologia-input" id="agua" min="0" step="0.1">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">¿Toma medicamentos, suplementos o vitaminas?</label>
+                        <input type="text" class="odontologia-input" id="medicamentos">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Calzado diario</label>
+                        <input type="text" class="odontologia-input" id="calzado">
+                    </div>
+                </div>
 
-   <script src="modificar-podologia.js"></script>
+                <h3 style="margin-top: 1.5rem;">Tipo de Alimentación</h3>
+                <div class="grid-3">
+                    <div>
+                        <label class="odontologia-label">Consumo de carne</label>
+                        <input type="text" class="odontologia-input" id="carne">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Consumo de pescado</label>
+                        <input type="text" class="odontologia-input" id="pescado">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Consumo de verduras</label>
+                        <input type="text" class="odontologia-input" id="verduras">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Consumo de frutas</label>
+                        <input type="text" class="odontologia-input" id="frutas">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">Consumo de pan</label>
+                        <input type="text" class="odontologia-input" id="pan">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">¿Realiza ejercicio?</label>
+                        <input type="text" class="odontologia-input" id="ejercicio">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">¿Qué tipo de ejercicio?</label>
+                        <input type="text" class="odontologia-input" id="tipoEjercicio">
+                    </div>
+                    <div>
+                        <label class="odontologia-label">¿Cuántas veces a la semana?</label>
+                        <input type="number" class="odontologia-input" id="frecuenciaEjercicio" min="0" max="7">
+                    </div>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label class="odontologia-label">¿Ha tenido cirugías estéticas o funcionales?</label>
+                    <textarea class="odontologia-textarea" id="cirugias"></textarea>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label class="odontologia-label">¿Acostumbra a tomar té o café muy caliente o muy frío?</label>
+                    <input type="text" class="odontologia-input" id="bebidas">
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label class="odontologia-label">Frecuencia de consumo de bebidas calientes/frías</label>
+                    <input type="text" class="odontologia-input" id="frecuenciaBebidas">
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label class="odontologia-label">¿Cuáles son sus hábitos de limpieza?</label>
+                    <textarea class="odontologia-textarea" id="habitosLimpieza"></textarea>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label class="odontologia-label">¿Utiliza algún producto específico?</label>
+                    <input type="text" class="odontologia-input" id="productosEspecificos">
+                </div>
+            </div>
+
+            <div class="odontologia-section">
+                <h2>💰 Sistema de Pagos y Abonos</h2>
+
+                <div id="cargos-container">
+                    <h3>Cargos (Tratamientos)</h3>
+                    <!-- Los cargos se agregarán aquí -->
+                </div>
+
+                <button type="button" id="agregar-cargo" style="margin-top: 1rem; background: #6c757d;">+ Agregar
+                    cargo</button>
+
+                <div id="abonos-container">
+                    <h3 style="margin-top: 2rem;">Abonos (Pagos realizados)</h3>
+                    <!-- Los abonos se agregarán aquí -->
+                </div>
+
+                <button type="button" id="agregar-abono" style="margin-top: 1rem; background: #2a9d8f;">+ Agregar
+                    abono</button>
+
+                <div class="resumen-pagos"
+                    style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                    <h4>Resumen de Pagos</h4>
+                    <div class="grid-3">
+                        <div>
+                            <strong>Total Cargos:</strong> $<span id="totalCargos">0.00</span>
+                        </div>
+                        <div>
+                            <strong>Total Abonado:</strong> $<span id="totalAbonos">0.00</span>
+                        </div>
+                        <div>
+                            <strong>Saldo Pendiente:</strong> $<span id="saldoPendiente">0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="odontologia-section">
+                <h2>📝 Observaciones y Tratamiento</h2>
+                <div>
+                    <label class="odontologia-label">Observaciones y plan de tratamiento</label>
+                    <textarea class="odontologia-textarea" id="observaciones" rows="4"></textarea>
+                </div>
+            </div>
+
+            <div class="odontologia-section">
+                <h2>🖼️ Imágenes del Paciente</h2>
+
+                <div id="imagenes-container">
+                    <h3>Imágenes existentes</h3>
+                    <div id="imagenes-existentes" class="imagenes-grid">
+                        <!-- Las imágenes existentes se cargarán aquí -->
+                    </div>
+
+                    <h3 style="margin-top: 1.5rem;">Agregar nuevas imágenes</h3>
+                    <input type="file" id="nuevas-imagenes" multiple accept="image/*">
+                    <div id="preview-nuevas-imagenes" class="imagenes-grid"></div>
+                </div>
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" id="btnActualizar">💾 Actualizar Historia</button>
+                <button type="button" onclick="window.location.href='admin.html'" class="btn-cancel">❌ Cancelar</button>
+            </div>
+        </form>
+    </main>
+
+    <script src="modificar-podologia.js"></script>
 </body>
+
 </html>

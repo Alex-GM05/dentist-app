@@ -1,5 +1,7 @@
 // Firebase init
-const firebaseConfig = {
+co
+
+nst firebaseConfig = {
   apiKey: "AIzaSyAmuMId-e9LiO0cxadGRtxYBK9Tqi2khdI",
   authDomain: "dentist-app-2bb07.firebaseapp.com",
   projectId: "dentist-app-2bb07",
@@ -16,6 +18,9 @@ const db = firebase.firestore();
 let pacienteId = null;
 let cargos = [];
 let abonos = [];
+let imagenesExistentes = [];
+let imagenesAEliminar = [];
+let nuevasImagenes = [];
 
 // Cargar datos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
@@ -40,6 +45,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Calcular IMC automáticamente
   document.getElementById('peso').addEventListener('input', calcularIMC);
   document.getElementById('estatura').addEventListener('input', calcularIMC);
+
+  // Configurar evento para nuevas imágenes
+  document.getElementById('nuevas-imagenes').addEventListener('change', manejarNuevasImagenes);
   
   // Cargar datos del paciente
   cargarPaciente();
@@ -48,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Función para cargar los datos del paciente
 async function cargarPaciente() {
   try {
-    const docRef = db.collection('podologia').doc(pacienteId);
+    const docRef = db.collection('historial-podologia').doc(pacienteId);
     const doc = await docRef.get();
     
     if (!doc.exists) {
@@ -132,6 +140,11 @@ async function cargarPaciente() {
     
     // Observaciones
     document.getElementById('observaciones').value = paciente.observaciones || '';
+    
+    // Cargar imágenes existentes (si las hay)
+    if (paciente.imagenes) {
+      cargarImagenesExistentes(paciente.imagenes);
+    }
     
     // Cargar cargos y abonos
     if (paciente.cargos) {
@@ -390,7 +403,146 @@ function calcularTotales() {
   }
 }
 
-// Actualizar paciente en Firebase
+// Función para cargar imágenes existentes
+function cargarImagenesExistentes(imagenes) {
+  const contenedor = document.getElementById('imagenes-existentes');
+  contenedor.innerHTML = '';
+  
+  imagenesExistentes = imagenes || [];
+  
+  if (imagenesExistentes.length === 0) {
+    contenedor.innerHTML = '<p>No hay imágenes registradas.</p>';
+    return;
+  }
+  
+  imagenesExistentes.forEach((imagen, index) => {
+    const imagenDiv = document.createElement('div');
+    imagenDiv.className = 'imagen-item';
+    imagenDiv.innerHTML = `
+      <img src="${imagen.url}" alt="Imagen del paciente">
+      <button type="button" class="eliminar-imagen" onclick="marcarImagenParaEliminar(${index})">❌</button>
+    `;
+    contenedor.appendChild(imagenDiv);
+  });
+}
+
+// Función para marcar imágenes para eliminar
+function marcarImagenParaEliminar(index) {
+  Swal.fire({
+    title: '¿Eliminar imagen?',
+    text: "Esta acción no se puede deshacer.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Agregar a la lista de imágenes a eliminar
+      imagenesAEliminar.push(imagenesExistentes[index].url);
+      
+      // Eliminar del DOM
+      document.querySelectorAll('.imagen-item')[index].remove();
+      
+      Swal.fire('Eliminada', 'La imagen se eliminará al guardar los cambios.', 'success');
+    }
+  });
+}
+
+// Función para manejar nuevas imágenes
+function manejarNuevasImagenes(e) {
+  const files = e.target.files;
+  const previewContainer = document.getElementById('preview-nuevas-imagenes');
+  previewContainer.innerHTML = '';
+  
+  nuevasImagenes = []; // Reiniciar array
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      const previewDiv = document.createElement('div');
+      previewDiv.className = 'imagen-preview';
+      previewDiv.innerHTML = `
+        <img src="${e.target.result}" alt="Vista previa">
+        <button type="button" class="eliminar-preview" onclick="eliminarPreview(this)">❌</button>
+      `;
+      previewContainer.appendChild(previewDiv);
+      
+      // Guardar referencia al archivo
+      nuevasImagenes.push({
+        file: file,
+        preview: e.target.result
+      });
+    };
+    
+    reader.readAsDataURL(file);
+  }
+}
+
+// Función para eliminar vista previa
+function eliminarPreview(boton) {
+  const previewDiv = boton.parentElement;
+  const index = Array.from(previewDiv.parentElement.children).indexOf(previewDiv);
+  
+  // Eliminar de nuevasImagenes
+  nuevasImagenes.splice(index, 1);
+  
+  // Eliminar del DOM
+  previewDiv.remove();
+}
+
+// Función para subir imágenes a Firebase Storage
+async function subirImagenes() {
+  const imagenesSubidas = [];
+  
+  for (const imagen of nuevasImagenes) {
+    try {
+      // Crear referencia en Storage
+      const storageRef = firebase.storage().ref();
+      const imagenRef = storageRef.child(`podologia/${pacienteId}/${Date.now()}_${imagen.file.name}`);
+      
+      // Subir imagen
+      const snapshot = await imagenRef.put(imagen.file);
+      
+      // Obtener URL de descarga
+      const downloadURL = await snapshot.ref.getDownloadURL();
+      
+      imagenesSubidas.push({
+        url: downloadURL,
+        nombre: imagen.file.name,
+        fecha: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error al subir imagen:', error);
+    }
+  }
+  
+  return imagenesSubidas;
+}
+
+// Función para eliminar imágenes de Firebase Storage
+async function eliminarImagenesStorage() {
+  for (const url of imagenesAEliminar) {
+    try {
+      // Obtener referencia a la imagen desde la URL
+      const imagenRef = firebase.storage().refFromURL(url);
+      await imagenRef.delete();
+    } catch (error) {
+      console.error('Error al eliminar imagen:', error);
+    }
+  }
+}
+
+// Función para obtener el valor de un grupo de radio buttons
+function getRadioValue(name) {
+  const selected = document.querySelector(`input[name="${name}"]:checked`);
+  return selected ? selected.value : 'No';
+}
+
+// Actualizar paciente en Firebase (FUNCIÓN COMPLETA Y CORREGIDA)
 async function actualizarPaciente(e) {
   e.preventDefault();
   
@@ -405,7 +557,23 @@ async function actualizarPaciente(e) {
       }
     });
     
-    // Obtener valores de cargos
+    // 1. Eliminar imágenes marcadas para eliminar
+    if (imagenesAEliminar.length > 0) {
+      await eliminarImagenesStorage();
+    }
+    
+    // 2. Subir nuevas imágenes
+    let nuevasImagenesSubidas = [];
+    if (nuevasImagenes.length > 0) {
+      nuevasImagenesSubidas = await subirImagenes();
+    }
+    
+    // 3. Preparar array final de imágenes
+    const imagenesFinales = imagenesExistentes.filter(imagen => 
+      !imagenesAEliminar.includes(imagen.url)
+    ).concat(nuevasImagenesSubidas);
+    
+    // 4. Obtener valores de cargos
     const nuevosCargos = [];
     const elementosCargos = document.querySelectorAll('.cargo-item');
     
@@ -421,7 +589,7 @@ async function actualizarPaciente(e) {
       }
     });
     
-    // Preparar datos para actualizar
+    // 5. Preparar datos para actualizar
     const datosActualizados = {
       nombre: document.getElementById('nombre').value,
       sexo: document.getElementById('sexo').value,
@@ -483,14 +651,15 @@ async function actualizarPaciente(e) {
       
       cargos: nuevosCargos,
       abonos: abonos,
+      imagenes: imagenesFinales, // ← AQUÍ SE AGREGAN LAS IMÁGENES
       
       observaciones: document.getElementById('observaciones').value,
       
       ultimaActualizacion: new Date()
     };
     
-    // Actualizar en Firebase
-    await db.collection('podologia').doc(pacienteId).update(datosActualizados);
+    // 6. Actualizar en Firebase
+    await db.collection('historial-podologia').doc(pacienteId).update(datosActualizados);
     
     Swal.fire('Éxito', 'Historia podológica actualizada correctamente.', 'success')
       .then(() => {
@@ -501,10 +670,4 @@ async function actualizarPaciente(e) {
     console.error('Error al actualizar:', error);
     Swal.fire('Error', 'No se pudo actualizar la historia podológica.', 'error');
   }
-}
-
-// Función para obtener el valor de un grupo de radio buttons
-function getRadioValue(name) {
-  const selected = document.querySelector(`input[name="${name}"]:checked`);
-  return selected ? selected.value : 'No';
 }

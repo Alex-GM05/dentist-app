@@ -1040,3 +1040,62 @@ textarea {
     border: 1px solid #dee2e6;
   }
 }
+
+.imagenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.imagen-item {
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.imagen-item img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.eliminar-imagen {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.imagen-preview {
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.imagen-preview img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.eliminar-preview {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
