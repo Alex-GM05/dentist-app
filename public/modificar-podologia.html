@@ -301,36 +301,19 @@
             <div class="odontologia-section">
                 <h2>💰 Sistema de Pagos y Abonos</h2>
 
-                <div id="cargos-container">
-                    <h3>Cargos (Tratamientos)</h3>
-                    <!-- Los cargos se agregarán aquí -->
-                </div>
+                <!-- Botones -->
+                <button type="button" id="agregar-costo" class="btn-secundario">+ Agregar Costo</button>
+                <button type="button" id="agregar-abono" class="btn-secundario">+ Agregar Abono</button>
 
-                <button type="button" id="agregar-cargo" style="margin-top: 1rem; background: #6c757d;">+ Agregar
-                    cargo</button>
+                <!-- Contenedores -->
+                <div id="costos-container"></div>
+                <div id="abonos-container"></div>
 
-                <div id="abonos-container">
-                    <h3 style="margin-top: 2rem;">Abonos (Pagos realizados)</h3>
-                    <!-- Los abonos se agregarán aquí -->
-                </div>
-
-                <button type="button" id="agregar-abono" style="margin-top: 1rem; background: #2a9d8f;">+ Agregar
-                    abono</button>
-
-                <div class="resumen-pagos"
-                    style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-                    <h4>Resumen de Pagos</h4>
-                    <div class="grid-3">
-                        <div>
-                            <strong>Total Cargos:</strong> $<span id="totalCargos">0.00</span>
-                        </div>
-                        <div>
-                            <strong>Total Abonado:</strong> $<span id="totalAbonos">0.00</span>
-                        </div>
-                        <div>
-                            <strong>Saldo Pendiente:</strong> $<span id="saldoPendiente">0.00</span>
-                        </div>
-                    </div>
+                <!-- Resumen -->
+                <div class="resumen-pagos">
+                    <p>Total Costos: $<span id="totalCargos">0.00</span></p>
+                    <p>Total Abonado: $<span id="totalAbonos">0.00</span></p>
+                    <p><strong>Saldo Pendiente: $<span id="saldoPendiente">0.00</span></strong></p>
                 </div>
             </div>
 

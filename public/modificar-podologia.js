@@ -14,7 +14,7 @@ const db = firebase.firestore();
 
 // Variables globales
 let pacienteId = null;
-let cargos = [];
+let costos = [];
 let abonos = [];
 let imagenesExistentes = [];
 let imagenesAEliminar = [];
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Configurar eventos
   document.getElementById('formPodologia').addEventListener('submit', actualizarPaciente);
-  document.getElementById('agregar-cargo').addEventListener('click', agregarCargo);
+  document.getElementById('agregar-cargo').addEventListener('click', agregarCosto);
   document.getElementById('agregar-abono').addEventListener('click', agregarAbono);
   document.getElementById('sexo').addEventListener('change', toggleSeccionesMujer);
   
@@ -145,9 +145,10 @@ async function cargarPaciente() {
     }
     
     // Cargar cargos y abonos
-    if (paciente.cargos) {
-      cargos = paciente.cargos;
-      renderCargos();
+    if (paciente.costos) {
+      // Compatibilidad con ambos nombres (cargos o costos)
+      costos = paciente.costos || [];
+      renderCostos();
     }
     
     if (paciente.abonos) {
@@ -206,66 +207,57 @@ function calcularIMC() {
   }
 }
 
-// Agregar un nuevo cargo
-function agregarCargo() {
-  const contenedor = document.getElementById('cargos-container');
+// AGREGAR NUEVO COSTO - FUNCIÓN NUEVA
+function agregarCosto() {
+  const nuevoCosto = {
+    concepto: '',
+    costo: 0,
+    fecha: new Date().toISOString().split('T')[0] // Fecha actual por defecto
+  };
   
-  const cargoId = Date.now(); // ID único basado en timestamp
-  
-  const cargoDiv = document.createElement('div');
-  cargoDiv.className = 'cargo-item';
-  cargoDiv.innerHTML = `
-    <div class="grid-3" style="margin-bottom: 0.5rem;">
-      <div>
-        <input type="text" class="odontologia-input" placeholder="Descripción del cargo" id="cargo-desc-${cargoId}">
-      </div>
-      <div>
-        <input type="number" class="odontologia-input" placeholder="Monto" min="0" step="0.01" id="cargo-monto-${cargoId}">
-      </div>
-      <div>
-        <button type="button" class="btn-eliminar" onclick="eliminarCargo(${cargoId})">❌</button>
-      </div>
-    </div>
-  `;
-  
-  contenedor.appendChild(cargoDiv);
+  costos.push(nuevoCosto);
+  renderCostos();
 }
 
-// Eliminar un cargo
-function eliminarCargo(id) {
-  const cargoDiv = document.querySelector(`#cargos-container .cargo-item:nth-child(${Array.from(document.querySelectorAll('.cargo-item')).findIndex(el => el.innerHTML.includes(`cargo-desc-${id}`)) + 1})`);
-  if (cargoDiv) {
-    cargoDiv.remove();
-    calcularTotales();
+// RENDERIZAR COSTOS EXISTENTES - FUNCIÓN CORREGIDA
+function renderCostos() {
+  const contenedor = document.getElementById('costos-container');
+  contenedor.innerHTML = '<h3>Costos (Tratamientos)</h3>';
+  
+  if (costos.length === 0) {
+    contenedor.innerHTML += '<p>No hay costos registrados.</p>';
+    return;
   }
-}
-
-// Renderizar cargos existentes
-function renderCargos() {
-  const contenedor = document.getElementById('cargos-container');
-  contenedor.innerHTML = '<h3>Cargos (Tratamientos)</h3>';
   
-  cargos.forEach((cargo, index) => {
-    const cargoDiv = document.createElement('div');
-    cargoDiv.className = 'cargo-item';
-    cargoDiv.innerHTML = `
+  costos.forEach((costo, index) => {
+    const costoDiv = document.createElement('div');
+    costoDiv.className = 'costo-item';
+    costoDiv.innerHTML = `
       <div class="grid-3" style="margin-bottom: 0.5rem;">
         <div>
-          <input type="text" class="odontologia-input" placeholder="Descripción del cargo" value="${cargo.descripcion || ''}" id="cargo-desc-${index}">
+          <input type="date" class="odontologia-input" 
+                 value="${costo.fecha || new Date().toISOString().split('T')[0]}" 
+                 oninput="costos[${index}].fecha = this.value">
         </div>
         <div>
-          <input type="number" class="odontologia-input" placeholder="Monto" min="0" step="0.01" value="${cargo.monto || ''}" id="cargo-monto-${index}" oninput="calcularTotales()">
+          <input type="text" class="odontologia-input" placeholder="Concepto del costo" 
+                 value="${costo.concepto || ''}" 
+                 oninput="costos[${index}].concepto = this.value; calcularTotales()">
         </div>
         <div>
-          <button type="button" class="btn-eliminar" onclick="eliminarCargoExistente(${index})">❌</button>
+          <input type="number" class="odontologia-input" placeholder="Monto" min="0" step="0.01" 
+                 value="${costo.costo || 0}" 
+                 oninput="costos[${index}].costo = parseFloat(this.value) || 0; calcularTotales()">
+        </div>
+        <div>
+          <button type="button" class="btn-eliminar" onclick="eliminarCostoExistente(${index})">❌</button>
         </div>
       </div>
     `;
     
-    contenedor.appendChild(cargoDiv);
+    contenedor.appendChild(costoDiv);
   });
   
-  // Calcular totales después de renderizar
   calcularTotales();
 }
 
@@ -289,45 +281,121 @@ function eliminarCargoExistente(index) {
   });
 }
 
-// Agregar un nuevo abono
+// Agregar un nuevo cargo
+function agregarCosto() {
+  const nuevoCargo = {
+    descripcion: '',
+    monto: 0
+  };
+  
+  cargos.push(nuevoCargo);
+  renderCargos();
+}
+
+// ELIMINAR COSTO EXISTENTE - FUNCIÓN CORREGIDA
+function eliminarCostoExistente(index) {
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "Esta acción no se puede deshacer.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      costos.splice(index, 1);
+      renderCostos();
+      Swal.fire('Eliminado', 'El costo ha sido eliminado.', 'success');
+    }
+  });
+}
+
+// AGREGAR ABONO - FUNCIÓN MEJORADA
 function agregarAbono() {
   Swal.fire({
     title: 'Agregar Abono',
     html:
       `<input id="swal-fecha" type="date" class="swal2-input" placeholder="Fecha" value="${new Date().toISOString().split('T')[0]}">` +
       `<input id="swal-concepto" type="text" class="swal2-input" placeholder="Concepto">` +
-      `<input id="swal-cantidad" type="number" class="swal2-input" placeholder="Cantidad abonada" min="0" step="0.01">`,
+      `<input id="swal-cantidad" type="number" class="swal2-input" placeholder="Cantidad abonada" min="0" step="0.01">` +
+      `<select id="swal-metodo" class="swal2-input">
+        <option value="efectivo">Efectivo</option>
+        <option value="transferencia">Transferencia</option>
+        <option value="tarjeta">Tarjeta</option>
+      </select>`,
     focusConfirm: false,
     preConfirm: () => {
       return {
         fecha: document.getElementById('swal-fecha').value,
         concepto: document.getElementById('swal-concepto').value,
-        cantidad: parseFloat(document.getElementById('swal-cantidad').value)
+        cantidad: parseFloat(document.getElementById('swal-cantidad').value),
+        metodo: document.getElementById('swal-metodo').value
       };
     }
   }).then((result) => {
     if (result.isConfirmed && result.value) {
-      const { fecha, concepto, cantidad } = result.value;
+      const { fecha, concepto, cantidad, metodo } = result.value;
       
       if (!fecha || !concepto || isNaN(cantidad) || cantidad <= 0) {
         Swal.fire('Error', 'Todos los campos son obligatorios y la cantidad debe ser mayor a 0.', 'error');
         return;
       }
       
-      // Agregar el abono
       abonos.push({
         fecha,
         concepto,
-        cantidad
+        cantidad,
+        metodo
       });
       
-      // Renderizar abonos y calcular totales
       renderAbonos();
       calcularTotales();
       
       Swal.fire('Éxito', 'Abono agregado correctamente.', 'success');
     }
   });
+}
+
+// RENDERIZAR ABONOS - FUNCIÓN MEJORADA
+function renderAbonos() {
+  const contenedor = document.getElementById('abonos-container');
+  contenedor.innerHTML = '<h3 style="margin-top: 2rem;">Abonos (Pagos realizados)</h3>';
+  
+  if (abonos.length === 0) {
+    contenedor.innerHTML += '<p>No hay abonos registrados.</p>';
+    return;
+  }
+  
+  const tabla = document.createElement('table');
+  tabla.className = 'abonos-table';
+  tabla.innerHTML = `
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Concepto</th>
+        <th>Cantidad</th>
+        <th>Método</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${abonos.map((abono, index) => `
+        <tr>
+          <td>${abono.fecha}</td>
+          <td>${abono.concepto}</td>
+          <td>$${abono.cantidad.toFixed(2)}</td>
+          <td>${abono.metodo || 'efectivo'}</td>
+          <td>
+            <button type="button" class="btn-eliminar" onclick="eliminarAbono(${index})">❌</button>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  
+  contenedor.appendChild(tabla);
 }
 
 // Eliminar un abono
@@ -351,75 +419,27 @@ function eliminarAbono(index) {
   });
 }
 
-// Renderizar abonos existentes
-function renderAbonos() {
-  const contenedor = document.getElementById('abonos-container');
-  contenedor.innerHTML = '<h3 style="margin-top: 2rem;">Abonos (Pagos realizados)</h3>';
-  
-  if (abonos.length === 0) {
-    contenedor.innerHTML += '<p>No hay abonos registrados.</p>';
-    return;
-  }
-  
-  const tabla = document.createElement('table');
-  tabla.className = 'abonos-table';
-  tabla.innerHTML = `
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Concepto</th>
-        <th>Cantidad</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${abonos.map((abono, index) => `
-        <tr>
-          <td>${abono.fecha}</td>
-          <td>${abono.concepto}</td>
-          <td>$${abono.cantidad.toFixed(2)}</td>
-          <td>
-            <button type="button" class="btn-eliminar" onclick="eliminarAbono(${index})">❌</button>
-          </td>
-        </tr>
-      `).join('')}
-    </tbody>
-  `;
-  
-  contenedor.appendChild(tabla);
-}
-
-// Calcular totales de cargos y abonos (FUNCIÓN MEJORADA)
+// CALCULAR TOTALES - FUNCIÓN CORREGIDA
 function calcularTotales() {
-  // Calcular total de cargos (existentes + nuevos)
-  let totalCargos = 0;
-  
-  // Sumar cargos existentes
-  cargos.forEach(cargo => {
-    totalCargos += parseFloat(cargo.monto) || 0;
-  });
-  
-  // Sumar cargos nuevos (en el formulario)
-  const elementosCargos = document.querySelectorAll('.cargo-item');
-  elementosCargos.forEach(item => {
-    const montoInput = item.querySelector('input[type="number"]');
-    if (montoInput && montoInput.value) {
-      totalCargos += parseFloat(montoInput.value) || 0;
-    }
-  });
+  // Calcular total de costos
+  let totalCostos = costos.reduce((total, costo) => {
+    return total + (parseFloat(costo.costo) || 0);
+  }, 0);
   
   // Calcular total de abonos
-  const totalAbonos = abonos.reduce((total, abono) => total + (abono.cantidad || 0), 0);
+  const totalAbonos = abonos.reduce((total, abono) => {
+    return total + (parseFloat(abono.cantidad) || 0);
+  }, 0);
   
   // Calcular saldo pendiente
-  const saldoPendiente = totalCargos - totalAbonos;
+  const saldoPendiente = totalCostos - totalAbonos;
   
   // Actualizar la UI
-  document.getElementById('totalCargos').textContent = totalCargos.toFixed(2);
+  document.getElementById('totalCargos').textContent = totalCostos.toFixed(2);
   document.getElementById('totalAbonos').textContent = totalAbonos.toFixed(2);
   document.getElementById('saldoPendiente').textContent = saldoPendiente.toFixed(2);
   
-  // Resaltar saldo pendiente si es positivo
+  // Resaltar saldo pendiente
   const saldoElement = document.getElementById('saldoPendiente');
   if (saldoPendiente > 0) {
     saldoElement.parentElement.style.color = '#e63946';
@@ -576,12 +596,11 @@ function getRadioValue(name) {
   return selected ? selected.value : 'No';
 }
 
-// Actualizar paciente en Firebase (FUNCIÓN COMPLETA Y CORREGIDA)
+// ACTUALIZAR PACIENTE - FUNCIÓN CORREGIDA
 async function actualizarPaciente(e) {
   e.preventDefault();
   
   try {
-    // Mostrar indicador de carga
     Swal.fire({
       title: 'Actualizando...',
       text: 'Por favor espere',
@@ -603,27 +622,27 @@ async function actualizarPaciente(e) {
     }
     
     // 3. Preparar array final de imágenes
-    const imagenesFinales = imagenesExistentes.filter(imagen => 
-      !imagenesAEliminar.includes(imagen)
-    ).concat(nuevasImagenesSubidas);
+    const imagenesFinales = imagenesExistentes.filter((imagen, index) => {
+      return !imagenesAEliminar.includes(imagen.url); // ← CORREGIR esto
+    }).concat(nuevasImagenesSubidas);
     
     // 4. Obtener valores de cargos (existentes + nuevos)
-    const nuevosCargos = [...cargos]; // Copiar cargos existentes
+    const nuevosCostos = [...costos]; // Copiar cargos existentes
     
     // Agregar cargos nuevos del formulario
-    const elementosCargos = document.querySelectorAll('.cargo-item');
-    elementosCargos.forEach(item => {
+    const elementosCostos = document.querySelectorAll('.costo-item');
+    elementosCostos.forEach(item => {
       const descInput = item.querySelector('input[type="text"]');
       const montoInput = item.querySelector('input[type="number"]');
       
       if (descInput && descInput.value && montoInput && montoInput.value) {
         // Verificar si es un cargo nuevo (no existente)
-        const esCargoNuevo = !descInput.id.startsWith('cargo-desc-') || isNaN(parseInt(descInput.id.split('-')[2]));
+        const esCostoNuevo = !descInput.id.startsWith('costo-desc-') || isNaN(parseInt(descInput.id.split('-')[2]));
         
-        if (esCargoNuevo) {
-          nuevosCargos.push({
-            descripcion: descInput.value,
-            monto: parseFloat(montoInput.value)
+        if (esCostoNuevo) {
+          nuevosCostos.push({
+            concepto: descInput.value,
+            costo: parseFloat(montoInput.value)
           });
         }
       }
@@ -689,7 +708,7 @@ async function actualizarPaciente(e) {
       habitosLimpieza: document.getElementById('habitosLimpieza').value,
       productosEspecificos: document.getElementById('productosEspecificos').value,
       
-            cargos: nuevosCargos,
+      costos: nuevosCostos,
       abonos: abonos,
       imagenes: imagenesFinales,
       
