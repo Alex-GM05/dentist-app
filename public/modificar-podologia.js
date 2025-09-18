@@ -569,7 +569,7 @@ function actualizarUI() {
   }
 }
 
-// Función para cargar imágenes existentes
+// Función para cargar imágenes existentes - VERSIÓN MEJORADA
 function cargarImagenesExistentes(imagenes) {
   const contenedor = document.getElementById('imagenes-existentes');
   if (!contenedor) {
@@ -597,6 +597,9 @@ function cargarImagenesExistentes(imagenes) {
               style="position: absolute; top: 5px; right: 5px; background: #e63946; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">
         ❌
       </button>
+      <div style="font-size: 10px; text-align: center; margin-top: 5px;">
+        ${imagen.nombre || 'imagen'}
+      </div>
     `;
     contenedor.appendChild(imagenDiv);
   });
@@ -670,13 +673,13 @@ function eliminarPreview(boton) {
   previewDiv.remove();
 }
 
-// Función para subir imágenes a Firebase Storage
+// Función para subir imágenes a Firebase Storage - VERSIÓN CORREGIDA
 async function subirImagenes() {
   const imagenesSubidas = [];
   
   for (const imagen of nuevasImagenes) {
     try {
-      // Crear referencia en Storage
+      // Crear referencia en Storage según tu estructura
       const storageRef = firebase.storage().ref();
       const imagenRef = storageRef.child(`historial-podologia/${pacienteId}/adjuntos/${Date.now()}_${imagen.file.name}`);
       
@@ -688,9 +691,12 @@ async function subirImagenes() {
       
       imagenesSubidas.push({
         url: downloadURL,
+        path: snapshot.ref.fullPath, // Guardar el path completo
         nombre: imagen.file.name,
         fecha: new Date().toISOString()
       });
+      
+      console.log('Imagen subida a:', snapshot.ref.fullPath);
     } catch (error) {
       console.error('Error al subir imagen:', error);
     }
@@ -699,7 +705,7 @@ async function subirImagenes() {
   return imagenesSubidas;
 }
 
-// Función para eliminar imágenes de Firebase Storage
+// Función para eliminar imágenes de Firebase Storage - VERSIÓN CORREGIDA
 function eliminarImagenesStorage(imagenesAEliminar) {
   if (!imagenesAEliminar || !Array.isArray(imagenesAEliminar)) {
     console.log('No hay imágenes para eliminar');
@@ -707,23 +713,57 @@ function eliminarImagenesStorage(imagenesAEliminar) {
   }
 
   const promesasEliminacion = imagenesAEliminar.map(imagenUrl => {
-    // Validación más estricta
-    if (!imagenUrl || typeof imagenUrl !== 'string' || !imagenUrl.startsWith('https://firebasestorage.googleapis.com/')) {
-      console.log('URL omitida (inválida):', imagenUrl);
+    // Verificar que la URL sea válida
+    if (!imagenUrl || typeof imagenUrl !== 'string') {
+      console.warn('URL inválida:', imagenUrl);
       return Promise.resolve();
     }
 
     try {
-      const imagenRef = storage.refFromURL(imagenUrl);
-      return imagenRef.delete()
-        .then(() => console.log('Imagen eliminada:', imagenUrl))
-        .catch(error => {
-          console.error('Error al eliminar imagen:', error);
-          return Promise.resolve(); // No romper la cadena de promesas
-        });
+      // OPCIÓN 1: Si la URL es completa de Firebase Storage
+      if (imagenUrl.startsWith('https://firebasestorage.googleapis.com/')) {
+        const imagenRef = storage.refFromURL(imagenUrl);
+        return imagenRef.delete()
+          .then(() => {
+            console.log('Imagen eliminada de Storage:', imagenUrl);
+            return true;
+          })
+          .catch(error => {
+            console.error('Error al eliminar imagen de Storage:', error);
+            return false;
+          });
+      }
+      // OPCIÓN 2: Si es solo el path (tu caso)
+      else if (imagenUrl.includes('/historial-podologia/') && imagenUrl.includes('/adjuntos/')) {
+        const imagenRef = storage.ref(imagenUrl);
+        return imagenRef.delete()
+          .then(() => {
+            console.log('Imagen eliminada de Storage:', imagenUrl);
+            return true;
+          })
+          .catch(error => {
+            console.error('Error al eliminar imagen de Storage:', error);
+            return false;
+          });
+      }
+      // OPCIÓN 3: Si es un path relativo
+      else {
+        // Reconstruir la ruta completa según tu estructura
+        const rutaCompleta = `historial-podologia/${pacienteId}/adjuntos/${imagenUrl}`;
+        const imagenRef = storage.ref(rutaCompleta);
+        return imagenRef.delete()
+          .then(() => {
+            console.log('Imagen eliminada de Storage:', rutaCompleta);
+            return true;
+          })
+          .catch(error => {
+            console.error('Error al eliminar imagen de Storage:', error);
+            return false;
+          });
+      }
     } catch (error) {
-      console.error('Error procesando URL:', error);
-      return Promise.resolve();
+      console.error('Error procesando URL:', imagenUrl, error);
+      return Promise.resolve(false);
     }
   });
 
@@ -846,7 +886,14 @@ async function actualizarPaciente(e) {
       
       costos: costos,
       abonos: abonos,
-      imagenes: imagenesFinales,
+      imagenes: imagenesFinales.map(imagen => ({
+      url: imagen.url,
+      path: imagen.path || // Si ya tienes el path
+            imagen.url.split('/o/')[1]?.split('?')[0] || // Extraer path de URL
+            `historial-podologia/${pacienteId}/adjuntos/${imagen.nombre}`,
+      nombre: imagen.nombre,
+      fecha: imagen.fecha
+    })),
       ultimaActualizacion: new Date()
     };
     
