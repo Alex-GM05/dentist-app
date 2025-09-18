@@ -562,9 +562,6 @@ function actualizarUI(totalCostos, totalAbonos, saldoPendiente) {
   }
 }
 
-// Variable para evitar updates innecesarios a Firestore
-let ultimoTotalGuardado = null;
-
 // Función para cargar imágenes existentes - VERSIÓN MEJORADA
 function cargarImagenesExistentes(imagenes) {
   const contenedor = document.getElementById('imagenes-existentes');
