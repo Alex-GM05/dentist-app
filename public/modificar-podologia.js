@@ -14,13 +14,23 @@ const db = firebase.firestore();
 // Para Firebase version 9+ usa esta sintaxis:
 const storage = firebase.storage();
 
-// Verificar autenticación
+// AUTENTICACIÓN ANÓNIMA AUTOMÁTICA
+firebase.auth().signInAnonymously()
+  .then(() => {
+    console.log('Autenticación anónima exitosa');
+  })
+  .catch((error) => {
+    console.error('Error en autenticación anónima:', error);
+    Swal.fire('Error', 'No se pudo inicializar la aplicación', 'error');
+  });
+
+// Opcional: Escuchar cambios de autenticación
 firebase.auth().onAuthStateChanged((user) => {
-  if (!user) {
-    Swal.fire('No autenticado', 'Debes iniciar sesión para continuar', 'error')
-      .then(() => {
-        window.location.href = 'index.html'; // Redirige a tu página de login
-      });
+  if (user) {
+    console.log('Usuario anónimo autenticado:', user.uid);
+    // user.isAnonymous será true
+  } else {
+    console.log('Usuario no autenticado');
   }
 });
 
@@ -648,6 +658,19 @@ function getRadioValue(name) {
 // ACTUALIZAR PACIENTE - VERSIÓN COMPLETAMENTE CORREGIDA
 async function actualizarPaciente(e) {
   e.preventDefault();
+  
+  // VERIFICAR SI HAY USUARIO AUTENTICADO (ANÓNIMO O NO)
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    // Intentar autenticar anónimamente justo antes de la operación
+    try {
+      await firebase.auth().signInAnonymously();
+      console.log('Autenticado anónimamente para la operación');
+    } catch (authError) {
+      Swal.fire('Error de autenticación', 'No se pudo autenticar para realizar la operación', 'error');
+      return;
+    }
+  }
   
   try {
     Swal.fire({
