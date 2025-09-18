@@ -599,23 +599,42 @@ async function subirImagenes() {
 }
 
 // Función para eliminar imágenes de Firebase Storage
-async function eliminarImagenesStorage() {
-  for (const url of imagenesAEliminar) {
+function eliminarImagenesStorage(imagenesAEliminar) {
+  if (!imagenesAEliminar || !Array.isArray(imagenesAEliminar)) {
+    console.log('No hay imágenes para eliminar o el formato es incorrecto');
+    return Promise.resolve();
+  }
+
+  const promesasEliminacion = imagenesAEliminar.map(imagenUrl => {
+    // Verificar que la URL sea válida
+    if (!imagenUrl || typeof imagenUrl !== 'string') {
+      console.warn('URL inválida:', imagenUrl);
+      return Promise.resolve();
+    }
+
     try {
-      // Verificar si es una URL completa o solo una ruta
-      if (url.startsWith('http')) {
-        // Es una URL completa - usar refFromURL
-        const imagenRef = firebase.storage().refFromURL(url);
-        await imagenRef.delete();
+      // Asegurarse de que la URL sea de Firebase Storage
+      if (imagenUrl.startsWith('https://firebasestorage.googleapis.com/')) {
+        const imagenRef = storage.refFromURL(imagenUrl);
+        return imagenRef.delete()
+          .then(() => {
+            console.log('Imagen eliminada:', imagenUrl);
+          })
+          .catch(error => {
+            console.error('Error al eliminar imagen:', error);
+            // No lanzar error para no interrumpir otras eliminaciones
+          });
       } else {
-        // Es solo una ruta - usar ref
-        const imagenRef = firebase.storage().ref(url);
-        await imagenRef.delete();
+        console.warn('URL no es de Firebase Storage:', imagenUrl);
+        return Promise.resolve();
       }
     } catch (error) {
-      console.error('Error al eliminar imagen:', error);
+      console.error('Error procesando URL:', imagenUrl, error);
+      return Promise.resolve();
     }
-  }
+  });
+
+  return Promise.all(promesasEliminacion);
 }
 
 // Función para obtener el valor de un grupo de radio buttons
@@ -624,7 +643,7 @@ function getRadioValue(name) {
   return selected ? selected.value : 'No';
 }
 
-// ACTUALIZAR PACIENTE - VERSIÓN SIMPLIFICADA
+// ACTUALIZAR PACIENTE - VERSIÓN CORREGIDA
 async function actualizarPaciente(e) {
   e.preventDefault();
   
@@ -638,9 +657,9 @@ async function actualizarPaciente(e) {
       }
     });
     
-    // 1. Eliminar imágenes marcadas para eliminar
+    // 1. Eliminar imágenes marcadas para eliminar (CON PARÁMETRO CORRECTO)
     if (imagenesAEliminar.length > 0) {
-      await eliminarImagenesStorage();
+      await eliminarImagenesStorage(imagenesAEliminar); // Se agregó el parámetro
     }
     
     // 2. Subir nuevas imágenes
@@ -654,7 +673,7 @@ async function actualizarPaciente(e) {
       return !imagenesAEliminar.includes(imagen.url);
     }).concat(nuevasImagenesSubidas);
     
-    // 4. Preparar datos para actualizar
+    // 4. Preparar datos para actualizar (CON VALIDACIONES MEJORADAS)
     const datosActualizados = {
       nombre: document.getElementById('nombre').value,
       sexo: document.getElementById('sexo').value,
@@ -663,7 +682,7 @@ async function actualizarPaciente(e) {
       ocupacion: document.getElementById('ocupacion').value,
       telefono: document.getElementById('telefono').value,
       fecha: document.getElementById('fecha').value,
-      edad: parseInt(document.getElementById('edad').value),
+      edad: parseInt(document.getElementById('edad').value) || 0,
       estadoCivil: document.getElementById('estadoCivil').value,
       objetivoVisita: document.getElementById('objetivoVisita').value,
       alergias: document.getElementById('alergias').value,
@@ -683,36 +702,36 @@ async function actualizarPaciente(e) {
       },
       
       usoTacon: getRadioValue('usoTacon'),
-      alturaTacon: document.getElementById('alturaTacon').value,
-      horasUsoTacon: document.getElementById('horasUsoTacon').value,
-      diasTacon: document.getElementById('diasTacon').value,
+      alturaTacon: document.getElementById('alturaTacon').value || '',
+      horasUsoTacon: document.getElementById('horasUsoTacon').value || '',
+      diasTacon: document.getElementById('diasTacon').value || '',
       
       peso: parseFloat(document.getElementById('peso').value) || 0,
       estatura: parseFloat(document.getElementById('estatura').value) || 0,
-      imc: document.getElementById('imc').value,
-      frecuenciaCardiaca: document.getElementById('frecuenciaCardiaca').value,
-      pulso: document.getElementById('pulso').value,
+      imc: document.getElementById('imc').value || '',
+      frecuenciaCardiaca: document.getElementById('frecuenciaCardiaca').value || '',
+      pulso: document.getElementById('pulso').value || '',
       temperatura: parseFloat(document.getElementById('temperatura').value) || 0,
       
-      alcohol: document.getElementById('alcohol').value,
-      cigarro: document.getElementById('cigarro').value,
-      desvela: document.getElementById('desvela').value,
+      alcohol: document.getElementById('alcohol').value || '',
+      cigarro: document.getElementById('cigarro').value || '',
+      desvela: document.getElementById('desvela').value || '',
       agua: parseFloat(document.getElementById('agua').value) || 0,
-      medicamentos: document.getElementById('medicamentos').value,
-      calzado: document.getElementById('calzado').value,
-      carne: document.getElementById('carne').value,
-      pescado: document.getElementById('pescado').value,
-      verduras: document.getElementById('verduras').value,
-      frutas: document.getElementById('frutas').value,
-      pan: document.getElementById('pan').value,
-      ejercicio: document.getElementById('ejercicio').value,
-      tipoEjercicio: document.getElementById('tipoEjercicio').value,
+      medicamentos: document.getElementById('medicamentos').value || '',
+      calzado: document.getElementById('calzado').value || '',
+      carne: document.getElementById('carne').value || '',
+      pescado: document.getElementById('pescado').value || '',
+      verduras: document.getElementById('verduras').value || '',
+      frutas: document.getElementById('frutas').value || '',
+      pan: document.getElementById('pan').value || '',
+      ejercicio: document.getElementById('ejercicio').value || '',
+      tipoEjercicio: document.getElementById('tipoEjercicio').value || '',
       frecuenciaEjercicio: parseInt(document.getElementById('frecuenciaEjercicio').value) || 0,
-      cirugias: document.getElementById('cirugias').value,
-      bebidas: document.getElementById('bebidas').value,
-      frecuenciaBebidas: document.getElementById('frecuenciaBebidas').value,
-      habitosLimpieza: document.getElementById('habitosLimpieza').value,
-      productosEspecificos: document.getElementById('productosEspecificos').value,
+      cirugias: document.getElementById('cirugias').value || '',
+      bebidas: document.getElementById('bebidas').value || '',
+      frecuenciaBebidas: document.getElementById('frecuenciaBebidas').value || '',
+      habitosLimpieza: document.getElementById('habitosLimpieza').value || '',
+      productosEspecificos: document.getElementById('productosEspecificos').value || '',
       
       costos: costos,
       abonos: abonos,
@@ -720,7 +739,7 @@ async function actualizarPaciente(e) {
       ultimaActualizacion: new Date()
     };
     
-    // 5. Actualizar en Firebase
+    // 5. Actualizar en Firebase con manejo de errores específico
     await db.collection('historial-podologia').doc(pacienteId).update(datosActualizados);
     
     Swal.fire('Éxito', 'Historia podológica actualizada correctamente.', 'success')
@@ -730,6 +749,12 @@ async function actualizarPaciente(e) {
       
   } catch (error) {
     console.error('Error al actualizar:', error);
-    Swal.fire('Error', 'No se pudo actualizar la historia podológica: ' + error.message, 'error');
+    
+    // Manejo específico de errores de permisos
+    if (error.code === 'permission-denied') {
+      Swal.fire('Error de permisos', 'No tienes permisos para actualizar este documento. Contacta al administrador.', 'error');
+    } else {
+      Swal.fire('Error', 'No se pudo actualizar la historia podológica: ' + error.message, 'error');
+    }
   }
 }
