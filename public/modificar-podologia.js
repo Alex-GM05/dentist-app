@@ -42,8 +42,8 @@ let imagenesExistentes = [];
 let imagenesAEliminar = [];
 let nuevasImagenes = [];
 
-// AGREGAR NUEVO COSTO - FUNCIÓN FALTANTE
-function agregarCosto() {
+// AGREGAR NUEVO COSTO - FUNCIÓN CORREGIDA
+async function agregarCosto() {
   const nuevoCosto = {
     concepto: '',
     costo: 0,
@@ -52,11 +52,12 @@ function agregarCosto() {
   
   costos.push(nuevoCosto);
   renderCostos();
+  await calcularTotales();
 }
 
-// AGREGAR ABONO
-function agregarAbono() {
-  Swal.fire({
+// AGREGAR ABONO - VERSIÓN CORREGIDA
+async function agregarAbono() {
+  const { value: formValues } = await Swal.fire({
     title: 'Agregar Abono',
     html:
       `<input id="swal-fecha" type="date" class="swal2-input" placeholder="Fecha" value="${new Date().toISOString().split('T')[0]}">` +
@@ -68,6 +69,9 @@ function agregarAbono() {
         <option value="tarjeta">Tarjeta</option>
       </select>`,
     focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Agregar',
+    cancelButtonText: 'Cancelar',
     preConfirm: () => {
       return {
         fecha: document.getElementById('swal-fecha').value,
@@ -76,28 +80,28 @@ function agregarAbono() {
         metodo: document.getElementById('swal-metodo').value
       };
     }
-  }).then((result) => {
-    if (result.isConfirmed && result.value) {
-      const { fecha, concepto, cantidad, metodo } = result.value;
-      
-      if (!fecha || !concepto || isNaN(cantidad) || cantidad <= 0) {
-        Swal.fire('Error', 'Todos los campos son obligatorios y la cantidad debe ser mayor a 0.', 'error');
-        return;
-      }
-      
-      abonos.push({
-        fecha,
-        concepto,
-        cantidad,
-        metodo
-      });
-      
-      renderAbonos();
-      calcularTotales();
-      
-      Swal.fire('Éxito', 'Abono agregado correctamente.', 'success');
-    }
   });
+
+  if (formValues) {
+    const { fecha, concepto, cantidad, metodo } = formValues;
+    
+    if (!fecha || !concepto || isNaN(cantidad) || cantidad <= 0) {
+      Swal.fire('Error', 'Todos los campos son obligatorios y la cantidad debe ser mayor a 0.', 'error');
+      return;
+    }
+    
+    abonos.push({
+      fecha,
+      concepto,
+      cantidad,
+      metodo
+    });
+    
+    renderAbonos();
+    await calcularTotales();
+    
+    Swal.fire('Éxito', 'Abono agregado correctamente.', 'success');
+  }
 }
 
 // Función para mostrar/ocultar secciones de mujeres
@@ -145,8 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Configurar eventos
   document.getElementById('formPodologia').addEventListener('submit', actualizarPaciente);
-  document.getElementById('agregar-costo').addEventListener('click', agregarCosto);
-  document.getElementById('agregar-abono').addEventListener('click', agregarAbono);
+  document.getElementById('agregar-costo').addEventListener('click', () => agregarCosto());
+  document.getElementById('agregar-abono').addEventListener('click', () => agregarAbono());
   document.getElementById('sexo').addEventListener('change', toggleSeccionesMujer);
   
   // Calcular IMC automáticamente
@@ -295,7 +299,7 @@ async function cargarPaciente() {
     }
     
     // Calcular totales
-    calcularTotales();
+    actualizarUI();
     
   } catch (error) {
     console.error('Error al cargar el paciente:', error);
@@ -338,21 +342,21 @@ function renderCostos() {
       <div class="grid-4" style="margin-bottom: 1rem; gap: 10px; align-items: end;">
         <div>
           <label class="odontologia-label">Fecha</label>
-          <input type="date" class="odontologia-input" 
+          <input type="date" class="odontologia-input costo-fecha" 
                  value="${costo.fecha || new Date().toISOString().split('T')[0]}" 
-                 oninput="costos[${index}].fecha = this.value">
+                 data-index="${index}">
         </div>
         <div>
           <label class="odontologia-label">Concepto</label>
-          <input type="text" class="odontologia-input" placeholder="Concepto del costo" 
+          <input type="text" class="odontologia-input costo-concepto" placeholder="Concepto del costo" 
                  value="${costo.concepto || ''}" 
-                 oninput="costos[${index}].concepto = this.value; calcularTotales()">
+                 data-index="${index}">
         </div>
         <div>
           <label class="odontologia-label">Monto ($)</label>
-          <input type="number" class="odontologia-input" placeholder="Monto" min="0" step="0.01" 
+          <input type="number" class="odontologia-input costo-monto" placeholder="Monto" min="0" step="0.01" 
                  value="${costo.costo || 0}" 
-                 oninput="costos[${index}].costo = parseFloat(this.value) || 0; calcularTotales()">
+                 data-index="${index}">
         </div>
         <div>
           <button type="button" class="btn-eliminar" onclick="eliminarCostoExistente(${index})" style="margin-top: 24px;">❌ Eliminar</button>
@@ -363,12 +367,38 @@ function renderCostos() {
     contenedor.appendChild(costoDiv);
   });
   
+  // Agregar event listeners después de crear los elementos
+  setTimeout(() => {
+    document.querySelectorAll('.costo-concepto').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        costos[index].concepto = e.target.value;
+        calcularTotales();
+      });
+    });
+    
+    document.querySelectorAll('.costo-monto').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        costos[index].costo = parseFloat(e.target.value) || 0;
+        calcularTotales();
+      });
+    });
+    
+    document.querySelectorAll('.costo-fecha').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        costos[index].fecha = e.target.value;
+      });
+    });
+  }, 0);
+  
   calcularTotales();
 }
 
-// ELIMINAR COSTO EXISTENTE
-function eliminarCostoExistente(index) {
-  Swal.fire({
+// ELIMINAR COSTO EXISTENTE - VERSIÓN CORREGIDA
+async function eliminarCostoExistente(index) {
+  const { isConfirmed } = await Swal.fire({
     title: '¿Estás seguro?',
     text: "Esta acción no se puede deshacer.",
     icon: 'warning',
@@ -377,13 +407,14 @@ function eliminarCostoExistente(index) {
     cancelButtonColor: '#d33',
     confirmButtonText: 'Sí, eliminar',
     cancelButtonText: 'Cancelar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      costos.splice(index, 1);
-      renderCostos();
-      Swal.fire('Eliminado', 'El costo ha sido eliminado.', 'success');
-    }
   });
+
+  if (isConfirmed) {
+    costos.splice(index, 1);
+    renderCostos();
+    await calcularTotales();
+    Swal.fire('Eliminado', 'El costo ha sido eliminado.', 'success');
+  }
 }
 
 // RENDERIZAR ABONOS
@@ -431,9 +462,9 @@ function renderAbonos() {
   contenedor.appendChild(tabla);
 }
 
-// Eliminar un abono
-function eliminarAbono(index) {
-  Swal.fire({
+// Eliminar un abono - VERSIÓN CORREGIDA
+async function eliminarAbono(index) {
+  const { isConfirmed } = await Swal.fire({
     title: '¿Estás seguro?',
     text: "Esta acción no se puede deshacer.",
     icon: 'warning',
@@ -442,32 +473,83 @@ function eliminarAbono(index) {
     cancelButtonColor: '#d33',
     confirmButtonText: 'Sí, eliminar',
     cancelButtonText: 'Cancelar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      abonos.splice(index, 1);
-      renderAbonos();
-      calcularTotales();
-      Swal.fire('Eliminado', 'El abono ha sido eliminado.', 'success');
-    }
   });
+
+  if (isConfirmed) {
+    abonos.splice(index, 1);
+    renderAbonos();
+    await calcularTotales();
+    Swal.fire('Eliminado', 'El abono ha sido eliminado.', 'success');
+  }
 }
 
-// CALCULAR TOTALES
-function calcularTotales() {
-  // Calcular total de costos
+// CALCULAR TOTALES Y ACTUALIZAR FIRESTORE
+async function calcularTotales() {
+  try {
+    // Calcular total de costos
+    let totalCostos = costos.reduce((total, costo) => {
+      return total + (parseFloat(costo.costo) || 0);
+    }, 0);
+    
+    // Calcular total de abonos
+    const totalAbonos = abonos.reduce((total, abono) => {
+      return total + (parseFloat(abono.cantidad) || 0);
+    }, 0);
+    
+    // Calcular saldo pendiente
+    const saldoPendiente = totalCostos - totalAbonos;
+    
+    // ✅ ACTUALIZAR FIRESTORE con el totalGeneral
+    if (pacienteId) {
+      await db.collection('historial-podologia').doc(pacienteId).update({
+        totalGeneral: saldoPendiente,
+        ultimaActualizacion: new Date()
+      });
+      console.log('Total general actualizado en Firestore:', saldoPendiente);
+    }
+    
+    // Actualizar la UI
+    const totalCargosElement = document.getElementById('totalCargos');
+    const totalAbonosElement = document.getElementById('totalAbonos');
+    const saldoPendienteElement = document.getElementById('saldoPendiente');
+    
+    if (totalCargosElement) totalCargosElement.textContent = totalCostos.toFixed(2);
+    if (totalAbonosElement) totalAbonosElement.textContent = totalAbonos.toFixed(2);
+    if (saldoPendienteElement) {
+      saldoPendienteElement.textContent = saldoPendiente.toFixed(2);
+      
+      // Resaltar saldo pendiente
+      if (saldoPendiente > 0) {
+        saldoPendienteElement.parentElement.style.color = '#e63946';
+        saldoPendienteElement.parentElement.style.fontWeight = 'bold';
+      } else {
+        saldoPendienteElement.parentElement.style.color = 'inherit';
+        saldoPendienteElement.parentElement.style.fontWeight = 'inherit';
+      }
+    }
+    
+    return saldoPendiente;
+    
+  } catch (error) {
+    console.error('Error al calcular totales y actualizar Firestore:', error);
+    // Aún así mostrar los totales en la UI aunque falle la actualización en Firestore
+    actualizarUI();
+    return 0;
+  }
+}
+
+// Función solo para actualizar la UI (sin Firestore)
+function actualizarUI() {
   let totalCostos = costos.reduce((total, costo) => {
     return total + (parseFloat(costo.costo) || 0);
   }, 0);
   
-  // Calcular total de abonos
   const totalAbonos = abonos.reduce((total, abono) => {
     return total + (parseFloat(abono.cantidad) || 0);
   }, 0);
   
-  // Calcular saldo pendiente
   const saldoPendiente = totalCostos - totalAbonos;
   
-  // Actualizar la UI
   const totalCargosElement = document.getElementById('totalCargos');
   const totalAbonosElement = document.getElementById('totalAbonos');
   const saldoPendienteElement = document.getElementById('saldoPendiente');
@@ -477,7 +559,6 @@ function calcularTotales() {
   if (saldoPendienteElement) {
     saldoPendienteElement.textContent = saldoPendiente.toFixed(2);
     
-    // Resaltar saldo pendiente
     if (saldoPendiente > 0) {
       saldoPendienteElement.parentElement.style.color = '#e63946';
       saldoPendienteElement.parentElement.style.fontWeight = 'bold';
