@@ -41,6 +41,7 @@ let abonos = [];
 let imagenesExistentes = [];
 let imagenesAEliminar = [];
 let nuevasImagenes = [];
+let ultimoTotalGuardado = null;
 
 // AGREGAR NUEVO COSTO - FUNCIÓN CORREGIDA
 async function agregarCosto() {
@@ -298,6 +299,9 @@ async function cargarPaciente() {
       renderAbonos();
     }
     
+    if (paciente.totalGeneral) {
+      ultimoTotalGuardado = paciente.totalGeneral;
+    }
     // Calcular totales
     actualizarUI();
     
@@ -321,6 +325,7 @@ function setRadioValue(name, value) {
 }
 
 // RENDERIZAR COSTOS EXISTENTES - VERSIÓN MEJORADA
+// RENDERIZAR COSTOS EXISTENTES - VERSIÓN MEJORADA CON EVENT LISTENERS
 function renderCostos() {
   const contenedor = document.getElementById('costos-container');
   if (!contenedor) {
@@ -359,7 +364,7 @@ function renderCostos() {
                  data-index="${index}">
         </div>
         <div>
-          <button type="button" class="btn-eliminar" onclick="eliminarCostoExistente(${index})" style="margin-top: 24px;">❌ Eliminar</button>
+          <button type="button" class="btn-eliminar" data-index="${index}" style="margin-top: 24px;">❌ Eliminar</button>
         </div>
       </div>
     `;
@@ -367,28 +372,39 @@ function renderCostos() {
     contenedor.appendChild(costoDiv);
   });
   
-  // Agregar event listeners después de crear los elementos
+  // AGREGAR EVENT LISTENERS DESPUÉS DE CREAR LOS ELEMENTOS
   setTimeout(() => {
+    // Event listeners para montos de costos (CÁLCULO AUTOMÁTICO)
+    document.querySelectorAll('.costo-monto').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        const nuevoValor = parseFloat(e.target.value) || 0;
+        costos[index].costo = nuevoValor;
+        calcularTotales(); // ✅ Se actualiza automáticamente
+      });
+    });
+    
+    // Event listeners para conceptos
     document.querySelectorAll('.costo-concepto').forEach(input => {
       input.addEventListener('input', (e) => {
         const index = parseInt(e.target.getAttribute('data-index'));
         costos[index].concepto = e.target.value;
-        calcularTotales();
       });
     });
     
-    document.querySelectorAll('.costo-monto').forEach(input => {
-      input.addEventListener('input', (e) => {
-        const index = parseInt(e.target.getAttribute('data-index'));
-        costos[index].costo = parseFloat(e.target.value) || 0;
-        calcularTotales();
-      });
-    });
-    
+    // Event listeners para fechas
     document.querySelectorAll('.costo-fecha').forEach(input => {
       input.addEventListener('input', (e) => {
         const index = parseInt(e.target.getAttribute('data-index'));
         costos[index].fecha = e.target.value;
+      });
+    });
+    
+    // Event listeners para botones de eliminar
+    document.querySelectorAll('.btn-eliminar').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        eliminarCostoExistente(index);
       });
     });
   }, 0);
@@ -411,8 +427,7 @@ async function eliminarCostoExistente(index) {
 
   if (isConfirmed) {
     costos.splice(index, 1);
-    renderCostos();
-    await calcularTotales();
+    renderCostos(); // Esto llamará a calcularTotales() automáticamente
     Swal.fire('Eliminado', 'El costo ha sido eliminado.', 'success');
   }
 }
@@ -483,7 +498,7 @@ async function eliminarAbono(index) {
   }
 }
 
-// CALCULAR TOTALES Y ACTUALIZAR FIRESTORE
+// CALCULAR TOTALES Y ACTUALIZAR FIRESTORE - VERSIÓN OPTIMIZADA
 async function calcularTotales() {
   try {
     // Calcular total de costos
@@ -499,57 +514,34 @@ async function calcularTotales() {
     // Calcular saldo pendiente
     const saldoPendiente = totalCostos - totalAbonos;
     
-    // ✅ ACTUALIZAR FIRESTORE con el totalGeneral
-    if (pacienteId) {
+    // ✅ ACTUALIZAR FIRESTORE con el totalGeneral (solo si hay cambios significativos)
+    if (pacienteId && Math.abs(saldoPendiente - (ultimoTotalGuardado || 0)) > 0.01) {
       await db.collection('historial-podologia').doc(pacienteId).update({
         totalGeneral: saldoPendiente,
         ultimaActualizacion: new Date()
       });
       console.log('Total general actualizado en Firestore:', saldoPendiente);
+      ultimoTotalGuardado = saldoPendiente; // Guardar referencia
     }
     
     // Actualizar la UI
-    const totalCargosElement = document.getElementById('totalCargos');
-    const totalAbonosElement = document.getElementById('totalAbonos');
-    const saldoPendienteElement = document.getElementById('saldoPendiente');
-    
-    if (totalCargosElement) totalCargosElement.textContent = totalCostos.toFixed(2);
-    if (totalAbonosElement) totalAbonosElement.textContent = totalAbonos.toFixed(2);
-    if (saldoPendienteElement) {
-      saldoPendienteElement.textContent = saldoPendiente.toFixed(2);
-      
-      // Resaltar saldo pendiente
-      if (saldoPendiente > 0) {
-        saldoPendienteElement.parentElement.style.color = '#e63946';
-        saldoPendienteElement.parentElement.style.fontWeight = 'bold';
-      } else {
-        saldoPendienteElement.parentElement.style.color = 'inherit';
-        saldoPendienteElement.parentElement.style.fontWeight = 'inherit';
-      }
-    }
+    actualizarUI(totalCostos, totalAbonos, saldoPendiente);
     
     return saldoPendiente;
     
   } catch (error) {
-    console.error('Error al calcular totales y actualizar Firestore:', error);
-    // Aún así mostrar los totales en la UI aunque falle la actualización en Firestore
-    actualizarUI();
+    console.error('Error al calcular totales:', error);
+    // Aún así mostrar los totales en la UI
+    const totalCostos = costos.reduce((total, costo) => total + (parseFloat(costo.costo) || 0), 0);
+    const totalAbonos = abonos.reduce((total, abono) => total + (parseFloat(abono.cantidad) || 0), 0);
+    const saldoPendiente = totalCostos - totalAbonos;
+    actualizarUI(totalCostos, totalAbonos, saldoPendiente);
     return 0;
   }
 }
 
-// Función solo para actualizar la UI (sin Firestore)
-function actualizarUI() {
-  let totalCostos = costos.reduce((total, costo) => {
-    return total + (parseFloat(costo.costo) || 0);
-  }, 0);
-  
-  const totalAbonos = abonos.reduce((total, abono) => {
-    return total + (parseFloat(abono.cantidad) || 0);
-  }, 0);
-  
-  const saldoPendiente = totalCostos - totalAbonos;
-  
+// Función solo para actualizar la UI
+function actualizarUI(totalCostos, totalAbonos, saldoPendiente) {
   const totalCargosElement = document.getElementById('totalCargos');
   const totalAbonosElement = document.getElementById('totalAbonos');
   const saldoPendienteElement = document.getElementById('saldoPendiente');
@@ -559,6 +551,7 @@ function actualizarUI() {
   if (saldoPendienteElement) {
     saldoPendienteElement.textContent = saldoPendiente.toFixed(2);
     
+    // Resaltar saldo pendiente
     if (saldoPendiente > 0) {
       saldoPendienteElement.parentElement.style.color = '#e63946';
       saldoPendienteElement.parentElement.style.fontWeight = 'bold';
@@ -568,6 +561,9 @@ function actualizarUI() {
     }
   }
 }
+
+// Variable para evitar updates innecesarios a Firestore
+let ultimoTotalGuardado = null;
 
 // Función para cargar imágenes existentes - VERSIÓN MEJORADA
 function cargarImagenesExistentes(imagenes) {
