@@ -22,6 +22,93 @@ let imagenesExistentes = [];
 let imagenesAEliminar = [];
 let nuevasImagenes = [];
 
+// AGREGAR NUEVO COSTO - FUNCIÓN FALTANTE
+function agregarCosto() {
+  const nuevoCosto = {
+    concepto: '',
+    costo: 0,
+    fecha: new Date().toISOString().split('T')[0]
+  };
+  
+  costos.push(nuevoCosto);
+  renderCostos();
+}
+
+// AGREGAR ABONO
+function agregarAbono() {
+  Swal.fire({
+    title: 'Agregar Abono',
+    html:
+      `<input id="swal-fecha" type="date" class="swal2-input" placeholder="Fecha" value="${new Date().toISOString().split('T')[0]}">` +
+      `<input id="swal-concepto" type="text" class="swal2-input" placeholder="Concepto">` +
+      `<input id="swal-cantidad" type="number" class="swal2-input" placeholder="Cantidad abonada" min="0" step="0.01">` +
+      `<select id="swal-metodo" class="swal2-input">
+        <option value="efectivo">Efectivo</option>
+        <option value="transferencia">Transferencia</option>
+        <option value="tarjeta">Tarjeta</option>
+      </select>`,
+    focusConfirm: false,
+    preConfirm: () => {
+      return {
+        fecha: document.getElementById('swal-fecha').value,
+        concepto: document.getElementById('swal-concepto').value,
+        cantidad: parseFloat(document.getElementById('swal-cantidad').value),
+        metodo: document.getElementById('swal-metodo').value
+      };
+    }
+  }).then((result) => {
+    if (result.isConfirmed && result.value) {
+      const { fecha, concepto, cantidad, metodo } = result.value;
+      
+      if (!fecha || !concepto || isNaN(cantidad) || cantidad <= 0) {
+        Swal.fire('Error', 'Todos los campos son obligatorios y la cantidad debe ser mayor a 0.', 'error');
+        return;
+      }
+      
+      abonos.push({
+        fecha,
+        concepto,
+        cantidad,
+        metodo
+      });
+      
+      renderAbonos();
+      calcularTotales();
+      
+      Swal.fire('Éxito', 'Abono agregado correctamente.', 'success');
+    }
+  });
+}
+
+// Función para mostrar/ocultar secciones de mujeres
+function toggleSeccionesMujer() {
+  const sexo = document.getElementById('sexo').value;
+  const seccionMujeres = document.getElementById('seccion-mujeres');
+  const seccionEmbarazo = document.getElementById('seccion-embarazo');
+  
+  if (sexo === 'Mujer') {
+    seccionMujeres.classList.remove('seccion-oculta');
+    seccionEmbarazo.classList.remove('seccion-oculta');
+  } else {
+    seccionMujeres.classList.add('seccion-oculta');
+    seccionEmbarazo.classList.add('seccion-oculta');
+  }
+}
+
+// Calcular IMC automáticamente (versión mejorada)
+function calcularIMC() {
+  const peso = parseFloat(document.getElementById('peso').value);
+  const estatura = parseFloat(document.getElementById('estatura').value);
+  
+  if (peso > 0 && estatura > 0) {
+    const estaturaMetros = estatura / 100;
+    const imc = peso / (estaturaMetros * estaturaMetros);
+    document.getElementById('imc').value = imc.toFixed(2);
+  } else {
+    document.getElementById('imc').value = '';
+  }
+}
+
 // Cargar datos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
   // Obtener ID del paciente desde la URL
@@ -209,47 +296,6 @@ function setRadioValue(name, value) {
   }
 }
 
-// Función para mostrar/ocultar secciones de mujeres
-function toggleSeccionesMujer() {
-  const sexo = document.getElementById('sexo').value;
-  const seccionMujeres = document.getElementById('seccion-mujeres');
-  const seccionEmbarazo = document.getElementById('seccion-embarazo');
-  
-  if (sexo === 'Mujer') {
-    seccionMujeres.classList.remove('seccion-oculta');
-    seccionEmbarazo.classList.remove('seccion-oculta');
-  } else {
-    seccionMujeres.classList.add('seccion-oculta');
-    seccionEmbarazo.classList.add('seccion-oculta');
-  }
-}
-
-// Calcular IMC automáticamente (versión mejorada)
-function calcularIMC() {
-  const peso = parseFloat(document.getElementById('peso').value);
-  const estatura = parseFloat(document.getElementById('estatura').value);
-  
-  if (peso > 0 && estatura > 0) {
-    const estaturaMetros = estatura / 100;
-    const imc = peso / (estaturaMetros * estaturaMetros);
-    document.getElementById('imc').value = imc.toFixed(2);
-  } else {
-    document.getElementById('imc').value = '';
-  }
-}
-
-// AGREGAR NUEVO COSTO - FUNCIÓN FALTANTE
-function agregarCosto() {
-  const nuevoCosto = {
-    concepto: '',
-    costo: 0,
-    fecha: new Date().toISOString().split('T')[0]
-  };
-  
-  costos.push(nuevoCosto);
-  renderCostos();
-}
-
 // RENDERIZAR COSTOS EXISTENTES - VERSIÓN MEJORADA
 function renderCostos() {
   const contenedor = document.getElementById('costos-container');
@@ -316,52 +362,6 @@ function eliminarCostoExistente(index) {
       costos.splice(index, 1);
       renderCostos();
       Swal.fire('Eliminado', 'El costo ha sido eliminado.', 'success');
-    }
-  });
-}
-
-// AGREGAR ABONO
-function agregarAbono() {
-  Swal.fire({
-    title: 'Agregar Abono',
-    html:
-      `<input id="swal-fecha" type="date" class="swal2-input" placeholder="Fecha" value="${new Date().toISOString().split('T')[0]}">` +
-      `<input id="swal-concepto" type="text" class="swal2-input" placeholder="Concepto">` +
-      `<input id="swal-cantidad" type="number" class="swal2-input" placeholder="Cantidad abonada" min="0" step="0.01">` +
-      `<select id="swal-metodo" class="swal2-input">
-        <option value="efectivo">Efectivo</option>
-        <option value="transferencia">Transferencia</option>
-        <option value="tarjeta">Tarjeta</option>
-      </select>`,
-    focusConfirm: false,
-    preConfirm: () => {
-      return {
-        fecha: document.getElementById('swal-fecha').value,
-        concepto: document.getElementById('swal-concepto').value,
-        cantidad: parseFloat(document.getElementById('swal-cantidad').value),
-        metodo: document.getElementById('swal-metodo').value
-      };
-    }
-  }).then((result) => {
-    if (result.isConfirmed && result.value) {
-      const { fecha, concepto, cantidad, metodo } = result.value;
-      
-      if (!fecha || !concepto || isNaN(cantidad) || cantidad <= 0) {
-        Swal.fire('Error', 'Todos los campos son obligatorios y la cantidad debe ser mayor a 0.', 'error');
-        return;
-      }
-      
-      abonos.push({
-        fecha,
-        concepto,
-        cantidad,
-        metodo
-      });
-      
-      renderAbonos();
-      calcularTotales();
-      
-      Swal.fire('Éxito', 'Abono agregado correctamente.', 'success');
     }
   });
 }
