@@ -14,6 +14,16 @@ const db = firebase.firestore();
 // Para Firebase version 9+ usa esta sintaxis:
 const storage = firebase.storage();
 
+// Verificar autenticación
+firebase.auth().onAuthStateChanged((user) => {
+  if (!user) {
+    Swal.fire('No autenticado', 'Debes iniciar sesión para continuar', 'error')
+      .then(() => {
+        window.location.href = 'index.html'; // Redirige a tu página de login
+      });
+  }
+});
+
 // Variables globales
 let pacienteId = null;
 let costos = [];
@@ -601,35 +611,27 @@ async function subirImagenes() {
 // Función para eliminar imágenes de Firebase Storage
 function eliminarImagenesStorage(imagenesAEliminar) {
   if (!imagenesAEliminar || !Array.isArray(imagenesAEliminar)) {
-    console.log('No hay imágenes para eliminar o el formato es incorrecto');
+    console.log('No hay imágenes para eliminar');
     return Promise.resolve();
   }
 
   const promesasEliminacion = imagenesAEliminar.map(imagenUrl => {
-    // Verificar que la URL sea válida
-    if (!imagenUrl || typeof imagenUrl !== 'string') {
-      console.warn('URL inválida:', imagenUrl);
+    // Validación más estricta
+    if (!imagenUrl || typeof imagenUrl !== 'string' || !imagenUrl.startsWith('https://firebasestorage.googleapis.com/')) {
+      console.log('URL omitida (inválida):', imagenUrl);
       return Promise.resolve();
     }
 
     try {
-      // Asegurarse de que la URL sea de Firebase Storage
-      if (imagenUrl.startsWith('https://firebasestorage.googleapis.com/')) {
-        const imagenRef = storage.refFromURL(imagenUrl);
-        return imagenRef.delete()
-          .then(() => {
-            console.log('Imagen eliminada:', imagenUrl);
-          })
-          .catch(error => {
-            console.error('Error al eliminar imagen:', error);
-            // No lanzar error para no interrumpir otras eliminaciones
-          });
-      } else {
-        console.warn('URL no es de Firebase Storage:', imagenUrl);
-        return Promise.resolve();
-      }
+      const imagenRef = storage.refFromURL(imagenUrl);
+      return imagenRef.delete()
+        .then(() => console.log('Imagen eliminada:', imagenUrl))
+        .catch(error => {
+          console.error('Error al eliminar imagen:', error);
+          return Promise.resolve(); // No romper la cadena de promesas
+        });
     } catch (error) {
-      console.error('Error procesando URL:', imagenUrl, error);
+      console.error('Error procesando URL:', error);
       return Promise.resolve();
     }
   });
@@ -643,7 +645,7 @@ function getRadioValue(name) {
   return selected ? selected.value : 'No';
 }
 
-// ACTUALIZAR PACIENTE - VERSIÓN CORREGIDA
+// ACTUALIZAR PACIENTE - VERSIÓN COMPLETAMENTE CORREGIDA
 async function actualizarPaciente(e) {
   e.preventDefault();
   
@@ -656,10 +658,15 @@ async function actualizarPaciente(e) {
         Swal.showLoading();
       }
     });
+
+    // 1. FILTRAR imágenes válidas para eliminar (CORRECCIÓN IMPORTANTE)
+    const imagenesValidasAEliminar = imagenesAEliminar.filter(url => 
+      url && typeof url === 'string' && url.startsWith('https://firebasestorage.googleapis.com/')
+    );
     
-    // 1. Eliminar imágenes marcadas para eliminar (CON PARÁMETRO CORRECTO)
-    if (imagenesAEliminar.length > 0) {
-      await eliminarImagenesStorage(imagenesAEliminar); // Se agregó el parámetro
+    // Eliminar solo las imágenes válidas
+    if (imagenesValidasAEliminar.length > 0) {
+      await eliminarImagenesStorage(imagenesValidasAEliminar);
     }
     
     // 2. Subir nuevas imágenes
@@ -669,23 +676,23 @@ async function actualizarPaciente(e) {
     }
     
     // 3. Preparar array final de imágenes
-    const imagenesFinales = imagenesExistentes.filter(imagen => {
-      return !imagenesAEliminar.includes(imagen.url);
-    }).concat(nuevasImagenesSubidas);
+    const imagenesFinales = imagenesExistentes.filter(imagen => 
+      imagen && imagen.url && !imagenesAEliminar.includes(imagen.url)
+    ).concat(nuevasImagenesSubidas);
     
-    // 4. Preparar datos para actualizar (CON VALIDACIONES MEJORADAS)
+    // 4. Preparar datos para actualizar
     const datosActualizados = {
-      nombre: document.getElementById('nombre').value,
-      sexo: document.getElementById('sexo').value,
-      direccion: document.getElementById('direccion').value,
-      email: document.getElementById('email').value,
-      ocupacion: document.getElementById('ocupacion').value,
-      telefono: document.getElementById('telefono').value,
-      fecha: document.getElementById('fecha').value,
+      nombre: document.getElementById('nombre').value || '',
+      sexo: document.getElementById('sexo').value || '',
+      direccion: document.getElementById('direccion').value || '',
+      email: document.getElementById('email').value || '',
+      ocupacion: document.getElementById('ocupacion').value || '',
+      telefono: document.getElementById('telefono').value || '',
+      fecha: document.getElementById('fecha').value || '',
       edad: parseInt(document.getElementById('edad').value) || 0,
-      estadoCivil: document.getElementById('estadoCivil').value,
-      objetivoVisita: document.getElementById('objetivoVisita').value,
-      alergias: document.getElementById('alergias').value,
+      estadoCivil: document.getElementById('estadoCivil').value || '',
+      objetivoVisita: document.getElementById('objetivoVisita').value || '',
+      alergias: document.getElementById('alergias').value || '',
       
       antecedentesMedicos: {
         embarazo: getRadioValue('embarazo'),
@@ -739,7 +746,28 @@ async function actualizarPaciente(e) {
       ultimaActualizacion: new Date()
     };
     
-    // 5. Actualizar en Firebase con manejo de errores específico
+    // 5. VERIFICAR PERMISOS ANTES DE ACTUALIZAR
+    console.log("Intentando actualizar paciente:", pacienteId);
+    console.log("Datos a actualizar:", datosActualizados);
+    
+    // Intenta una operación simple primero para verificar permisos
+    try {
+      const testRef = db.collection('historial-podologia').doc(pacienteId);
+      const testDoc = await testRef.get();
+      
+      if (!testDoc.exists) {
+        throw new Error("El documento no existe");
+      }
+      
+      // Verificar si tenemos permisos de escritura
+      await testRef.update({ ultimaActualizacion: new Date() });
+      
+    } catch (permError) {
+      console.error("Error de permisos:", permError);
+      throw new Error(`Error de permisos: ${permError.message}. Contacta al administrador.`);
+    }
+    
+    // 6. ACTUALIZACIÓN PRINCIPAL
     await db.collection('historial-podologia').doc(pacienteId).update(datosActualizados);
     
     Swal.fire('Éxito', 'Historia podológica actualizada correctamente.', 'success')
@@ -748,11 +776,22 @@ async function actualizarPaciente(e) {
       });
       
   } catch (error) {
-    console.error('Error al actualizar:', error);
+    console.error('Error completo al actualizar:', error);
     
-    // Manejo específico de errores de permisos
-    if (error.code === 'permission-denied') {
-      Swal.fire('Error de permisos', 'No tienes permisos para actualizar este documento. Contacta al administrador.', 'error');
+    // Manejo específico de errores
+    if (error.message.includes('permission-denied') || error.message.includes('permisos')) {
+      Swal.fire({
+        title: 'Error de permisos',
+        html: `No tienes permisos para actualizar este documento.<br><br>
+               <strong>Posibles soluciones:</strong><br>
+               1. Verifica que estés autenticado<br>
+               2. Contacta al administrador<br>
+               3. Revisa las reglas de Firestore`,
+        icon: 'error',
+        confirmButtonText: 'Entendido'
+      });
+    } else if (error.message.includes('documento no existe')) {
+      Swal.fire('Error', 'El paciente que intentas editar ya no existe.', 'error');
     } else {
       Swal.fire('Error', 'No se pudo actualizar la historia podológica: ' + error.message, 'error');
     }
