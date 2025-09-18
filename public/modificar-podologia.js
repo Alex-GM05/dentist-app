@@ -196,6 +196,60 @@ async function cargarPaciente() {
   }
 }
 
+// Función para establecer valores de radio buttons
+function setRadioValue(name, value) {
+  if (!value) return;
+  
+  const radios = document.querySelectorAll(`input[name="${name}"]`);
+  for (const radio of radios) {
+    if (radio.value === value) {
+      radio.checked = true;
+      break;
+    }
+  }
+}
+
+// Función para mostrar/ocultar secciones de mujeres
+function toggleSeccionesMujer() {
+  const sexo = document.getElementById('sexo').value;
+  const seccionMujeres = document.getElementById('seccion-mujeres');
+  const seccionEmbarazo = document.getElementById('seccion-embarazo');
+  
+  if (sexo === 'Mujer') {
+    seccionMujeres.classList.remove('seccion-oculta');
+    seccionEmbarazo.classList.remove('seccion-oculta');
+  } else {
+    seccionMujeres.classList.add('seccion-oculta');
+    seccionEmbarazo.classList.add('seccion-oculta');
+  }
+}
+
+// Calcular IMC automáticamente (versión mejorada)
+function calcularIMC() {
+  const peso = parseFloat(document.getElementById('peso').value);
+  const estatura = parseFloat(document.getElementById('estatura').value);
+  
+  if (peso > 0 && estatura > 0) {
+    const estaturaMetros = estatura / 100;
+    const imc = peso / (estaturaMetros * estaturaMetros);
+    document.getElementById('imc').value = imc.toFixed(2);
+  } else {
+    document.getElementById('imc').value = '';
+  }
+}
+
+// AGREGAR NUEVO COSTO - FUNCIÓN FALTANTE
+function agregarCosto() {
+  const nuevoCosto = {
+    concepto: '',
+    costo: 0,
+    fecha: new Date().toISOString().split('T')[0]
+  };
+  
+  costos.push(nuevoCosto);
+  renderCostos();
+}
+
 // RENDERIZAR COSTOS EXISTENTES - VERSIÓN MEJORADA
 function renderCostos() {
   const contenedor = document.getElementById('costos-container');
