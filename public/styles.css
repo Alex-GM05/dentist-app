@@ -1176,3 +1176,63 @@ textarea {
   margin: 0.5rem 0;
   font-size: 1.1rem;
 }
+
+/* Estilos para tablas financieras */
+.costos-table,
+.abonos-table,
+.resumen-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+
+.costos-table th,
+.abonos-table th,
+.resumen-table td {
+  padding: 8px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.costos-table th,
+.abonos-table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.resumen-table {
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.resumen-table td {
+  border: none;
+  padding: 8px 12px;
+}
+
+.saldo-pendiente td {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.saldo-cero td {
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.resumen-financiero {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  border-left: 4px solid #3498db;
+}
+
+.historial-section h5 {
+  color: #2c3e50;
+  margin: 15px 0 10px 0;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 5px;
+}
