@@ -298,12 +298,16 @@ async function cargarPaciente() {
       abonos = [];
       renderAbonos();
     }
-    
+   
     if (paciente.totalGeneral) {
       ultimoTotalGuardado = paciente.totalGeneral;
     }
-    // Calcular totales
-    actualizarUI();
+    
+    // ✅ CORRECCIÓN: Calcular totales correctamente
+    const totalCostos = costos.reduce((total, costo) => total + (parseFloat(costo.costo) || 0), 0);
+    const totalAbonos = abonos.reduce((total, abono) => total + (parseFloat(abono.cantidad) || 0), 0);
+    const saldoPendiente = totalCostos - totalAbonos;
+    actualizarUI(totalCostos, totalAbonos, saldoPendiente);
     
   } catch (error) {
     console.error('Error al cargar el paciente:', error);
@@ -542,6 +546,11 @@ async function calcularTotales() {
 
 // Función solo para actualizar la UI
 function actualizarUI(totalCostos, totalAbonos, saldoPendiente) {
+  // Asegurar que los valores sean números
+  totalCostos = Number(totalCostos) || 0;
+  totalAbonos = Number(totalAbonos) || 0;
+  saldoPendiente = Number(saldoPendiente) || 0;
+
   const totalCargosElement = document.getElementById('totalCargos');
   const totalAbonosElement = document.getElementById('totalAbonos');
   const saldoPendienteElement = document.getElementById('saldoPendiente');
