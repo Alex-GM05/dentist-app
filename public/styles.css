@@ -276,28 +276,6 @@ button {
   object-fit: cover;
 }
 
-.costos-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.costos-table th {
-  background: #2a9d8f;
-  color: white;
-  padding: 1rem;
-  text-align: left;
-}
-
-.costos-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #eee;
-}
-
 .costos-table tr:last-child td {
   border-bottom: none;
 }
