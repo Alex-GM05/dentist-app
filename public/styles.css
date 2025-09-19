@@ -164,18 +164,25 @@ button {
 }
 
 .historial-section {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  border: 1px solid #eee;
+  background: white;
+  padding: 20px;
   border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.historial-section h4 {
+  color: #2c3e50;
+  margin-top: 0;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
 }
 
 .historial-actions {
   display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
 }
 
 .admin-buttons {
@@ -185,49 +192,41 @@ button {
   margin-top: 2rem;
 }
 
-.btn-primary {
-  background: #2a9d8f;
-  color: white;
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  padding: 10px 20px;
   border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
+  font-weight: bold;
 }
 
-.btn-primary:hover {
-  background: #21867a;
+.btn-primary {
+  background: #3498db;
+  color: white;
 }
 
 .btn-secondary {
-  background: #6c757d;
+  background: #95a5a6;
   color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
-}
-
-.btn-secondary:hover {
-  background: #5a6268;
 }
 
 .btn-danger {
-  background: #e63946;
+  background: #e74c3c;
   color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: #2980b9;
+}
+
+.btn-secondary:hover {
+  background: #7f8c8d;
 }
 
 .btn-danger:hover {
-  background: #c53030;
+  background: #c0392b;
 }
 
 .btn-cancel {

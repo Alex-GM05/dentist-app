@@ -274,7 +274,35 @@ function mostrarHistorialOdontologia(data, id) {
         <p><strong>Fecha de creación:</strong> ${data.createdAt ? data.createdAt.toDate().toLocaleString('es-MX') : 'No disponible'}</p>
       </div>
       
-      <!-- ... (otros secciones iguales) ... -->
+      <div class="historial-section">
+        <h4>📋 Datos Generales</h4>
+        <div class="grid-2">
+          <p><strong>Nombre:</strong> ${data.nombre || "No especificado"}</p>
+          <p><strong>Edad:</strong> ${data.edad || "No especificado"}</p>
+          <p><strong>Sexo:</strong> ${data.sexo || "No especificado"}</p>
+          <p><strong>Email:</strong> ${data.email || "No especificado"}</p>
+          <p><strong>Teléfono:</strong> ${data.telefono || "No especificado"}</p>
+          <p><strong>Fecha de consulta:</strong> ${data.fecha || "No especificado"}</p>
+        </div>
+      </div>
+      
+      <div class="historial-section">
+        <h4>🎯 Motivo de Consulta</h4>
+        <p>${data.motivoConsulta || "No se registró motivo de consulta"}</p>
+      </div>
+      
+      <div class="historial-section">
+        <h4>🦷 Odontograma</h4>
+        <div class="preview-odontograma">
+          ${generarOdontogramaPreview(odontograma)}
+          ${data.observacionesOdontograma ? `<p><strong>Observaciones:</strong> ${data.observacionesOdontograma}</p>` : ''}
+        </div>
+      </div>
+
+      <div class="historial-section">
+        <h4>📋 Receta médica</h4>
+        <p>${data.receta || "Sin receta"}</p>
+      </div>
       
       ${costos.length > 0 || abonos.length > 0 ? `
       <div class="historial-section">
@@ -347,7 +375,26 @@ function mostrarHistorialOdontologia(data, id) {
       </div>
       ` : ''}
       
-      <!-- ... (resto del código igual) ... -->
+      ${imagenes.length > 0 ? `
+      <div class="historial-section">
+        <h4>🖼️ Imágenes Adjuntas</h4>
+        <div class="images-grid">
+          ${imagenes.map((img, index) => `
+            <div class="thumb">
+              <a href="${img}" target="_blank">
+                <img src="${img}" alt="Imagen ${index + 1}">
+              </a>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+      ` : ''}
+      
+      <div class="historial-actions">
+        <button onclick="window.location.href='preview-odontologia.html?id=${id}'" class="btn-primary">👁️ Ver Vista Previa</button>
+        <button onclick="modificarPaciente()" class="btn-secondary">✏️ Modificar</button>
+        <button onclick="eliminarRegistroCompleto('odontologia', '${id}', '${data.nombre || "este paciente"}')" class="btn-danger">🗑️ Eliminar Registro</button>
+      </div>
     </div>
   `;
 
@@ -374,7 +421,33 @@ function mostrarHistorialPodologia(data, id) {
         <p><strong>Fecha de creación:</strong> ${data.createdAt ? data.createdAt.toDate().toLocaleString('es-MX') : 'No disponible'}</p>
       </div>
       
-      <!-- ... (otros secciones iguales) ... -->
+      <div class="historial-section">
+        <h4>📋 Datos Generales</h4>
+        <div class="grid-2">
+          <p><strong>Nombre:</strong> ${data.nombre || "No especificado"}</p>
+          <p><strong>Edad:</strong> ${data.edad || "No especificado"}</p>
+          <p><strong>Sexo:</strong> ${data.sexo || "No especificado"}</p>
+          <p><strong>Email:</strong> ${data.email || "No especificado"}</p>
+          <p><strong>Teléfono:</strong> ${data.telefono || "No especificado"}</p>
+          <p><strong>Fecha de consulta:</strong> ${data.fecha || "No especificado"}</p>
+          <p><strong>Objetivo de la visita:</strong> ${data.objetivoVisita || "No especificado"}</p>
+          <p><strong>Observaciones y plan de tratamiento:</strong> ${data.observaciones || "Sin observaciones"}</p>
+        </div>
+      </div>
+      
+      ${data.sexo === 'Mujer' ? `
+      <div class="historial-section">
+        <h4>👩 Datos Específicos para Mujeres</h4>
+        <div class="grid-2">
+          <p><strong>Uso de tacón:</strong> ${data.usoTacon || "No especificado"}</p>
+          ${data.usoTacon === 'Sí' ? `
+            <p><strong>Altura de tacón:</strong> ${data.alturaTacon || "0"} cm</p>
+            <p><strong>Horas de uso diario:</strong> ${data.horasUsoTacon || "0"}</p>
+            <p><strong>Días de uso semanal:</strong> ${data.diasTacon || "0"}</p>
+          ` : ''}
+        </div>
+      </div>
+      ` : ''}
       
       ${costos.length > 0 || abonos.length > 0 ? `
       <div class="historial-section">
@@ -447,7 +520,26 @@ function mostrarHistorialPodologia(data, id) {
       </div>
       ` : ''}
       
-      <!-- ... (resto del código igual) ... -->
+      ${imagenes.length > 0 ? `
+      <div class="historial-section">
+        <h4>🖼️ Imágenes Adjuntas</h4>
+        <div class="images-grid">
+          ${imagenes.map((img, index) => `
+            <div class="thumb">
+              <a href="${img.url || img}" target="_blank">
+                <img src="${img.url || img}" alt="Imagen ${index + 1}">
+              </a>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+      ` : ''}
+      
+      <div class="historial-actions">
+        <button onclick="window.location.href='preview-podologia.html?id=${id}'" class="btn-primary">👁️ Ver Vista Previa</button>
+        <button onclick="modificarPaciente()" class="btn-secondary">✏️ Modificar</button>
+        <button onclick="eliminarRegistroCompleto('podologia', '${id}', '${data.nombre || "este paciente"}')" class="btn-danger">🗑️ Eliminar Registro</button>
+      </div>
     </div>
   `;
 
