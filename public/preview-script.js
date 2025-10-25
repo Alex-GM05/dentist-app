@@ -191,14 +191,6 @@ function renderPreview(data) {
       </div>
     </div>
 
-    <div class="preview-section">
-      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🦷 Odontograma</h2>
-      <div class="preview-odontograma">
-        ${generarOdontogramaPreview(odontograma)}
-        ${data.observacionesOdontograma ? `<p><strong>Observaciones:</strong> ${data.observacionesOdontograma}</p>` : ''}
-      </div>
-    </div>
-
     {/* --- SECCIÓN FINANCIERA CORREGIDA --- */}
     <div class="preview-section">
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💰 Información Financiera</h2>
