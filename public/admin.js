@@ -412,7 +412,7 @@ function mostrarHistorialPodologia(data, id) {
 
   // Calcular totales (como ya lo teníamos)
   const totalCostos = costos.reduce((total, costo) => total + (Number(costo.costo) || 0), 0);
-  const totalAbonos = abonos.reduce((total, abono) => total + (Number(abono.cantidad) || 0), 0);
+  const totalAbonos = abonos.reduce((total, abono) => total + (Number(abono.monto) || 0), 0);
   const saldoPendiente = totalCostos - totalAbonos;
 
   // Helper para crear líneas clave-valor y evitar repetir '|| "No especificado"'
@@ -537,9 +537,9 @@ function mostrarHistorialPodologia(data, id) {
         ${abonos.length > 0 ? `
             <h3 style="margin-top: 1rem; color: #264653;">Abonos / Pagos</h3>
             <table class="abonos-table">
-                <thead><tr><th>Fecha</th><th>Concepto</th><th>Cantidad</th><th>Método</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th><th>Método</th></tr></thead>
                 <tbody>
-                    ${abonos.map(a => `<tr><td>${a.fecha||"-"}</td><td>${a.concepto||"-"}</td><td>$${Number(a.cantidad||0).toFixed(2)}</td><td>${a.metodo||"-"}</td></tr>`).join("")}
+                    ${abonos.map(a => `<tr><td>${a.fecha||"-"}</td><td>${a.concepto||"-"}</td><td>$${Number(a.monto||0).toFixed(2)}</td><td>${a.metodo||"-"}</td></tr>`).join("")}
                 </tbody>
             </table>
         ` : '<p style="margin-top: 1rem;">No se registraron abonos.</p>'}
@@ -547,8 +547,8 @@ function mostrarHistorialPodologia(data, id) {
             <h3 style="margin-bottom: 0.5rem;">Resumen</h3>
             <div class="preview-kv">
                 ${kv("Total Cargos", `$${Number(totalCostos).toFixed(2)}`)}
-                ${kv("Total Abonos", `$${Number(totalAbonos).toFixed(2)}`)} {/* Muestra totalAbonos */}
-                ${kv("Saldo Pendiente", `<strong style="color: ${saldoPendiente > 0 ? '#e63946' : '#2a9d8f'};">$${Number(saldoPendiente).toFixed(2)}</strong>`)} {/* Muestra saldoPendiente */}
+                ${kv("Total Abonos", `$${Number(totalAbonos).toFixed(2)}`)}
+                ${kv("Saldo Pendiente", `<strong style="color: ${saldoPendiente > 0 ? '#e63946' : '#2a9d8f'};">$${Number(saldoPendiente).toFixed(2)}</strong>`)}
             </div>
         </div>
       </div>
@@ -565,7 +565,6 @@ function mostrarHistorialPodologia(data, id) {
         <div class="images-grid">
           ${imagenes.map((imgData, index) => `
             <div class="thumb">
-              {/* Usar imgData.url para el enlace y la imagen */}
               <a href="${imgData.url || '#'}" target="_blank">
                 <img src="${imgData.url || 'placeholder.png'}" alt="${imgData.nombre || `Imagen ${index + 1}`}">
               </a>
