@@ -124,15 +124,25 @@ function kv(label, value) {
 // Función principal para renderizar la vista previa
 function renderPreview(data) {
   console.log("Renderizando preview con datos:", data);
-  
+
+  // Leer costos, abonos, imágenes y odontograma
   const costos = Array.isArray(data.costos) ? data.costos : [];
+  const abonos = Array.isArray(data.abonos) ? data.abonos : []; // <<< LEE LOS ABONOS
+  const imagenes = Array.isArray(data.imagenesAdjuntas) ? data.imagenesAdjuntas : [];
+  const odontograma = data.odontograma || {};
+
+  // Leer totales guardados (si existen) o calcularlos SI NO EXISTEN
+  // Intenta leer los totales guardados por modificar-odontologia.js
+  const totalGeneral = data.totalGeneral ?? costos.reduce((sum, c) => sum + (Number(c.costo) || 0), 0);
+  const totalAbonos = data.totalAbonos ?? abonos.reduce((sum, a) => sum + (Number(a.monto) || 0), 0); // <<< LEE/CALCULA TOTAL ABONOS (usa a.monto)
+  const saldoPendiente = data.saldoPendiente ?? (totalGeneral - totalAbonos); // <<< LEE/CALCULA SALDO
 
   const html = `
     <div class="preview-section">
       <div style="background: #2a9d8f; color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; text-align: center;">
         <h1 style="margin: 0 0 0.5rem 0; color: white; font-size: 2rem;">Historia Clínica Odontológica</h1>
         <p style="margin: 0; opacity: 0.9; font-size: 1.1rem;">Paciente: <strong>${data.nombre || 'No especificado'}</strong></p>
-        <p style="margin: 0; opacity: 0.9;">Fecha: ${data.fechaCreacion || data.fecha || 'No disponible'}</p>
+        <p style="margin: 0; opacity: 0.9;">Fecha Creación: ${data.fechaCreacion || 'No disponible'}</p>
       </div>
     </div>
 
@@ -181,33 +191,75 @@ function renderPreview(data) {
       </div>
     </div>
 
-    ${costos.length > 0 ? `
     <div class="preview-section">
-      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💰 Costos del Tratamiento</h2>
-      <table class="costos-table">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Concepto</th>
-            <th>Costo</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${costos.map((costo, index) => `
-            <tr>
-              <td>${costo.fecha || "No especificado"}</td>
-              <td>${costo.concepto || "No especificado"}</td>
-              <td>$${Number(costo.costo || 0).toFixed(2)}</td>
-            </tr>
-          `).join("")}
-          <tr class="total-row">
-            <td colspan="2" style="text-align: right; font-weight: bold;">Total general:</td>
-            <td style="font-weight: bold;">$${Number(data.totalGeneral || 0).toFixed(2)}</td>
-          </tr>
-        </tbody>
-      </table>
+      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🦷 Odontograma</h2>
+      <div class="preview-odontograma">
+        ${generarOdontogramaPreview(odontograma)}
+        ${data.observacionesOdontograma ? `<p><strong>Observaciones:</strong> ${data.observacionesOdontograma}</p>` : ''}
+      </div>
     </div>
-    ` : ''}
+
+    {/* --- SECCIÓN FINANCIERA CORREGIDA --- */}
+    <div class="preview-section">
+      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💰 Información Financiera</h2>
+
+      {/* Tabla de Cargos */}
+      ${costos.length > 0 ? `
+        <h3 style="margin-top: 1rem; color: #264653;">Cargos / Tratamientos</h3>
+        <table class="costos-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Concepto</th>
+              <th>Costo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${costos.map(c => `
+              <tr>
+                <td>${c.fecha || "-"}</td>
+                <td>${c.concepto || "-"}</td>
+                <td>$${Number(c.costo || 0).toFixed(2)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      ` : '<p>No se registraron cargos.</p>'}
+
+      {/* Tabla de Abonos <<< AÑADIDA >>> */}
+      ${abonos.length > 0 ? `
+        <h3 style="margin-top: 1rem; color: #264653;">Abonos / Pagos</h3>
+        <table class="abonos-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Concepto/Método</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${abonos.map(a => `
+              <tr>
+                <td>${a.fecha || "-"}</td>
+                <td>${a.concepto || "-"} (${a.metodo || 'N/A'})</td> {/* Muestra concepto y método */}
+                <td>$${Number(a.monto || 0).toFixed(2)}</td> {/* Usa a.monto */}
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      ` : '<p style="margin-top: 1rem;">No se registraron abonos.</p>'}
+
+      {/* Resumen Financiero <<< CORREGIDO >>> */}
+      <div class="resumen-financiero" style="margin-top: 1.5rem;">
+        <h3 style="margin-bottom: 0.5rem;">Resumen</h3>
+        <div class="preview-kv">
+          ${kv("Total Cargos", `$${Number(totalGeneral).toFixed(2)}`)}
+          ${kv("Total Abonos", `$${Number(totalAbonos).toFixed(2)}`)} {/* Muestra totalAbonos */}
+          ${kv("Saldo Pendiente", `<strong style="color: ${saldoPendiente > 0 ? '#e63946' : '#2a9d8f'};">$${Number(saldoPendiente).toFixed(2)}</strong>`)} {/* Muestra saldoPendiente */}
+        </div>
+      </div>
+    </div>
+    {/* --- FIN SECCIÓN FINANCIERA --- */}
 
     <div class="preview-section">
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💊 Receta Médica</h2>
@@ -216,13 +268,22 @@ function renderPreview(data) {
       </div>
     </div>
 
+    ${imagenes.length > 0 ? `
+    <div class="preview-section no-imprimir">
+      <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">🖼️ Imágenes Adjuntas</h2>
+      <div class="preview-images-grid">
+        ${imagenes.map(u => `<a href="${u}" target="_blank" rel="noreferrer noopener"><img src="${u}" alt="Adjunto"></a>`).join("")}
+      </div>
+    </div>
+    ` : ''}
+
     <div class="preview-section firmas">
       <div>
         <div class="firma-line"></div>
         <p style="font-weight: bold; color: #2a9d8f;">Firma del paciente</p>
         <p>${data.nombre || ''}</p>
       </div>
-      
+
       <div>
         <div class="firma-line"></div>
         <p style="font-weight: bold; color: #2a9d8f;">Firma del odontólogo</p>
@@ -353,6 +414,34 @@ dynamicStyles.textContent = `
     margin: 0.5rem;
     transition: background 0.3s;
     font-size: 0.9rem;
+  }
+  .abonos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  .abonos-table th,
+  .abonos-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .abonos-table th {
+    background-color: #f2f2f2;
+  }
+
+  .abonos-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .resumen-financiero {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 4px solid #3498db;
   }
 
   .btn-print:hover {
