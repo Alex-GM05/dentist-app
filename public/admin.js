@@ -263,7 +263,7 @@ function mostrarHistorialOdontologia(data, id) {
 
   // Calcular totales
   const totalCostos = costos.reduce((total, costo) => total + (Number(costo.costo) || 0), 0);
-  const totalAbonos = abonos.reduce((total, abono) => total + (Number(abono.cantidad) || 0), 0);
+  const totalAbonos = abonos.reduce((total, abono) => total + (Number(abono.monto) || 0), 0);
   const saldoPendiente = totalCostos - totalAbonos;
 
   const html = `
@@ -337,7 +337,7 @@ function mostrarHistorialOdontologia(data, id) {
             <tr>
               <th>Fecha</th>
               <th>Concepto</th>
-              <th>Cantidad</th>
+              <th>Monto</th>
               <th>Método</th>
             </tr>
           </thead>
@@ -346,7 +346,7 @@ function mostrarHistorialOdontologia(data, id) {
               <tr>
                 <td>${abono.fecha || "No especificado"}</td>
                 <td>${abono.concepto || "No especificado"}</td>
-                <td>$${Number(abono.cantidad || 0).toFixed(2)}</td>
+                <td>$${Number(abono.monto || 0).toFixed(2)}</td>
                 <td>${abono.metodo || "No especificado"}</td>
               </tr>
             `).join("")}

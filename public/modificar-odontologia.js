@@ -228,6 +228,14 @@ function setupAbonos() {
     tr.innerHTML = `
       <td><input type="date" name="fechaAbono" value="${fecha}" required></td>
       <td><input type="text" name="conceptoAbono" value="${concepto}" placeholder="Efectivo, Tarjeta, etc." required></td>
+      <td>
+        <select name="metodoAbono" class="odontologia-select" required>
+          <option ${metodo === 'Efectivo' ? 'selected' : ''}>Efectivo</option>
+          <option ${metodo === 'Tarjeta' ? 'selected' : ''}>Tarjeta</option>
+          <option ${metodo === 'Transferencia' ? 'selected' : ''}>Transferencia</option>
+          <option ${metodo === 'Otro' ? 'selected' : ''}>Otro</option>
+        </select>
+      </td>
       <td><input type="number" name="montoAbono" value="${monto}" min="0" step="0.01" required></td>
       <td><button type="button" onclick="eliminarFilaAbono(this)">❌</button></td>
     `;
@@ -402,10 +410,11 @@ function poblarFormulario(data) {
   tbodyAbonos.innerHTML = ""; // Limpiar
   if (data.abonos && Array.isArray(data.abonos) && data.abonos.length > 0) {
     data.abonos.forEach(abono => {
-      agregarFilaAbono(abono.fecha, abono.concepto, abono.monto); // Asegúrate que el campo se llame 'monto'
+      agregarFilaAbono(abono.fecha, abono.concepto, abono.metodo || 'Efectivo', abono.monto);
     });
   } else {
-      agregarFilaAbono(new Date().toISOString().split('T')[0], "", 0); // Agregar una fila vacía
+      // Pasar fecha, concepto, metodo por defecto, monto
+      agregarFilaAbono(new Date().toISOString().split('T')[0], "", 'Efectivo', 0);
   }
 
   // Poblar Imágenes
@@ -506,12 +515,14 @@ function setupFormSubmission(docId) {
       document.querySelectorAll("#tablaAbonos tbody tr").forEach(tr => {
         const fechaInput = tr.querySelector("[name='fechaAbono']");
         const conceptoInput = tr.querySelector("[name='conceptoAbono']");
+        const metodoInput = tr.querySelector("[name='metodoAbono']");
         const montoInput = tr.querySelector("[name='montoAbono']");
-        if (fechaInput && conceptoInput && montoInput && (conceptoInput.value || montoInput.value)) {
+        if (fechaInput && conceptoInput && metodoInput && montoInput && (conceptoInput.value || metodoInput.value || montoInput.value)) {
           abonos.push({
             fecha: fechaInput.value,
             concepto: conceptoInput.value,
-            monto: parseFloat(montoInput.value) || 0 // Asegúrate que el campo se llame 'monto'
+            metodo: metodoInput.value,
+            monto: parseFloat(montoInput.value) || 0
           });
         }
       });
