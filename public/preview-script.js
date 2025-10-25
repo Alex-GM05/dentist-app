@@ -191,11 +191,9 @@ function renderPreview(data) {
       </div>
     </div>
 
-    {/* --- SECCIÓN FINANCIERA CORREGIDA --- */}
     <div class="preview-section">
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💰 Información Financiera</h2>
 
-      {/* Tabla de Cargos */}
       ${costos.length > 0 ? `
         <h3 style="margin-top: 1rem; color: #264653;">Cargos / Tratamientos</h3>
         <table class="costos-table">
@@ -218,7 +216,6 @@ function renderPreview(data) {
         </table>
       ` : '<p>No se registraron cargos.</p>'}
 
-      {/* Tabla de Abonos <<< AÑADIDA >>> */}
       ${abonos.length > 0 ? `
         <h3 style="margin-top: 1rem; color: #264653;">Abonos / Pagos</h3>
         <table class="abonos-table">
@@ -233,25 +230,23 @@ function renderPreview(data) {
             ${abonos.map(a => `
               <tr>
                 <td>${a.fecha || "-"}</td>
-                <td>${a.concepto || "-"} (${a.metodo || 'N/A'})</td> {/* Muestra concepto y método */}
-                <td>$${Number(a.monto || 0).toFixed(2)}</td> {/* Usa a.monto */}
+                <td>${a.concepto || "-"} (${a.metodo || 'N/A'})</td> 
+                <td>$${Number(a.monto || 0).toFixed(2)}</td>
               </tr>
             `).join("")}
           </tbody>
         </table>
       ` : '<p style="margin-top: 1rem;">No se registraron abonos.</p>'}
 
-      {/* Resumen Financiero <<< CORREGIDO >>> */}
       <div class="resumen-financiero" style="margin-top: 1.5rem;">
         <h3 style="margin-bottom: 0.5rem;">Resumen</h3>
         <div class="preview-kv">
           ${kv("Total Cargos", `$${Number(totalGeneral).toFixed(2)}`)}
-          ${kv("Total Abonos", `$${Number(totalAbonos).toFixed(2)}`)} {/* Muestra totalAbonos */}
-          ${kv("Saldo Pendiente", `<strong style="color: ${saldoPendiente > 0 ? '#e63946' : '#2a9d8f'};">$${Number(saldoPendiente).toFixed(2)}</strong>`)} {/* Muestra saldoPendiente */}
+          ${kv("Total Abonos", `$${Number(totalAbonos).toFixed(2)}`)}
+          ${kv("Saldo Pendiente", `<strong style="color: ${saldoPendiente > 0 ? '#e63946' : '#2a9d8f'};">$${Number(saldoPendiente).toFixed(2)}</strong>`)}
         </div>
       </div>
     </div>
-    {/* --- FIN SECCIÓN FINANCIERA --- */}
 
     <div class="preview-section">
       <h2 style="color: #2a9d8f; border-bottom: 2px solid #2a9d8f; padding-bottom: 0.5rem;">💊 Receta Médica</h2>
