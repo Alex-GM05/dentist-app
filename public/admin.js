@@ -565,10 +565,9 @@ function mostrarHistorialPodologia(data, id) {
         <div class="images-grid">
           ${imagenes.map((imgData, index) => `
             <div class="thumb">
-              <a href="${imgData.url || '#'}" target="_blank">
-                <img src="${imgData.url || 'placeholder.png'}" alt="${imgData.nombre || `Imagen ${index + 1}`}">
+              <a href="${imgData}" target="_blank">
+                <img src="${imgData}" alt="Imagen ${index + 1}">
               </a>
-              <p style="font-size:0.7rem; text-align:center;">${imgData.nombre || 'imagen'}</p>
             </div>
           `).join("")}
         </div>
