@@ -525,9 +525,32 @@ function mostrarHistorialPodologia(data, id) {
       ${costos.length > 0 || abonos.length > 0 ? `
       <div class="historial-section">
         <h4>💰 Información Financiera</h4>
-        ${costos.length > 0 ? `<h5>Costos</h5><table class="costos-table">... (igual que antes) ...</table>` : ''}
-        ${abonos.length > 0 ? `<h5 style="margin-top:1rem;">Abonos</h5><table class="abonos-table">... (igual que antes) ...</table>` : ''}
-        <div class="resumen-financiero" style="margin-top:1rem;"><h5>Resumen</h5><table class="resumen-table">... (igual que antes) ...</table></div>
+       ${costos.length > 0 ? `
+            <h3 style="margin-top: 1rem; color: #264653;">Cargos / Tratamientos</h3>
+            <table class="costos-table">
+                <thead><tr><th>Fecha</th><th>Concepto</th><th>Costo</th></tr></thead>
+                <tbody>
+                    ${costos.map(c => `<tr><td>${c.fecha||"-"}</td><td>${c.concepto||"-"}</td><td>$${Number(c.costo||0).toFixed(2)}</td></tr>`).join("")}
+                </tbody>
+            </table>
+        ` : '<p>No se registraron cargos.</p>'}
+        ${abonos.length > 0 ? `
+            <h3 style="margin-top: 1rem; color: #264653;">Abonos / Pagos</h3>
+            <table class="abonos-table">
+                <thead><tr><th>Fecha</th><th>Concepto</th><th>Cantidad</th><th>Método</th></tr></thead>
+                <tbody>
+                    ${abonos.map(a => `<tr><td>${a.fecha||"-"}</td><td>${a.concepto||"-"}</td><td>$${Number(a.cantidad||0).toFixed(2)}</td><td>${a.metodo||"-"}</td></tr>`).join("")}
+                </tbody>
+            </table>
+        ` : '<p style="margin-top: 1rem;">No se registraron abonos.</p>'}
+        <div class="resumen-financiero" style="margin-top: 1.5rem;">
+            <h3 style="margin-bottom: 0.5rem;">Resumen</h3>
+            <div class="preview-kv">
+                ${kv("Total Cargos", `$${Number(totalCostos).toFixed(2)}`)}
+                ${kv("Total Abonos", `$${Number(totalAbonos).toFixed(2)}`)} {/* Muestra totalAbonos */}
+                ${kv("Saldo Pendiente", `<strong style="color: ${saldoPendiente > 0 ? '#e63946' : '#2a9d8f'};">$${Number(saldoPendiente).toFixed(2)}</strong>`)} {/* Muestra saldoPendiente */}
+            </div>
+        </div>
       </div>
       ` : ''}
 
