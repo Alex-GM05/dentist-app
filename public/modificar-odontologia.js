@@ -218,44 +218,80 @@ function setupCostos() {
   };
 }
 
-// --- Abonos (Pagos) dinámicos ---
+// --- Abonos (Pagos) dinámicos (NUEVO Y CORREGIDO) ---
 function setupAbonos() {
+  // Define tbodyAbonos *una sola vez* aquí, asegurándonos que existe.
   const tbodyAbonos = document.querySelector("#tablaAbonos tbody");
-  if (!tbodyAbonos) return;
+  if (!tbodyAbonos) {
+    console.error("¡ERROR GRAVE! No se encontró el tbody de la tabla de abonos (#tablaAbonos tbody).");
+    return; // Detener si no se encuentra el elemento esencial.
+  }
 
-  window.agregarFilaAbono = function(fecha = new Date().toISOString().split('T')[0], concepto = "", monto = 0) {
+  // Define la función global para AGREGAR filas
+  window.agregarFilaAbono = function(fecha = new Date().toISOString().split('T')[0], concepto = "", metodo = "Efectivo", monto = 0) {
+    console.log("Agregando fila abono:", { fecha, concepto, metodo, monto }); // Log para depurar
     const tr = document.createElement("tr");
+
+    // Construir el HTML de la fila
     tr.innerHTML = `
       <td><input type="date" name="fechaAbono" value="${fecha}" required></td>
-      <td><input type="text" name="conceptoAbono" value="${concepto}" placeholder="Efectivo, Tarjeta, etc." required></td>
+      <td><input type="text" name="conceptoAbono" value="${concepto}" placeholder="Descripción del abono" required></td>
       <td>
         <select name="metodoAbono" class="odontologia-select" required>
-          <option ${metodo === 'Efectivo' ? 'selected' : ''}>Efectivo</option>
-          <option ${metodo === 'Tarjeta' ? 'selected' : ''}>Tarjeta</option>
-          <option ${metodo === 'Transferencia' ? 'selected' : ''}>Transferencia</option>
-          <option ${metodo === 'Otro' ? 'selected' : ''}>Otro</option>
+          {/* Usamos comillas dobles para los valores y verificamos 'metodo' */}
+          <option value="Efectivo" ${metodo === 'Efectivo' ? 'selected' : ''}>Efectivo</option>
+          <option value="Tarjeta" ${metodo === 'Tarjeta' ? 'selected' : ''}>Tarjeta</option>
+          <option value="Transferencia" ${metodo === 'Transferencia' ? 'selected' : ''}>Transferencia</option>
+          <option value="Otro" ${metodo === 'Otro' ? 'selected' : ''}>Otro</option>
         </select>
       </td>
       <td><input type="number" name="montoAbono" value="${monto}" min="0" step="0.01" required></td>
       <td><button type="button" onclick="eliminarFilaAbono(this)">❌</button></td>
     `;
-    tbodyAbonos.appendChild(tr);
 
-    tr.querySelector("input[name='montoAbono']").addEventListener("input", calcularGranTotalAbonos);
+    // *** Punto Clave: Añadir la fila AL TBODY ***
+    try {
+        tbodyAbonos.appendChild(tr); // Asegúrate que esta línea esté DENTRO de la función
+    } catch (error) {
+        console.error("Error al añadir fila al tbody de abonos:", error);
+        return; // Salir si no se puede añadir la fila
+    }
+
+
+    // Agregar listener al input de monto de ESTA fila recién creada
+    const montoInput = tr.querySelector("input[name='montoAbono']");
+    if (montoInput) {
+        montoInput.addEventListener("input", calcularGranTotalAbonos);
+    } else {
+        console.warn("No se encontró el input 'montoAbono' en la nueva fila.");
+    }
+
+
+    // Recalcular totales DESPUÉS de añadir la fila y los listeners
     calcularGranTotalAbonos();
   };
 
+  // Define la función global para ELIMINAR filas
   window.eliminarFilaAbono = function(btn) {
-    btn.closest("tr").remove();
-    calcularGranTotalAbonos();
-  };
-
-  window.limpiarFilasAbonos = function() {
-    if (confirm("¿Estás seguro de que quieres eliminar todos los abonos?")) {
-      tbodyAbonos.innerHTML = "";
-      calcularGranTotalAbonos();
+    // Verificar que el botón y su fila 'tr' ancestro existan
+    const fila = btn.closest("tr");
+    if (fila) {
+        fila.remove();
+        calcularGranTotalAbonos(); // Recalcular después de eliminar
+    } else {
+        console.error("No se pudo encontrar la fila para eliminar el abono.");
     }
   };
+
+  // Define la función global para LIMPIAR todas las filas
+  window.limpiarFilasAbonos = function() {
+    if (confirm("¿Estás seguro de que quieres eliminar todos los abonos?")) {
+      tbodyAbonos.innerHTML = ""; // Limpiar el contenido del tbody
+      calcularGranTotalAbonos(); // Recalcular (debería ser 0)
+    }
+  };
+
+  console.log("Función setupAbonos completada."); // Log para confirmar
 }
 
 // --- Previsualización local de imágenes NUEVAS ---
