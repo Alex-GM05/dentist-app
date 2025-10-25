@@ -21,8 +21,6 @@ try {
 }
 
 // --- Variables Globales ---
-// const params = new URLSearchParams(window.location.search); // --- MOVIDO ---
-// const docId = params.get('id'); // --- MOVIDO ---
 let imagenesExistentes = []; // Almacenará URLs de imágenes actuales
 let imagenesParaEliminar = []; // Almacenará URLs a eliminar de Storage
 
@@ -37,7 +35,7 @@ async function ensureAuth() {
     }
     console.log("Iniciando autenticación anónima...");
     const authTimeout = setTimeout(() => reject(new Error("Timeout en autenticación anónima")), 10000);
-    
+
     auth.signInAnonymously()
       .then((userCredential) => {
         clearTimeout(authTimeout);
@@ -52,15 +50,15 @@ async function ensureAuth() {
   });
 }
 
-// --- Generar odontograma (Igual que en add) ---
+// --- Generar odontograma ---
 function generarOdontograma() {
   const tbody = document.querySelector("#tablaOdontograma tbody");
   if (!tbody) return;
   tbody.innerHTML = ''; // Limpiar por si acaso
-  
+
   const dientesSuperiores = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
   const dientesInferiores = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
-  
+
   for (let i = 0; i < 8; i++) {
     const tr = document.createElement('tr');
     for (let j = 0; j < 3; j++) {
@@ -93,11 +91,11 @@ function generarOdontograma() {
     }
     tbody.appendChild(tr);
   }
-  
+
   const separator = document.createElement('tr');
   separator.innerHTML = '<td colspan="6" style="background-color: #f0f0f0; text-align: center; font-weight: bold;">Arcada Inferior</td>';
   tbody.appendChild(separator);
-  
+
   for (let i = 0; i < 8; i++) {
     const tr = document.createElement('tr');
     for (let j = 0; j < 3; j++) {
@@ -132,11 +130,11 @@ function generarOdontograma() {
   }
 }
 
-// --- Condicionales (Igual que en add) ---
+// --- Condicionales ---
 function setupConditionals() {
   const embarazoSelect = document.getElementById("embarazo");
   const drogasSelect = document.getElementById("drogas");
-  
+
   if (embarazoSelect) {
     embarazoSelect.addEventListener("change", function() {
       const embarazoExtra = document.getElementById("embarazoExtra");
@@ -145,7 +143,7 @@ function setupConditionals() {
     // Disparar el evento al cargar por si ya está seleccionado "Sí"
     embarazoSelect.dispatchEvent(new Event('change'));
   }
-  
+
   if (drogasSelect) {
     drogasSelect.addEventListener("change", function() {
       const drogasExtra = document.getElementById("drogasExtra");
@@ -192,7 +190,7 @@ function calcularSaldoPendiente() {
 function setupCostos() {
   const tbodyCostos = document.querySelector("#tablaCostos tbody");
   if (!tbodyCostos) return;
-  
+
   window.agregarFilaCosto = function(fecha = new Date().toISOString().split('T')[0], concepto = "", costo = 0) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -202,16 +200,16 @@ function setupCostos() {
       <td><button type="button" onclick="eliminarFilaCosto(this)">❌</button></td>
     `;
     tbodyCostos.appendChild(tr);
-    
+
     tr.querySelector("input[name='costoCosto']").addEventListener("input", calcularGranTotalCargos);
     calcularGranTotalCargos();
   };
-  
+
   window.eliminarFilaCosto = function(btn) {
     btn.closest("tr").remove();
     calcularGranTotalCargos();
   };
-  
+
   window.limpiarFilasCostos = function() {
     if (confirm("¿Estás seguro de que quieres eliminar todos los cargos?")) {
       tbodyCostos.innerHTML = "";
@@ -220,11 +218,11 @@ function setupCostos() {
   };
 }
 
-// --- Abonos (Pagos) dinámicos (NUEVO) ---
+// --- Abonos (Pagos) dinámicos ---
 function setupAbonos() {
   const tbodyAbonos = document.querySelector("#tablaAbonos tbody");
   if (!tbodyAbonos) return;
-  
+
   window.agregarFilaAbono = function(fecha = new Date().toISOString().split('T')[0], concepto = "", monto = 0) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -234,16 +232,16 @@ function setupAbonos() {
       <td><button type="button" onclick="eliminarFilaAbono(this)">❌</button></td>
     `;
     tbodyAbonos.appendChild(tr);
-    
+
     tr.querySelector("input[name='montoAbono']").addEventListener("input", calcularGranTotalAbonos);
     calcularGranTotalAbonos();
   };
-  
+
   window.eliminarFilaAbono = function(btn) {
     btn.closest("tr").remove();
     calcularGranTotalAbonos();
   };
-  
+
   window.limpiarFilasAbonos = function() {
     if (confirm("¿Estás seguro de que quieres eliminar todos los abonos?")) {
       tbodyAbonos.innerHTML = "";
@@ -256,7 +254,7 @@ function setupAbonos() {
 function setupImagePreview() {
   const inputImgs = document.getElementById("imagenes");
   const previewCont = document.getElementById("previewImagenes");
-  
+
   if (inputImgs && previewCont) {
     inputImgs.addEventListener("change", () => {
       previewCont.innerHTML = "";
@@ -276,12 +274,12 @@ function renderizarImagenesExistentes() {
   const container = document.getElementById("imagenesExistentes");
   if (!container) return;
   container.innerHTML = "";
-  
+
   if (!imagenesExistentes || imagenesExistentes.length === 0) {
       container.innerHTML = "<p>No hay imágenes guardadas.</p>";
       return;
   }
-  
+
   imagenesExistentes.forEach(url => {
     const div = document.createElement("div");
     div.className = "imagen-item"; // Usar la clase del CSS
@@ -289,21 +287,21 @@ function renderizarImagenesExistentes() {
       <img src="${url}" alt="Imagen existente">
       <button type="button" class="eliminar-imagen" title="Marcar para eliminar">❌</button>
     `;
-    
+
     div.querySelector(".eliminar-imagen").addEventListener("click", () => {
       // Marcar para eliminar
       if (confirm("¿Seguro que quieres eliminar esta imagen al guardar?")) {
         div.style.opacity = "0.5";
         div.querySelector("img").style.filter = "grayscale(100%)";
         div.querySelector(".eliminar-imagen").disabled = true;
-        
+
         if (!imagenesParaEliminar.includes(url)) {
           imagenesParaEliminar.push(url);
         }
         console.log("Marcada para eliminar:", url);
       }
     });
-    
+
     container.appendChild(div);
   });
 }
@@ -312,7 +310,7 @@ function renderizarImagenesExistentes() {
 async function eliminarImagenesDeStorage() {
   if (imagenesParaEliminar.length === 0) return;
   console.log("Eliminando imágenes de Storage:", imagenesParaEliminar);
-  
+
   const promises = imagenesParaEliminar.map(url => {
     try {
       const storageRef = storage.refFromURL(url);
@@ -322,19 +320,17 @@ async function eliminarImagenesDeStorage() {
       return Promise.resolve(); // No fallar si una URL es inválida
     }
   });
-  
+
   await Promise.allSettled(promises);
   console.log("Eliminación de imágenes completada.");
 }
 
-// --- Función para subir imágenes (Igual que en add) ---
+// --- Función para subir imágenes ---
 async function subirImagenes(docId, files) {
   const urls = [];
   if (!files || files.length === 0) return urls;
   const user = await ensureAuth();
-  
-  // (El código de la barra de progreso de 'add-odontologia.js' va aquí)
-  // ... (re-usando la misma lógica de progreso) ...
+
   let progressContainer = document.getElementById('upload-progress-container');
   if (progressContainer) {
       progressContainer.innerHTML = '<h3>Subiendo nuevas imágenes...</h3>';
@@ -344,20 +340,14 @@ async function subirImagenes(docId, files) {
   for (const file of files) {
     try {
       if (file.size > 5 * 1024 * 1024) continue;
-      
+
       const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
       const path = `historial-odontologia/${docId}/adjuntos/${fileName}`;
       const storageRef = storage.ref(path);
 
-      // (Aquí iría la lógica para crear el progressElement individual)
       console.log(`Subiendo ${file.name}...`);
-      
       const uploadTask = storageRef.put(file, { contentType: file.type });
-      
-      // Esperar a que la subida se complete
       await uploadTask;
-      
-      // Obtener la URL de descarga
       const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
       urls.push(downloadURL);
       console.log(`Subido ${file.name}, URL: ${downloadURL}`);
@@ -373,33 +363,30 @@ async function subirImagenes(docId, files) {
 // --- Función para poblar el formulario ---
 function poblarFormulario(data) {
   const form = document.getElementById("odontologiaForm");
-  
-  // 1. Poblar inputs, textareas y selects simples
+
+  // Poblar inputs, textareas y selects simples
   Object.keys(data).forEach(key => {
     const input = form.querySelector(`[name="${key}"]`);
     if (input) {
       if (input.tagName === 'SELECT') {
         input.value = data[key];
       } else if (input.type === 'radio' || input.type === 'checkbox') {
-        // (No aplica en este form, pero es bueno tenerlo)
         input.checked = data[key];
       } else {
         input.value = data[key];
       }
     }
   });
-  
-  // 2. Poblar odontograma
+
+  // Poblar odontograma
   if (data.odontograma) {
     Object.keys(data.odontograma).forEach(key => {
       const input = form.querySelector(`[name="${key}"]`);
-      if (input) {
-        input.value = data.odontograma[key];
-      }
+      if (input) input.value = data.odontograma[key];
     });
   }
-  
-  // 3. Poblar Costos
+
+  // Poblar Costos
   const tbodyCostos = document.querySelector("#tablaCostos tbody");
   tbodyCostos.innerHTML = ""; // Limpiar
   if (data.costos && Array.isArray(data.costos) && data.costos.length > 0) {
@@ -409,28 +396,27 @@ function poblarFormulario(data) {
   } else {
       agregarFilaCosto(); // Agregar una fila vacía si no hay costos
   }
-  
-  // 4. Poblar Abonos
+
+  // Poblar Abonos
   const tbodyAbonos = document.querySelector("#tablaAbonos tbody");
   tbodyAbonos.innerHTML = ""; // Limpiar
   if (data.abonos && Array.isArray(data.abonos) && data.abonos.length > 0) {
     data.abonos.forEach(abono => {
-      agregarFilaAbono(abono.fecha, abono.concepto, abono.monto);
+      agregarFilaAbono(abono.fecha, abono.concepto, abono.monto); // Asegúrate que el campo se llame 'monto'
     });
   } else {
       agregarFilaAbono(new Date().toISOString().split('T')[0], "", 0); // Agregar una fila vacía
   }
-  
-  // 5. Poblar Imágenes
+
+  // Poblar Imágenes
   imagenesExistentes = data.imagenesAdjuntas || [];
   renderizarImagenesExistentes();
-  
-  // 6. Calcular totales
+
+  // Calcular totales
   calcularGranTotalCargos();
   calcularGranTotalAbonos();
-  // El saldo pendiente se calcula dentro de las funciones anteriores
-  
-  // 7. Activar condicionales
+
+  // Activar condicionales
   setupConditionals();
 }
 
@@ -439,7 +425,7 @@ async function cargarDatosDelPaciente(id) {
   try {
     const docRef = db.collection("historial-odontologia").doc(id);
     const docSnap = await docRef.get();
-    
+
     if (docSnap.exists) {
       console.log("Datos del documento:", docSnap.data());
       poblarFormulario(docSnap.data());
@@ -457,7 +443,7 @@ async function cargarDatosDelPaciente(id) {
 function setupFormSubmission(docId) {
   const form = document.getElementById("odontologiaForm");
   if (!form) return;
-  
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -470,8 +456,7 @@ function setupFormSubmission(docId) {
     statusDiv.style.display = 'block';
 
     function updateStatus(message, type = 'info') {
-      // (Misma función de status que en add-odontologia.js)
-      const colors = {
+       const colors = {
          info: { bg: '#e3f2fd', text: '#1565c0', border: '#2196f3' },
          success: { bg: '#e8f5e9', text: '#2e7d32', border: '#4caf50' },
          warning: { bg: '#fff3e0', text: '#f57c00', border: '#ff9800' },
@@ -486,26 +471,21 @@ function setupFormSubmission(docId) {
 
     try {
       updateStatus("Iniciando proceso de actualización...", "info");
-      
       await ensureAuth();
       updateStatus("Autenticación exitosa", "success");
-      
+
       const data = {};
-      new FormData(form).forEach((value, key) => {
-        data[key] = value;
-      });
+      new FormData(form).forEach((value, key) => { data[key] = value; });
 
-      if (!data.email || !data.nombre) {
-        throw new Error("Nombre y correo son obligatorios");
-      }
+      if (!data.email || !data.nombre) throw new Error("Nombre y correo son obligatorios");
 
-      // 1. Recolectar Odontograma
+      // Recolectar Odontograma
       data.odontograma = {};
       document.querySelectorAll(".tooth-input").forEach(input => {
         if (input.value.trim() !== "") data.odontograma[input.name] = input.value;
       });
 
-      // 2. Recolectar Costos
+      // Recolectar Costos
       const costos = [];
       document.querySelectorAll("#tablaCostos tbody tr").forEach(tr => {
         const fechaInput = tr.querySelector("[name='fechaCosto']");
@@ -520,8 +500,8 @@ function setupFormSubmission(docId) {
         }
       });
       data.costos = costos;
-      
-      // 3. Recolectar Abonos
+
+      // Recolectar Abonos
       const abonos = [];
       document.querySelectorAll("#tablaAbonos tbody tr").forEach(tr => {
         const fechaInput = tr.querySelector("[name='fechaAbono']");
@@ -531,51 +511,46 @@ function setupFormSubmission(docId) {
           abonos.push({
             fecha: fechaInput.value,
             concepto: conceptoInput.value,
-            monto: parseFloat(montoInput.value) || 0
+            monto: parseFloat(montoInput.value) || 0 // Asegúrate que el campo se llame 'monto'
           });
         }
       });
       data.abonos = abonos;
 
-      // 4. Recolectar Totales
+      // Recolectar Totales
       data.totalGeneral = parseFloat(document.getElementById("granTotalCargos").textContent) || 0;
       data.totalAbonos = parseFloat(document.getElementById("granTotalAbonos").textContent) || 0;
       data.saldoPendiente = parseFloat(document.getElementById("saldoPendiente").textContent) || 0;
 
-      // 5. Timestamp de actualización
+      // Timestamp de actualización
       data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-      
-      // 6. Manejar Imágenes
-      
-      // 6a. Eliminar las marcadas
+
+      // Manejar Imágenes
       if (imagenesParaEliminar.length > 0) {
         updateStatus("Eliminando imágenes antiguas...", "info");
         await eliminarImagenesDeStorage();
         updateStatus("Imágenes eliminadas", "success");
       }
-      
-      // 6b. Subir las nuevas
+
       const inputImgs = document.getElementById("imagenes");
       const files = inputImgs?.files ? Array.from(inputImgs.files) : [];
       let nuevasImageUrls = [];
-      
       if (files.length > 0) {
         updateStatus(`Subiendo ${files.length} nueva(s) imagen(es)...`, "info");
         nuevasImageUrls = await subirImagenes(docId, files);
         updateStatus(`✅ ${nuevasImageUrls.length} imagen(es) subidas`, "success");
       }
-      
-      // 6c. Consolidar lista final de imágenes
+
       const imagenesActuales = imagenesExistentes.filter(url => !imagenesParaEliminar.includes(url));
       data.imagenesAdjuntas = [...imagenesActuales, ...nuevasImageUrls];
 
-      // 7. Actualizar el documento en Firestore
+      // Actualizar el documento en Firestore
       updateStatus("Guardando datos principales...", "info");
       const docRef = db.collection("historial-odontologia").doc(docId);
       await docRef.update(data);
       updateStatus("Datos actualizados correctamente", "success");
 
-      // 8. Redirigir
+      // Redirigir
       updateStatus("✅ Proceso completado. Redirigiendo...", "success");
       setTimeout(() => {
         window.location.href = `preview-odontologia.html?id=${docId}`;
@@ -592,10 +567,10 @@ function setupFormSubmission(docId) {
 
 // --- Inicialización cuando el DOM esté listo ---
 document.addEventListener('DOMContentLoaded', async () => {
-  // --- MOVIDAS AQUÍ ---
+  // --- *** CAMBIO AQUÍ *** ---
   const params = new URLSearchParams(window.location.search);
-  const docId = params.get('id');
-  // --- FIN DEL CAMBIO ---
+  const docId = params.get('edit'); // Cambiado de 'id' a 'edit'
+  // --- *** FIN DEL CAMBIO *** ---
 
   const loader = document.getElementById('loader');
   const container = document.getElementById('odontologiaContainer');
@@ -603,28 +578,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!docId) {
     loader.style.display = 'none';
     container.style.display = 'block';
-    container.innerHTML = '<h1>Error: No se proporcionó un ID de paciente.</h1><p>Asegúrate de que la URL contenga "?id=DOCUMENTO_ID"</p>';
+    // Mensaje de error actualizado para reflejar 'edit'
+    container.innerHTML = '<h1>Error: No se proporcionó un ID de paciente.</h1><p>Asegúrate de que la URL contenga "?edit=DOCUMENTO_ID"</p>';
     return;
   }
 
   try {
     console.log("Inicializando... Autenticando...");
     await ensureAuth();
-    
-    console.log("Generando UI...");
-    // 1. Setup UI skeletons and global functions
-    generarOdontograma();
-    setupCostos(); // Define window.agregarFilaCosto, etc.
-    setupAbonos(); // Define window.agregarFilaAbono, etc.
-    setupImagePreview(); // Define listener for <input type="file">
 
-    console.log("Cargando datos del paciente...");
-    // 2. Fetch data and populate the UI
-    await cargarDatosDelPaciente(docId); // This will call agregarFilaCosto/Abono
+    console.log("Generando UI...");
+    generarOdontograma();
+    setupCostos();
+    setupAbonos();
+    setupImagePreview();
+
+    console.log("Cargando datos del paciente ID:", docId); // Log para verificar
+    await cargarDatosDelPaciente(docId);
 
     console.log("Configurando envío...");
-    // 3. Setup the submit listener
-    setupFormSubmission(docId); 
+    setupFormSubmission(docId);
 
     container.style.display = 'block';
   } catch (error) {
