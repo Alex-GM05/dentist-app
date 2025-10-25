@@ -602,31 +602,48 @@ async function eliminarRegistroCompleto(especialidad, id, nombrePaciente) {
   if (confirmacion.isConfirmed) {
     try {
       // Primero eliminar las imágenes del Storage
-      let imagenes = [];
+      let imagenesPaths = [];
 
       if (especialidad === "odontologia") {
         const doc = await db.collection("historial-odontologia").doc(id).get();
         if (doc.exists) {
           const data = doc.data();
-          imagenes = Array.isArray(data.imagenesAdjuntas) ? data.imagenesAdjuntas : [];
+          imagenesPaths = Array.isArray(data.imagenesAdjuntas) ? data.imagenesAdjuntas : [];
         }
       } else if (especialidad === "podologia") {
         const doc = await db.collection("historial-podologia").doc(id).get();
         if (doc.exists) {
           const data = doc.data();
-          imagenes = Array.isArray(data.imagenes) ? data.imagenes : [];
+          if (Array.isArray(data.imagenes)) {
+            imagenesPaths = data.imagenes
+              .map(imgData => imgData?.path) // Obtiene el path de cada objeto
+              .filter(path => path && typeof path === 'string');
+          } else {
+            imagenesPaths = [];
+          }
         }
       }
-
-      // Eliminar cada imagen del Storage
-      for (const imgUrl of imagenes) {
+      // Eliminar cada imagen del Storage (usando URL para odonto, path para podo)
+      console.log("Intentando eliminar de Storage:", imagenesPaths); // Log para depurar
+      for (const itemToDelete of imagenesPaths) {
         try {
-          // Convertir URL en referencia de Storage
-          const imgRef = storage.refFromURL(imgUrl);
+          let imgRef;
+          if (itemToDelete.startsWith('https://')) {
+            // Es una URL (Odontología)
+            imgRef = storage.refFromURL(itemToDelete);
+          } else if (itemToDelete.includes('/')) {
+            // Es un path (Podología)
+            imgRef = storage.ref(itemToDelete);
+          } else {
+            console.warn("Item inválido para eliminar:", itemToDelete);
+            continue; // Saltar este item
+          }
+
           await imgRef.delete();
-          console.log("Imagen eliminada:", imgUrl);
+          console.log("Archivo eliminado de Storage:", itemToDelete);
         } catch (imgError) {
-          console.warn("No se pudo eliminar la imagen:", imgUrl, imgError);
+          // Es común que falle si el archivo ya no existe, usamos warn
+          console.warn("No se pudo eliminar de Storage (puede que ya no exista):", itemToDelete, imgError.code);
         }
       }
 
