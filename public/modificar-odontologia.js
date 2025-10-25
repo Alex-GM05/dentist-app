@@ -21,8 +21,8 @@ try {
 }
 
 // --- Variables Globales ---
-const params = new URLSearchParams(window.location.search);
-const docId = params.get('id');
+// const params = new URLSearchParams(window.location.search); // --- MOVIDO ---
+// const docId = params.get('id'); // --- MOVIDO ---
 let imagenesExistentes = []; // Almacenará URLs de imágenes actuales
 let imagenesParaEliminar = []; // Almacenará URLs a eliminar de Storage
 
@@ -402,24 +402,22 @@ function poblarFormulario(data) {
   // 3. Poblar Costos
   const tbodyCostos = document.querySelector("#tablaCostos tbody");
   tbodyCostos.innerHTML = ""; // Limpiar
-  if (data.costos && Array.isArray(data.costos)) {
+  if (data.costos && Array.isArray(data.costos) && data.costos.length > 0) {
     data.costos.forEach(costo => {
       agregarFilaCosto(costo.fecha, costo.concepto, costo.costo);
     });
-  }
-  if (data.costos.length === 0) {
+  } else {
       agregarFilaCosto(); // Agregar una fila vacía si no hay costos
   }
   
   // 4. Poblar Abonos
   const tbodyAbonos = document.querySelector("#tablaAbonos tbody");
   tbodyAbonos.innerHTML = ""; // Limpiar
-  if (data.abonos && Array.isArray(data.abonos)) {
+  if (data.abonos && Array.isArray(data.abonos) && data.abonos.length > 0) {
     data.abonos.forEach(abono => {
       agregarFilaAbono(abono.fecha, abono.concepto, abono.monto);
     });
-  }
-  if (!data.abonos || data.abonos.length === 0) {
+  } else {
       agregarFilaAbono(new Date().toISOString().split('T')[0], "", 0); // Agregar una fila vacía
   }
   
@@ -594,6 +592,11 @@ function setupFormSubmission(docId) {
 
 // --- Inicialización cuando el DOM esté listo ---
 document.addEventListener('DOMContentLoaded', async () => {
+  // --- MOVIDAS AQUÍ ---
+  const params = new URLSearchParams(window.location.search);
+  const docId = params.get('id');
+  // --- FIN DEL CAMBIO ---
+
   const loader = document.getElementById('loader');
   const container = document.getElementById('odontologiaContainer');
 
