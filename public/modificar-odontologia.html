@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Modificar Historia Clínica Odontología</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+  
+  <script src="modificar-odontologia.js" defer></script>
+</head>
+<body>
+
+  <div id="loader" style="padding: 2rem; text-align: center; font-size: 1.2rem;">
+    Cargando datos del paciente...
+  </div>
+
+  <div class="odontologia-container" id="odontologiaContainer" style="display:none;">
+    <h1>Modificar Historia Clínica Odontológica</h1>
+    <form id="odontologiaForm">
+
+      <section class="odontologia-section">
+        <h2>Datos Generales</h2>
+        <div class="grid-2">
+          <label class="odontologia-label">Nombre completo
+            <input type="text" name="nombre" class="odontologia-input" required>
+          </label>
+          <label class="odontologia-label">Edad
+            <input type="number" name="edad" class="odontologia-input" min="0" required>
+          </label>
+          <label class="odontologia-label">Sexo
+            <select name="sexo" class="odontologia-select" required>
+              <option value="">Seleccione</option>
+              <option>Hombre</option>
+              <option>Mujer</option>
+            </select>
+          </label>
+          <label class="odontologia-label">Estado civil
+            <input type="text" name="estadoCivil" class="odontologia-input" placeholder="Soltero/a, Casado/a, etc.">
+          </label>
+          <label class="odontologia-label">Correo electrónico
+            <input type="email" name="email" id="emailPaciente" class="odontologia-input" required>
+          </label>
+          <label class="odontologia-label">Teléfono
+            <input type="text" name="telefono" class="odontologia-input">
+          </label>
+          <label class="odontologia-label">Ocupación
+            <input type="text" name="ocupacion" class="odontologia-input">
+          </label>
+          <label class="odontologia-label">Dirección
+            <input type="text" name="direccion" class="odontologia-input">
+          </label>
+          <label class="odontologia-label">Fecha
+            <input type="date" name="fecha" class="odontologia-input" required>
+          </label>
+        </div>
+      </section>
+
+      <section class="odontologia-section">
+        <h2>Antecedentes</h2>
+        <div class="grid-2">
+          <label class="odontologia-label">¿En buen estado de salud?
+            <select name="estadoSalud" class="odontologia-select">
+              <option>Sí</option>
+              <option>No</option>
+            </select>
+          </label>
+          <label class="odontologia-label">Tratamiento médico actual
+            <input type="text" name="tratamiento" class="odontologia-input" placeholder="Especifique si aplica">
+          </label>
+
+          <label class="odontologia-label">¿Toma medicamentos?
+            <input type="text" name="medicamentos" class="odontologia-input" placeholder="¿Cuáles?">
+          </label>
+          <label class="odontologia-label">¿Alergias?
+            <input type="text" name="alergias" class="odontologia-input" placeholder="¿A qué?">
+          </label>
+
+          <label class="odontologia-label">¿Ha sido operado?
+            <input type="text" name="operaciones" class="odontologia-input" placeholder="Procedimiento y fecha">
+          </label>
+          <label class="odontologia-label">¿Ha recibido transfusiones?
+            <input type="text" name="transfusiones" class="odontologia-input">
+          </label>
+
+          <label class="odontologia-label">¿Padece enfermedad sistémica?
+            <input type="text" name="enfermedad" class="odontologia-input" placeholder="Diabetes, cardiopatías, etc.">
+          </label>
+          <label class="odontologia-label">Enfermedad importante
+            <input type="text" name="enfermedadImportante" class="odontologia-input">
+          </label>
+
+          <label class="odontologia-label">¿Es diabético?
+            <select name="diabetico" class="odontologia-select"><option>No</option><option>Sí</option></select>
+          </label>
+          <label class="odontologia-label">¿Es hipertenso?
+            <select name="hipertenso" class="odontologia-select"><option>No</option><option>Sí</option></select>
+          </label>
+
+          <label class="odontologia-label">¿Primera vez con anestesia?
+            <select name="primeraAnestesia" class="odontologia-select"><option>No</option><option>Sí</option></select>
+          </label>
+          <label class="odontologia-label">Problemas con anestesia local
+            <input type="text" name="problemasAnestesia" class="odontologia-input" placeholder="Explique si aplica">
+          </label>
+
+          <label class="odontologia-label">¿Fuma?
+            <input type="text" name="fuma" class="odontologia-input" placeholder="Frecuencia/cantidad">
+          </label>
+          <label class="odontologia-label">¿Contacto con drogas?
+            <select name="drogas" id="drogas" class="odontologia-select"><option>No</option><option>Sí</option></select>
+          </label>
+        </div>
+
+        <div id="drogasExtra" style="display:none; margin-top:.75rem;">
+          <div class="grid-2">
+            <label class="odontologia-label">¿Cuáles drogas?
+              <input type="text" name="tipoDrogas" class="odontologia-input">
+            </label>
+            <label class="odontologia-label">Frecuencia/Cantidad
+              <input type="text" name="frecuenciaDrogas" class="odontologia-input">
+            </label>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:1rem;">
+          <label class="odontologia-label">¿Está embarazada?
+            <select name="embarazo" id="embarazo" class="odontologia-select"><option>No</option><option>Sí</option></select>
+          </label>
+          <div id="embarazoExtra" style="display:none;">
+            <label class="odontologia-label">Meses de embarazo
+              <input type="number" name="mesesEmbarazo" class="odontologia-input" min="0">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="odontologia-section">
+        <h2>Motivo de consulta</h2>
+        <textarea name="motivoConsulta" class="odontologia-textarea" placeholder="Describa el motivo de la consulta..."></textarea>
+      </section>
+
+      <section class="odontologia-section">
+        <h2>Odontograma</h2>
+        <div class="odontograma-wrap">
+          <p class="muted">Complete la información dental según el formato OD (Oclusal Distal), DX (Distal), TX (Otras áreas):</p>
+          
+          <table class="odontograma-table-custom" id="tablaOdontograma">
+            <thead>
+              <tr>
+                <th class="tooth-section">OD</th>
+                <th class="tooth-section">DX</th>
+                <th class="tooth-section">TX</th>
+                <th class="tooth-section">OD</th>
+                <th class="tooth-section">DX</th>
+                <th class="tooth-section">TX</th>
+              </tr>
+            </thead>
+            <tbody>
+              </tbody>
+          </table>
+          
+          <div style="margin-top: 1rem;">
+            <label class="odontologia-label">Observaciones del odontograma:</label>
+            <textarea name="observacionesOdontograma" class="odontologia-textarea" rows="3" placeholder="Anotaciones sobre el estado dental..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="odontologia-section">
+        <h2>Cargos / Tratamientos</h2>
+        <table id="tablaCostos" class="odontologia-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Concepto</th>
+              <th>Costo</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="btn-row" style="margin-top:.5rem;">
+          <button type="button" onclick="agregarFilaCosto()">➕ Agregar cargo</button>
+          <button type="button" class="btn-link" onclick="limpiarFilasCostos()">Limpiar cargos</button>
+        </div>
+      </section>
+
+      <section class="odontologia-section">
+        <h2>Abonos / Pagos</h2>
+        <table id="tablaAbonos" class="odontologia-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Concepto/Método</th>
+              <th>Monto</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="btn-row" style="margin-top:.5rem;">
+          <button type="button" onclick="agregarFilaAbono()">➕ Agregar abono</button>
+          <button type="button" class="btn-link" onclick="limpiarFilasAbonos()">Limpiar abonos</button>
+        </div>
+      </section>
+      
+      <section class="odontologia-section resumen-financiero">
+        <h2>Resumen Financiero</h2>
+        <div class="preview-kv">
+            <div><strong>Total de Cargos:</strong></div>
+            <div>$<span id="granTotalCargos">0.00</span></div>
+            <div><strong>Total de Abonos:</strong></div>
+            <div>$<span id="granTotalAbonos">0.00</span></div>
+            <div><strong>Saldo Pendiente:</strong></div>
+            <div><strong>$<span id="saldoPendiente">0.00</span></strong></div>
+        </div>
+      </section>
+
+      <section class="odontologia-section">
+        <h2>Receta</h2>
+        <textarea name="receta" class="odontologia-textarea" rows="6" placeholder="Medicamentos e indicaciones..."></textarea>
+      </section>
+
+      <section class="odontologia-section">
+        <h2>Imágenes Adjuntas</h2>
+        
+        <p class="muted">Imágenes guardadas actualmente. Haz clic en ❌ para eliminarlas al guardar.</p>
+        <div id="imagenesExistentes" class="images-grid" style="margin-top: .75rem; margin-bottom: 1.5rem;">
+            </div>
+
+        <hr style="margin: 1.5rem 0;">
+
+        <h3>Subir nuevas imágenes (opcional)</h3>
+        <p class="muted">Puedes subir nuevas radiografías, fotos, etc. (JPG/PNG, máx. 5 MB c/u)</p>
+        <input type="file" id="imagenes" accept="image/*" multiple>
+        <div id="previewImagenes" class="images-grid" style="margin-top: .75rem;"></div>
+      </section>
+      
+      <div id="upload-progress-container" style="display:none;"></div>
+      <div id="upload-status"></div>
+
+      <div class="btn-row" style="margin-top:1rem;">
+        <button type="submit">Actualizar Historia</button>
+        <button type="button" onclick="window.location.href='select-add.html'" class="danger">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
