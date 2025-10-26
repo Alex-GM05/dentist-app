@@ -169,39 +169,60 @@ function setupEventListeners() {
   document.getElementById('formPodologia').addEventListener('submit', handleFormSubmit);
 }
 
-// Subir imágenes a Firebase Storage (FUNCIÓN MEJORADA)
 async function subirImagenes(docId, files) {
-  const urls = [];
-  
-  if (!files || files.length === 0) return urls;
+  const imageObjects = []; // Array para guardar los objetos resultado
+
+  if (!files || files.length === 0) {
+      console.log("subirImagenes: No hay archivos para subir.");
+      return imageObjects; // Devolver array vacío si no hay archivos
+  }
 
   try {
-    const user = await ensureAuth();
-    
+    const user = await ensureAuth(); // Asegurar autenticación
+
+    // --- Lógica de Progreso ---
     let progressContainer = document.getElementById('upload-progress-container');
     if (!progressContainer) {
-      progressContainer = document.createElement('div');
-      progressContainer.id = 'upload-progress-container';
-      progressContainer.style.marginTop = '1rem';
-      progressContainer.style.padding = '1rem';
-      progressContainer.style.background = '#f8f9fa';
-      progressContainer.style.borderRadius = '8px';
-      progressContainer.style.border = '1px solid #ddd';
-      const form = document.getElementById('formPodologia');
-      if (form) form.appendChild(progressContainer);
-    }
+       progressContainer = document.createElement('div');
+       progressContainer.id = 'upload-progress-container';
+       progressContainer.style.marginTop = '1rem';
+       progressContainer.style.padding = '1rem';
+       progressContainer.style.background = '#f8f9fa';
+       progressContainer.style.borderRadius = '8px';
+       progressContainer.style.border = '1px solid #ddd';
+       const form = document.getElementById('formPodologia'); // Asegúrate que el ID sea correcto
+       if (form) form.appendChild(progressContainer);
+     } else {
+       progressContainer.innerHTML = `<h3>Subiendo ${files.length} imágen(es)...</h3>`; // Limpiar y mostrar título
+       progressContainer.style.display = 'block';
+     }
+    // --- Fin Lógica de Progreso ---
 
-    for (const file of files) {
-      try {
-        if (file.size > 5 * 1024 * 1024) continue;
-        
-        const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-        const path = `historial-podologia/${docId}/adjuntos/${fileName}`;
-        const storageRef = storage.ref(path);
+    // Usar Promise.all para manejar las subidas en paralelo
+    const uploadPromises = files.map(async (file) => {
+      // Validar tamaño antes de procesar
+      if (file.size > 5 * 1024 * 1024) {
+          console.warn(`Archivo ${file.name} excede 5MB, será omitido.`);
+          // Opcional: Crear un elemento de UI para indicar que se omitió
+          if (progressContainer) {
+              const skippedElement = document.createElement('div');
+              skippedElement.className = 'upload-progress-item';
+              skippedElement.style.color = '#f57c00'; // Naranja para advertencia
+              skippedElement.innerHTML = `<span>${file.name} (Omitido: >5MB)</span>`;
+              progressContainer.appendChild(skippedElement);
+          }
+          return null; // Devolver null para filtrar después
+      }
 
-        const progressElement = document.createElement('div');
-        progressElement.className = 'upload-progress-item';
-        progressElement.innerHTML = `
+      // Generar nombre de archivo y path único
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 11)}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+      const path = `historial-podologia/${docId}/adjuntos/${fileName}`; // Ruta específica
+      const storageRef = storage.ref(path);
+
+      // --- Lógica de Progreso Individual ---
+      const progressElement = document.createElement('div');
+      progressElement.className = 'upload-progress-item';
+      progressElement.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="flex: 1; font-size: 0.9rem;">${file.name}</span>
             <span class="upload-progress" style="margin: 0 10px; font-weight: bold;">0%</span>
@@ -209,64 +230,93 @@ async function subirImagenes(docId, files) {
           </div>
           <div style="height: 4px; background: #e0e0e0; border-radius: 2px; margin-top: 5px;">
             <div class="upload-progress-bar" style="height: 100%; width: 0%; background: #4caf50; border-radius: 2px; transition: width 0.3s;"></div>
-          </div>
-        `;
-        progressContainer.appendChild(progressElement);
+          </div>`;
+      if (progressContainer) progressContainer.appendChild(progressElement);
+      // --- Fin Progreso Individual ---
 
+      try {
         const uploadTask = storageRef.put(file, {
-          contentType: file.type,
-          customMetadata: {
-            'uploadedBy': user.uid,
-            'isAnonymous': user.isAnonymous ? 'true' : 'false',
-            'uploadedAt': new Date().toISOString(),
-            'originalName': file.name,
-            'documentId': docId
-          }
+            contentType: file.type,
+            customMetadata: {
+             'uploadedBy': user.uid,
+             'isAnonymous': user.isAnonymous ? 'true' : 'false',
+             'uploadedAt': new Date().toISOString(),
+             'originalName': file.name,
+             'documentId': docId
+           }
         });
 
-        const downloadURL = await new Promise((resolve, reject) => {
-          uploadTask.on('state_changed',
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              const progressText = progressElement.querySelector('.upload-progress');
-              const progressBar = progressElement.querySelector('.upload-progress-bar');
-              if (progressText) progressText.textContent = `${Math.round(progress)}%`;
-              if (progressBar) progressBar.style.width = `${progress}%`;
-            },
-            (error) => {
-              const statusSpan = progressElement.querySelector('.upload-status');
-              if (statusSpan) statusSpan.textContent = '❌';
-              progressElement.style.color = '#d32f2f';
-              reject(error);
-            },
-            async () => {
-              try {
-                const url = await uploadTask.snapshot.ref.getDownloadURL();
-                const statusSpan = progressElement.querySelector('.upload-status');
-                if (statusSpan) statusSpan.textContent = '✅';
-                progressElement.style.color = '#2e7d32';
-                resolve(url);
-              } catch (urlError) {
-                const statusSpan = progressElement.querySelector('.upload-status');
-                if (statusSpan) statusSpan.textContent = '⚠️';
-                progressElement.style.color = '#f57c00';
-                resolve(null);
-              }
-            }
-          );
+        // Esperar a que la subida se complete (usando la promesa del SDK)
+        // y actualizar UI durante el proceso
+        await new Promise((resolve, reject) => {
+             uploadTask.on('state_changed',
+                (snapshot) => { // Progreso
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    const progressText = progressElement.querySelector('.upload-progress');
+                    const progressBar = progressElement.querySelector('.upload-progress-bar');
+                    if (progressText) progressText.textContent = `${Math.round(progress)}%`;
+                    if (progressBar) progressBar.style.width = `${progress}%`;
+                 },
+                (error) => { // Error
+                    console.error(`Error subiendo ${file.name}:`, error);
+                    const statusSpan = progressElement.querySelector('.upload-status');
+                    if (statusSpan) statusSpan.textContent = '❌';
+                    progressElement.style.color = '#d32f2f';
+                    reject(error); // Rechazar la promesa externa
+                 },
+                () => { // Completado
+                    const statusSpan = progressElement.querySelector('.upload-status');
+                    if (statusSpan) statusSpan.textContent = '✅';
+                    progressElement.style.color = '#2e7d32';
+                    resolve(); // Resolver la promesa cuando la subida esté completa
+                 }
+             );
         });
 
-        if (downloadURL) urls.push(downloadURL);
+        // Subida completada, obtener URL de descarga
+        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+        console.log(`Subido ${file.name} a ${path}. URL: ${downloadURL}`);
+
+        // *** Devolver el OBJETO completo ***
+        return {
+          url: downloadURL,
+          path: path, // El path completo usado en Storage
+          nombre: file.name, // Nombre original del archivo
+          fecha: new Date().toISOString() // Fecha de subida
+        }; // <<<----- ¡ESTA ES LA CLAVE!
 
       } catch (error) {
-        console.error(`Error procesando ${file.name}:`, error);
+        // Captura errores específicos de esta subida (ya loggeado en el 'on' state_changed)
+        // Asegurarse de marcar el elemento de progreso como fallido si no lo hizo el listener
+         const statusSpan = progressElement.querySelector('.upload-status');
+         if (statusSpan && statusSpan.textContent !== '❌') {
+            statusSpan.textContent = '❌';
+            progressElement.style.color = '#d32f2f';
+         }
+        return null; // Devolver null si falla la subida de este archivo
       }
-    }
+    }); // Fin .map()
 
-    return urls;
+    // Esperar a que todas las promesas (subidas individuales) terminen
+    const results = await Promise.all(uploadPromises);
 
-  } catch (authError) {
+    // Filtrar los resultados nulos (archivos grandes o errores de subida)
+    const successfulUploads = results.filter(result => result !== null);
+    console.log("Resultados de subida (objetos):", successfulUploads);
+
+    return successfulUploads; // <<< Devuelve el array de objetos exitosos
+
+  } catch (authError) { // Captura error de ensureAuth
+    console.error("Error de autenticación al intentar subir imágenes:", authError);
+    // Lanzar el error para que handleFormSubmit lo capture y muestre al usuario
     throw new Error("No se pudo autenticar para subir imágenes: " + authError.message);
+  } finally {
+      // Ocultar contenedor de progreso al finalizar (éxito o error general)
+      let progressContainer = document.getElementById('upload-progress-container');
+      // Esperar un poco para que el usuario vea el estado final de las barras
+      setTimeout(() => {
+          if (progressContainer) progressContainer.style.display = 'none';
+      }, 2000); // Espera 2 segundos antes de ocultar
   }
 }
 
