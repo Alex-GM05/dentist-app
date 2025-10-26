@@ -563,14 +563,32 @@ function mostrarHistorialPodologia(data, id) {
       <div class="historial-section">
         <h4>🖼️ Imágenes Adjuntas</h4>
         <div class="images-grid">
-          ${imagenes.map((imgData, index) => `
-            <div class="thumb">
-              <a href="${imgData.url || '#'}" target="_blank">
-                <img src="${imgData.url || 'placeholder.png'}" alt="${imgData.nombre || `Imagen ${index + 1}`}">
-              </a>
-              <p style="font-size:0.7rem; text-align:center; margin-top: 4px;">${imgData.nombre || 'imagen'}</p>
-            </div>
-          `).join("")}
+          ${imagenes.map((imgData, index) => {
+            let imageUrl = 'placeholder.png';
+            let imageNombre = `Imagen ${index + 1}`;
+            let linkUrl = '#';
+
+            if (typeof imgData === 'object' && imgData !== null && imgData.url) {
+              imageUrl = imgData.url;
+              imageNombre = imgData.nombre || imageNombre;
+              linkUrl = imgData.url;
+            }
+            else if (typeof imgData === 'string' && imgData.startsWith('https://')) {
+              imageUrl = imgData; 
+              imageNombre = 'imagen'; 
+              linkUrl = imgData;
+            } else {
+              console.warn(`Item de imagen inválido en índice ${index}:`, imgData);
+            }
+
+            return `
+              <div class="thumb">
+                <a href="${linkUrl}" target="_blank">
+                  <img src="${imageUrl}" alt="${imageNombre}">
+                </a>
+                <p style="font-size:0.7rem; text-align:center; margin-top: 4px;">${imageNombre}</p>
+              </div>`;
+          }).join("")}
         </div>
       </div>
       ` : ''}
