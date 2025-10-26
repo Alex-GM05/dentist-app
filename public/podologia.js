@@ -422,15 +422,18 @@ async function handleFormSubmit(e) {
     if (files.length > 0) {
       updateStatus(`Subiendo ${files.length} imagen(es)...`, "info");
       try {
-        const imageUrls = await subirImagenes(docRef.id, files);
-        if (imageUrls.length > 0) {
-          await docRef.update({ 
-            imagenes: imageUrls,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+        const imageObjects = await subirImagenes(docRef.id, files);
+        if (imageObjects && imageObjects.length > 0) {
+          // *** CORREGIDO: Guarda el array de OBJETOS ***
+          await docRef.update({
+            imagenes: imageObjects, // Guarda [{url, path...}, {url, path...}]
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          updateStatus(`✅ ${imageUrls.length} imagen(es) subidas correctamente`, "success");
+          updateStatus(`✅ ${imageObjects.length} imagen(es) subidas correctamente`, "success");
+        } else if (files.length > 0) {
+           updateStatus("⚠️ Se intentaron subir imágenes pero no se obtuvieron resultados.", "warning");
         } else {
-          updateStatus("⚠️ No se subieron imágenes", "warning");
+           updateStatus("⚠️ No se subieron imágenes (posible error en subida).", "warning");
         }
       } catch (error) {
         updateStatus("⚠️ Error subiendo imágenes, pero los datos se guardaron", "warning");
@@ -443,7 +446,7 @@ async function handleFormSubmit(e) {
     setTimeout(() => {
       window.location.href = `preview-podologia.html?id=${docRef.id}`;
     }, 1500);
-
+    
   } catch (error) {
     console.error('Error al guardar la ficha:', error);
     updateStatus(`Error: ${error.message}`, "error");
