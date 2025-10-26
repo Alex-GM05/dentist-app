@@ -563,12 +563,14 @@ function mostrarHistorialPodologia(data, id) {
       <div class="historial-section">
         <h4>🖼️ Imágenes Adjuntas</h4>
         <div class="images-grid">
+          {/* *** CORREGIDO: Acceder a imgData.url *** */}
           ${imagenes.map((imgData, index) => `
             <div class="thumb">
+              {/* Usar imgData.url (asegurarse que imgData es el objeto) */}
               <a href="${imgData.url || '#'}" target="_blank">
                 <img src="${imgData.url || 'placeholder.png'}" alt="${imgData.nombre || `Imagen ${index + 1}`}">
               </a>
-               <p style="font-size:0.7rem; text-align:center; margin-top: 4px;">${imgData.nombre || 'imagen'}</p>
+              <p style="font-size:0.7rem; text-align:center; margin-top: 4px;">${imgData.nombre || 'imagen'}</p>
             </div>
           `).join("")}
         </div>
