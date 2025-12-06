@@ -5,8 +5,7 @@ import {
   collection, 
   query, 
   where, 
-  getDocs,
-  orderBy 
+  getDocs 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -32,44 +31,47 @@ window.cerrarSesion = async () => {
   }
 };
 
+// Verificar autenticación
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    console.log("Usuario logueado:", user.uid);
-    await cargarOpcionesPaciente(user.uid);
+    console.log("Usuario logueado:", user.email);
+    // *** CAMBIO: Pasamos el email en lugar del UID ***
+    await cargarOpcionesPaciente(user.email);
   } else {
     window.location.href = "index.html";
   }
 });
 
-// Función principal para verificar historiales
-async function cargarOpcionesPaciente(userId) {
+// Función principal para verificar historiales por EMAIL
+async function cargarOpcionesPaciente(userEmail) {
   const container = document.getElementById("botones-container");
   const loader = document.getElementById("loader");
   
   try {
-    // 1. Consultar Odontología
-    // Nota: Usamos userId. Si tus registros viejos no tienen userId, podrías necesitar buscar por email.
+    console.log("Buscando historiales para:", userEmail);
+
+    // 1. Consultar Odontología por EMAIL
     const qOdonto = query(
       collection(db, "historial-odontologia"), 
-      where("userId", "==", userId)
+      where("email", "==", userEmail) // *** CAMBIO: Buscar por campo 'email' ***
     );
     const snapOdonto = await getDocs(qOdonto);
     const tieneOdonto = !snapOdonto.empty;
 
-    // 2. Consultar Podología
+    // 2. Consultar Podología por EMAIL
     const qPodo = query(
       collection(db, "historial-podologia"), 
-      where("userId", "==", userId)
+      where("email", "==", userEmail) // *** CAMBIO: Buscar por campo 'email' ***
     );
     const snapPodo = await getDocs(qPodo);
     const tienePodo = !snapPodo.empty;
 
     // 3. Renderizar Botones
-    loader.style.display = "none";
+    if (loader) loader.style.display = "none";
     container.innerHTML = ""; // Limpiar
 
     if (!tieneOdonto && !tienePodo) {
-      container.innerHTML = "<p>No se encontraron historiales médicos asociados a tu cuenta.</p>";
+      container.innerHTML = `<p>No se encontraron historiales médicos asociados al correo <strong>${userEmail}</strong>.</p>`;
       return;
     }
 
@@ -77,6 +79,7 @@ async function cargarOpcionesPaciente(userId) {
       const btnOdonto = document.createElement("button");
       btnOdonto.textContent = "🦷 Ver Historial Odontología";
       btnOdonto.className = "btn-primary btn-area";
+      // Pasamos el snapshot directamente para no volver a consultar
       btnOdonto.onclick = () => mostrarDetalles("odontologia", snapOdonto);
       container.appendChild(btnOdonto);
     }
@@ -84,7 +87,6 @@ async function cargarOpcionesPaciente(userId) {
     if (tienePodo) {
       const btnPodo = document.createElement("button");
       btnPodo.textContent = "🦶 Ver Historial Podología";
-      // Si hay dos botones, usamos un estilo secundario o margen para separarlos
       btnPodo.className = "btn-primary btn-area"; 
       if (tieneOdonto) btnPodo.style.marginLeft = "10px";
       btnPodo.onclick = () => mostrarDetalles("podologia", snapPodo);
@@ -93,7 +95,7 @@ async function cargarOpcionesPaciente(userId) {
 
   } catch (error) {
     console.error("Error cargando datos:", error);
-    loader.innerText = "Error al cargar la información. Por favor recarga la página.";
+    if (loader) loader.innerText = "Error al cargar la información. Por favor recarga la página.";
   }
 }
 
@@ -108,7 +110,7 @@ function mostrarDetalles(tipo, snapshot) {
   titulo.style.paddingBottom = "10px";
   detalleDiv.appendChild(titulo);
 
-  // Recorrer cada documento encontrado (puede haber varios historiales/citas)
+  // Recorrer cada documento encontrado
   snapshot.forEach(doc => {
     const data = doc.data();
     const card = document.createElement("div");
@@ -122,9 +124,9 @@ function mostrarDetalles(tipo, snapshot) {
     const abonos = Array.isArray(data.abonos) ? data.abonos : [];
     
     // Calcular totales
-    // Nota: En odontología usabas 'costo', en podología 'monto' para abonos según tus scripts anteriores
-    // Aquí hacemos un manejo seguro.
+    // Usamos Number() para asegurar que sumamos números
     const totalCargos = costos.reduce((sum, c) => sum + (Number(c.costo) || 0), 0);
+    // Soporte para 'monto' (nuevo) o 'cantidad' (viejo) en abonos
     const totalAbonos = abonos.reduce((sum, a) => sum + (Number(a.monto) || Number(a.cantidad) || 0), 0);
     const saldo = totalCargos - totalAbonos;
 
@@ -159,6 +161,8 @@ function mostrarDetalles(tipo, snapshot) {
             `).join("")}
           </tbody>
         </table>`;
+    } else {
+        htmlContent += `<p style="font-size: 0.9rem; color: #666;">No hay cargos registrados.</p>`;
     }
 
     // Tabla de Abonos
@@ -170,7 +174,7 @@ function mostrarDetalles(tipo, snapshot) {
           <tbody>
             ${abonos.map(a => `
               <tr>
-                <td>${a.fecha}</td>
+                <td>${a.fecha || '-'}</td>
                 <td>${a.metodo || 'Efectivo'}</td>
                 <td>$${(Number(a.monto) || Number(a.cantidad) || 0).toFixed(2)}</td>
               </tr>
