@@ -2,13 +2,40 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel del Paciente</title>
+  <link rel="stylesheet" href="styles.css"> <style>
+    /* Estilos rápidos específicos para el panel */
+    .panel-container { max-width: 800px; margin: 2rem auto; padding: 1rem; }
+    .btn-area { margin: 10px; padding: 15px 30px; font-size: 1.1rem; cursor: pointer; }
+    .historial-card { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .tabla-finanzas { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .tabla-finanzas th, .tabla-finanzas td { border: 1px solid #eee; padding: 8px; text-align: left; }
+    .tabla-finanzas th { background-color: #f8f9fa; }
+    .saldo-pendiente { color: #e63946; font-weight: bold; }
+    .saldo-cero { color: #2a9d8f; font-weight: bold; }
+    .loading { text-align: center; font-size: 1.2rem; color: #666; margin-top: 2rem; }
+    .welcome-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+  </style>
 </head>
 <body>
-  <h1>Panel del Paciente</h1>
-  <p>Aquí puedes ver tu información y tus citas.</p>
+  
+  <div class="panel-container">
+    <div class="welcome-header">
+      <h1>Panel del Paciente</h1>
+      <button onclick="window.cerrarSesion()" class="btn-cancel" style="width: auto; padding: 8px 16px;">Cerrar Sesión</button>
+    </div>
 
-  <button onclick="cerrarSesion()">Cerrar Sesión</button>
+    <p>Bienvenido. Selecciona un historial para ver tus detalles, recetas y estado de cuenta.</p>
+
+    <div id="botones-container" style="text-align: center; margin: 2rem 0;">
+      <div id="loader" class="loading">Cargando tu información...</div>
+    </div>
+
+    <div id="historial-detalle"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script type="module" src="./paciente.js"></script>
 </body>
